@@ -3,214 +3,230 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ИгроМир Studio</title>
-
+<title>Универсальный Видеоплеер</title>
 <style>
-
-body {
-    margin:0;
-    font-family: 'Trebuchet MS', sans-serif;
-    background: radial-gradient(circle at center, #3a2a1a, #1b120b);
-    color: #fff;
-    text-align:center;
-}
-
-/* ===== LOGO HEADER ===== */
-.header {
-    position: sticky;
-    top:0;
-    background: rgba(0,0,0,0.85);
-    padding:10px;
-    backdrop-filter: blur(8px);
-    z-index:1000;
-}
-
-.header img {
-    max-width:380px;
-    width:90%;
-    animation: glow 3s infinite alternate;
-}
-
-@keyframes glow {
-    from { filter: drop-shadow(0 0 10px gold); }
-    to { filter: drop-shadow(0 0 25px orange); }
-}
-
-/* ===== CONTAINER ===== */
-.container {
-    padding:20px;
-    background: rgba(0,0,0,0.6);
-    margin:20px;
-    border-radius:20px;
-}
-
-/* ===== VIDEO ===== */
-video {
-    width:90%;
-    max-height:500px;
-    margin-top:15px;
-    border-radius:15px;
-    box-shadow:0 0 30px gold;
-}
-
-/* ===== CONTROLS ===== */
-button {
-    padding:10px 15px;
-    margin:6px;
-    border:none;
-    border-radius:10px;
-    background: linear-gradient(to bottom, #ffd700, #caa400);
-    cursor:pointer;
-    font-weight:bold;
-}
-
-button:hover {
-    transform: scale(1.05);
-}
-
-input, select {
-    padding:6px;
-    margin:6px;
-    border-radius:8px;
-}
-
-#transcript {
-    margin-top:15px;
-    background:#111;
-    padding:10px;
-    border-radius:10px;
-    max-height:150px;
-    overflow:auto;
-    text-align:left;
-    font-size:14px;
-}
-
-/* ===== TIME DISPLAY ===== */
-#timeDisplay {
-    margin-top:10px;
-    font-weight:bold;
-}
-
-@media(max-width:768px){
-    video { width:100%; }
-}
-
+  body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin: 0; 
+    padding: 20px; 
+    text-align: center; 
+    transition: background 0.5s ease; 
+    background-size: cover; 
+    background-position: center;
+    background-attachment: fixed;
+    background-color: #eef2f5;
+  }
+  .container { 
+    background: rgba(255, 255, 255, 0.95); 
+    padding: 25px; 
+    border-radius: 12px; 
+    max-width: 800px; 
+    margin: auto; 
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+  }
+  /* Логотип вашей группы */
+  #logo { 
+    max-height: 80px; 
+    margin-bottom: 20px; 
+    border-radius: 8px;
+  }
+  .controls-panel { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px; 
+    text-align: left; 
+    margin-bottom: 25px; 
+  }
+  .controls-panel > div {
+    display: flex;
+    flex-direction: column;
+  }
+  label { font-size: 0.9em; font-weight: bold; margin-bottom: 5px; color: #333; }
+  input, select, button { 
+    padding: 10px; 
+    border: 1px solid #ccc; 
+    border-radius: 6px; 
+    font-size: 14px;
+    width: 100%; 
+    box-sizing: border-box; 
+  }
+  button { 
+    cursor: pointer; 
+    background: #4caf50; 
+    color: white; 
+    border: none; 
+    font-weight: bold; 
+    transition: background 0.3s;
+    margin-top: 10px;
+  }
+  button:hover { background: #45a049; }
+  
+  /* HTML5 Видеоплеер (включает время, прокрутку, громкость) */
+  video { 
+    width: 100%; 
+    border-radius: 10px; 
+    background: #000; 
+    outline: none; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+  #transcription-box { 
+    margin-top: 15px; 
+    padding: 15px; 
+    background: #fdfdfd; 
+    border: 1px solid #ddd; 
+    min-height: 80px; 
+    border-radius: 6px; 
+    text-align: left;
+    font-size: 0.95em;
+    color: #444;
+    max-height: 150px;
+    overflow-y: auto;
+  }
 </style>
 </head>
-
 <body>
 
-<div class="header">
-    <img src="logo.png" alt="ИгроМир в сундучке">
-</div>
+<div class="container" id="main-container">
+  <img id="logo" src="https://via.placeholder.com/400x100?text=ЛОГОТИП+ВАШЕЙ+ГРУППЫ" alt="Логотип группы">
 
-<div class="container">
+  <div class="controls-panel">
+    <div>
+      <label>1. Загрузить видео (с ПК):</label>
+      <input type="file" id="video-upload" accept="video/*">
+    </div>
+    <div>
+      <label>2. Вставить видео (по ссылке):</label>
+      <input type="url" id="video-url" placeholder="https://.../video.mp4">
+    </div>
+    <div>
+      <label>3. Загрузить фон (с ПК):</label>
+      <input type="file" id="bg-upload" accept="image/*">
+    </div>
+    <div>
+      <label>4. Вставить фон (по ссылке):</label>
+      <input type="url" id="bg-url" placeholder="https://.../background.jpg">
+    </div>
+    <div style="grid-column: span 2;">
+      <label>5. Выберите язык интерфейса/распознавания:</label>
+      <select id="language-select">
+        <option value="ru-RU">Русский</option>
+        <option value="de-DE">Немецкий</option>
+        <option value="en-US">Английский</option>
+        <option value="es-ES">Испанский</option>
+        <option value="fr-FR">Французский</option>
+        <option value="it-IT">Итальянский</option>
+        <option value="zh-CN">Китайский</option>
+        <option value="ja-JP">Японский</option>
+        <option value="fa-IR">Фарси</option>
+        <option value="hi-IN">Хинди</option>
+        <option value="prs-AF">Дари</option>
+        <option value="ar-SA">Арабский</option>
+        <option value="pt-PT">Португальский</option>
+      </select>
+    </div>
+  </div>
 
-<h2 id="title">ИгроМир Studio</h2>
+  <video id="video-player" controls crossorigin="anonymous">
+    <track id="caption-track" label="Титры" kind="subtitles" srclang="ru" src="">
+    Ваш браузер не поддерживает HTML5 видео.
+  </video>
 
-<input type="file" accept="video/*" id="videoUpload">
-<input type="text" id="videoURL" placeholder="Ссылка на видео">
-<button onclick="loadVideoURL()">Загрузить</button>
-
-<br>
-
-<input type="file" accept="image/*" id="bgUpload">
-<input type="text" id="bgURL" placeholder="Ссылка на фон">
-<button onclick="loadBGURL()">Фон</button>
-
-<br>
-
-<select id="language">
-<option value="ru">Русский</option>
-<option value="de">Deutsch</option>
-<option value="en">English</option>
-<option value="es">Español</option>
-<option value="fr">Français</option>
-<option value="it">Italiano</option>
-<option value="zh">中文</option>
-<option value="ja">日本語</option>
-</select>
-
-<video id="videoPlayer" controls></video>
-
-<div id="timeDisplay">00:00 / 00:00</div>
-
-<div>
-<button onclick="rewind()">⏪ -10s</button>
-<button onclick="forward()">+10s ⏩</button>
-<button onclick="toggleMute()">🔊</button>
-</div>
-
-<input type="file" accept=".vtt" id="subtitleUpload">
-<button onclick="addSubtitles()">Титры</button>
-
-<button onclick="startTranscription()">🎤 Транскрибация</button>
-
-<div id="transcript"></div>
-
+  <div>
+    <button id="transcribe-btn">▶ Начать транскрибирование речи (Web Speech API)</button>
+    <div id="transcription-box">Здесь будет появляться распознанный текст видео...</div>
+  </div>
 </div>
 
 <script>
+  const videoPlayer = document.getElementById('video-player');
+  const videoUpload = document.getElementById('video-upload');
+  const videoUrl = document.getElementById('video-url');
+  
+  const body = document.body;
+  const bgUpload = document.getElementById('bg-upload');
+  const bgUrl = document.getElementById('bg-url');
 
-const video = document.getElementById('videoPlayer');
-const timeDisplay = document.getElementById('timeDisplay');
+  const transcribeBtn = document.getElementById('transcribe-btn');
+  const transcriptionBox = document.getElementById('transcription-box');
+  const languageSelect = document.getElementById('language-select');
 
-document.getElementById('videoUpload').onchange = function(e) {
-    video.src = URL.createObjectURL(e.target.files[0]);
-};
+  // 1. Загрузка видео с компьютера
+  videoUpload.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if(file) {
+      videoPlayer.src = URL.createObjectURL(file);
+    }
+  });
 
-function loadVideoURL(){
-    video.src = document.getElementById('videoURL').value;
-}
+  // 2. Вставка видео по ссылке (важно: ссылка должна оканчиваться на .mp4, .webm и позволять CORS)
+  videoUrl.addEventListener('change', function(e) {
+    if(e.target.value) {
+      videoPlayer.src = e.target.value;
+    }
+  });
 
-document.getElementById('bgUpload').onchange = function(e){
-    document.body.style.backgroundImage = `url(${URL.createObjectURL(e.target.files[0])})`;
-};
+  // 3. Загрузка фона с компьютера
+  bgUpload.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if(file) {
+      body.style.backgroundImage = `url(${URL.createObjectURL(file)})`;
+    }
+  });
 
-function loadBGURL(){
-    document.body.style.backgroundImage = `url(${document.getElementById('bgURL').value})`;
-}
+  // 4. Вставка фона по ссылке
+  bgUrl.addEventListener('change', function(e) {
+    if(e.target.value) {
+      body.style.backgroundImage = `url(${e.target.value})`;
+    }
+  });
 
-function rewind(){ video.currentTime -= 10; }
-function forward(){ video.currentTime += 10; }
-function toggleMute(){ video.muted = !video.muted; }
+  // 8. Транскрибация (распознавание речи через микрофон/системный звук)
+  let recognition;
+  transcribeBtn.addEventListener('click', () => {
+    // Проверка поддержки браузером (лучше всего работает в Chrome/Edge)
+    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!window.SpeechRecognition) {
+      alert('Ваш браузер не поддерживает встроенное распознавание речи. Рекомендуется использовать Google Chrome.');
+      return;
+    }
 
-video.ontimeupdate = function(){
-    let current = formatTime(video.currentTime);
-    let total = formatTime(video.duration);
-    timeDisplay.textContent = current + " / " + total;
-};
+    if(recognition && transcribeBtn.innerText.includes('Остановить')) {
+        recognition.stop();
+        transcribeBtn.innerText = '▶ Начать транскрибирование речи';
+        return;
+    }
 
-function formatTime(seconds){
-    if(!seconds) return "00:00";
-    let m = Math.floor(seconds/60);
-    let s = Math.floor(seconds%60);
-    return (m<10?"0":"")+m + ":" + (s<10?"0":"")+s;
-}
-
-function addSubtitles(){
-    const file = document.getElementById('subtitleUpload').files[0];
-    const track = document.createElement("track");
-    track.kind="subtitles";
-    track.src=URL.createObjectURL(file);
-    track.default=true;
-    video.appendChild(track);
-}
-
-function startTranscription(){
-    const lang = document.getElementById("language").value;
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = lang;
+    recognition = new SpeechRecognition();
+    recognition.lang = languageSelect.value;
     recognition.continuous = true;
-    recognition.onresult = function(event){
-        for(let i=event.resultIndex;i<event.results.length;i++){
-            document.getElementById("transcript").innerHTML += event.results[i][0].transcript + "<br>";
-        }
+    recognition.interimResults = true;
+
+    recognition.onstart = function() {
+      transcribeBtn.innerText = '⏹ Остановить транскрибирование';
+      transcriptionBox.innerHTML = '<em>Слушаю звук... Воспроизведите видео (возможно потребуется направить звук видео в микрофон или использовать стерео-микшер ПК).</em><br>';
     };
+
+    recognition.onresult = function(event) {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + ' ';
+        }
+      }
+      if(finalTranscript) {
+         transcriptionBox.innerHTML += finalTranscript + '<br>';
+         // Автоскролл вниз
+         transcriptionBox.scrollTop = transcriptionBox.scrollHeight;
+      }
+    };
+
+    recognition.onerror = function(event) {
+      console.error("Ошибка распознавания: ", event.error);
+    };
+
     recognition.start();
-}
-
+  });
 </script>
-
 </body>
 </html>
