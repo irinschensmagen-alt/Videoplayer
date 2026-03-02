@@ -1,1 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ИгроМир Studio</title>
 
+<style>
+
+body {
+    margin:0;
+    font-family: 'Trebuchet MS', sans-serif;
+    background: radial-gradient(circle at center, #3a2a1a, #1b120b);
+    color: #fff;
+    text-align:center;
+}
+
+/* ===== LOGO HEADER ===== */
+.header {
+    position: sticky;
+    top:0;
+    background: rgba(0,0,0,0.85);
+    padding:10px;
+    backdrop-filter: blur(8px);
+    z-index:1000;
+}
+
+.header img {
+    max-width:380px;
+    width:90%;
+    animation: glow 3s infinite alternate;
+}
+
+@keyframes glow {
+    from { filter: drop-shadow(0 0 10px gold); }
+    to { filter: drop-shadow(0 0 25px orange); }
+}
+
+/* ===== CONTAINER ===== */
+.container {
+    padding:20px;
+    background: rgba(0,0,0,0.6);
+    margin:20px;
+    border-radius:20px;
+}
+
+/* ===== VIDEO ===== */
+video {
+    width:90%;
+    max-height:500px;
+    margin-top:15px;
+    border-radius:15px;
+    box-shadow:0 0 30px gold;
+}
+
+/* ===== CONTROLS ===== */
+button {
+    padding:10px 15px;
+    margin:6px;
+    border:none;
+    border-radius:10px;
+    background: linear-gradient(to bottom, #ffd700, #caa400);
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+input, select {
+    padding:6px;
+    margin:6px;
+    border-radius:8px;
+}
+
+#transcript {
+    margin-top:15px;
+    background:#111;
+    padding:10px;
+    border-radius:10px;
+    max-height:150px;
+    overflow:auto;
+    text-align:left;
+    font-size:14px;
+}
+
+/* ===== TIME DISPLAY ===== */
+#timeDisplay {
+    margin-top:10px;
+    font-weight:bold;
+}
+
+@media(max-width:768px){
+    video { width:100%; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <img src="logo.png" alt="ИгроМир в сундучке">
+</div>
+
+<div class="container">
+
+<h2 id="title">ИгроМир Studio</h2>
+
+<input type="file" accept="video/*" id="videoUpload">
+<input type="text" id="videoURL" placeholder="Ссылка на видео">
+<button onclick="loadVideoURL()">Загрузить</button>
+
+<br>
+
+<input type="file" accept="image/*" id="bgUpload">
+<input type="text" id="bgURL" placeholder="Ссылка на фон">
+<button onclick="loadBGURL()">Фон</button>
+
+<br>
+
+<select id="language">
+<option value="ru">Русский</option>
+<option value="de">Deutsch</option>
+<option value="en">English</option>
+<option value="es">Español</option>
+<option value="fr">Français</option>
+<option value="it">Italiano</option>
+<option value="zh">中文</option>
+<option value="ja">日本語</option>
+</select>
+
+<video id="videoPlayer" controls></video>
+
+<div id="timeDisplay">00:00 / 00:00</div>
+
+<div>
+<button onclick="rewind()">⏪ -10s</button>
+<button onclick="forward()">+10s ⏩</button>
+<button onclick="toggleMute()">🔊</button>
+</div>
+
+<input type="file" accept=".vtt" id="subtitleUpload">
+<button onclick="addSubtitles()">Титры</button>
+
+<button onclick="startTranscription()">🎤 Транскрибация</button>
+
+<div id="transcript"></div>
+
+</div>
+
+<script>
+
+const video = document.getElementById('videoPlayer');
+const timeDisplay = document.getElementById('timeDisplay');
+
+document.getElementById('videoUpload').onchange = function(e) {
+    video.src = URL.createObjectURL(e.target.files[0]);
+};
+
+function loadVideoURL(){
+    video.src = document.getElementById('videoURL').value;
+}
+
+document.getElementById('bgUpload').onchange = function(e){
+    document.body.style.backgroundImage = `url(${URL.createObjectURL(e.target.files[0])})`;
+};
+
+function loadBGURL(){
+    document.body.style.backgroundImage = `url(${document.getElementById('bgURL').value})`;
+}
+
+function rewind(){ video.currentTime -= 10; }
+function forward(){ video.currentTime += 10; }
+function toggleMute(){ video.muted = !video.muted; }
+
+video.ontimeupdate = function(){
+    let current = formatTime(video.currentTime);
+    let total = formatTime(video.duration);
+    timeDisplay.textContent = current + " / " + total;
+};
+
+function formatTime(seconds){
+    if(!seconds) return "00:00";
+    let m = Math.floor(seconds/60);
+    let s = Math.floor(seconds%60);
+    return (m<10?"0":"")+m + ":" + (s<10?"0":"")+s;
+}
+
+function addSubtitles(){
+    const file = document.getElementById('subtitleUpload').files[0];
+    const track = document.createElement("track");
+    track.kind="subtitles";
+    track.src=URL.createObjectURL(file);
+    track.default=true;
+    video.appendChild(track);
+}
+
+function startTranscription(){
+    const lang = document.getElementById("language").value;
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = lang;
+    recognition.continuous = true;
+    recognition.onresult = function(event){
+        for(let i=event.resultIndex;i<event.results.length;i++){
+            document.getElementById("transcript").innerHTML += event.results[i][0].transcript + "<br>";
+        }
+    };
+    recognition.start();
+}
+
+</script>
+
+</body>
+</html>
