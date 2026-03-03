@@ -3,329 +3,1418 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Универсальный Видеоплеер</title>
+<title>ИгроМир в Сундучке — Видеоредактор</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Uncial+Antiqua&family=IM+Fell+English:ital@0;1&family=Noto+Sans+SC&family=Noto+Sans+JP&display=swap" rel="stylesheet">
 <style>
-  body { 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    margin: 0; 
-    padding: 20px; 
-    text-align: center; 
-    background-color: #eef2f5;
-    background-size: cover; 
-    background-position: center;
-    background-attachment: fixed;
-    transition: background 0.5s ease;
+  :root {
+    --gold: #c9922a;
+    --gold-light: #f0c060;
+    --gold-dark: #8b5e1a;
+    --parchment: #f5e8c8;
+    --parchment-dark: #e8d5a3;
+    --brown: #5c3d1e;
+    --brown-dark: #3a2410;
+    --crimson: #8b1a1a;
+    --shadow: rgba(30,15,5,0.7);
+    --wood: #7a4f2a;
+    --wood-light: #a0703a;
   }
-  .container { 
-    background: rgba(255, 255, 255, 0.95); 
-    padding: 25px; 
-    border-radius: 12px; 
-    max-width: 900px; 
-    margin: auto; 
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1a0f05;
+    background-image: 
+      radial-gradient(ellipse at 20% 20%, rgba(139,94,26,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(201,146,42,0.1) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9922a' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    font-family: 'IM Fell English', serif;
+    color: var(--parchment);
+    min-height: 100vh;
+    overflow-x: hidden;
   }
-  #custom-logo { 
-    max-height: 80px; 
-    margin-bottom: 20px; 
+
+  /* ========== HEADER ========== */
+  .header {
+    text-align: center;
+    padding: 20px 20px 10px;
+    position: relative;
+    background: linear-gradient(180deg, rgba(30,15,5,1) 0%, rgba(30,15,5,0.7) 100%);
+    border-bottom: 2px solid var(--gold-dark);
+  }
+
+  .header-logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 20px var(--gold-dark), 0 0 40px rgba(201,146,42,0.3);
+    object-fit: cover;
+    animation: logoGlow 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes logoGlow {
+    from { box-shadow: 0 0 15px var(--gold-dark), 0 0 30px rgba(201,146,42,0.2); }
+    to   { box-shadow: 0 0 25px var(--gold), 0 0 60px rgba(201,146,42,0.5); }
+  }
+
+  .header-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(18px, 3vw, 32px);
+    color: var(--gold-light);
+    text-shadow: 0 0 20px var(--gold), 2px 2px 4px var(--brown-dark);
+    margin-top: 8px;
+    letter-spacing: 2px;
+  }
+
+  .header-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    color: var(--parchment-dark);
+    font-size: 14px;
+    margin-top: 4px;
+    opacity: 0.8;
+  }
+
+  .ornament {
+    color: var(--gold);
+    font-size: 20px;
+    letter-spacing: 8px;
+    margin: 6px 0;
+    opacity: 0.7;
+  }
+
+  /* ========== MAIN LAYOUT ========== */
+  .editor-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 16px;
+  }
+
+  /* ========== PANEL BASE ========== */
+  .panel {
+    background: linear-gradient(135deg, rgba(92,61,30,0.6) 0%, rgba(58,36,16,0.8) 100%);
+    border: 1px solid var(--gold-dark);
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    backdrop-filter: blur(4px);
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(201,146,42,0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .panel-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 12px;
+    color: var(--gold-light);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(201,146,42,0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title .icon { font-size: 16px; }
+
+  /* ========== LANGUAGE SELECTOR ========== */
+  .lang-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .lang-btn {
+    background: rgba(92,61,30,0.5);
+    border: 1px solid rgba(201,146,42,0.3);
+    border-radius: 6px;
+    padding: 6px 4px;
+    color: var(--parchment);
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    font-family: 'IM Fell English', serif;
+  }
+
+  .lang-btn:hover, .lang-btn.active {
+    background: rgba(201,146,42,0.3);
+    border-color: var(--gold);
+    color: var(--gold-light);
+    box-shadow: 0 0 8px rgba(201,146,42,0.3);
+  }
+
+  .lang-flag { font-size: 18px; display: block; }
+
+  /* ========== UPLOAD ZONES ========== */
+  .upload-zone {
+    border: 2px dashed rgba(201,146,42,0.4);
     border-radius: 8px;
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 10px;
+    background: rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-zone:hover {
+    border-color: var(--gold);
+    background: rgba(201,146,42,0.1);
+  }
+
+  .upload-zone input[type=file] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-icon { font-size: 28px; display: block; }
+  .upload-label { font-size: 11px; color: var(--parchment-dark); margin-top: 4px; }
+
+  .url-input {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(201,146,42,0.4);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--parchment);
+    font-size: 12px;
+    font-family: monospace;
+    margin-bottom: 6px;
+    transition: border-color 0.2s;
+  }
+
+  .url-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 8px rgba(201,146,42,0.2);
+  }
+
+  .url-input::placeholder { color: rgba(245,232,200,0.3); }
+
+  .btn {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: var(--brown-dark);
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  .btn:hover {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    box-shadow: 0 4px 15px rgba(201,146,42,0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-sm {
+    padding: 5px 10px;
+    font-size: 9px;
+    width: auto;
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--gold-dark);
+    color: var(--gold-light);
+  }
+
+  .btn-outline:hover {
+    background: rgba(201,146,42,0.2);
+    box-shadow: 0 0 10px rgba(201,146,42,0.3);
+  }
+
+  .section-label {
+    font-size: 10px;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 10px 0 6px;
+    font-family: 'Cinzel Decorative', cursive;
+  }
+
+  /* ========== VIDEO PLAYER ========== */
+  .player-panel {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .video-stage {
+    position: relative;
+    width: 100%;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--gold-dark);
+    min-height: 340px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #videoPlayer {
+    width: 100%;
+    height: 100%;
+    max-height: 480px;
+    object-fit: contain;
     display: none;
   }
-  .controls-panel { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 15px; 
-    text-align: left; 
-    margin-bottom: 20px; 
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-  }
-  .controls-panel > div { display: flex; flex-direction: column; }
-  label { font-size: 0.85em; font-weight: bold; margin-bottom: 5px; color: #333; }
-  input, select, button { 
-    padding: 8px; 
-    border: 1px solid #ccc; 
-    border-radius: 6px; 
-    font-size: 13px;
-    width: 100%; 
-    box-sizing: border-box; 
-  }
-  button { 
-    cursor: pointer; 
-    background: #4caf50; 
-    color: white; 
-    border: none; 
-    font-weight: bold; 
-    transition: background 0.3s;
-    margin-top: 10px;
-    padding: 12px;
-  }
-  button:hover { background: #45a049; }
-  
-  /* Блок генерации Iframe */
-  .iframe-panel {
-    background: #e3f2fd;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #90caf9;
-    margin-bottom: 25px;
-    text-align: left;
-  }
-  .iframe-panel .flex-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-  .iframe-panel input { flex-grow: 1; background: #fff; font-family: monospace; }
-  .iframe-panel button { margin-top: 0; width: auto; white-space: nowrap; background: #1976d2; }
-  .iframe-panel button:hover { background: #1565c0; }
 
-  video { 
-    width: 100%; 
-    border-radius: 10px; 
-    background: #000; 
-    outline: none; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  #iframeContainer {
+    width: 100%;
+    height: 100%;
+    min-height: 340px;
+    display: none;
   }
-  #transcription-box { 
-    margin-top: 15px; 
-    padding: 15px; 
-    background: #fdfdfd; 
-    border: 1px solid #ddd; 
-    min-height: 80px; 
-    max-height: 150px;
-    border-radius: 6px; 
-    text-align: left;
-    font-size: 0.95em;
-    color: #444;
+
+  #iframeContainer iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 340px;
+    border: none;
+  }
+
+  .video-placeholder {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .video-placeholder .ph-icon { font-size: 64px; opacity: 0.3; }
+  .video-placeholder p { font-size: 14px; opacity: 0.4; margin-top: 10px; font-style: italic; }
+
+  /* Background overlay */
+  .bg-overlay {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  /* Subtitles */
+  .subtitle-overlay {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+    max-width: 90%;
+    display: none;
+    z-index: 10;
+    line-height: 1.5;
+    border: 1px solid rgba(201,146,42,0.4);
+  }
+
+  /* Custom controls */
+  .custom-controls {
+    background: linear-gradient(180deg, rgba(30,15,5,0.95) 0%, rgba(58,36,16,0.98) 100%);
+    border: 1px solid var(--gold-dark);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 10px 14px;
+  }
+
+  .progress-bar-wrap {
+    position: relative;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.1s;
+    position: relative;
+  }
+
+  .progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: -3px;
+    width: 12px;
+    height: 12px;
+    background: var(--gold-light);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--gold);
+  }
+
+  .controls-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .ctrl-btn {
+    background: rgba(201,146,42,0.15);
+    border: 1px solid rgba(201,146,42,0.3);
+    color: var(--gold-light);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .ctrl-btn:hover {
+    background: rgba(201,146,42,0.35);
+    border-color: var(--gold);
+    box-shadow: 0 0 8px rgba(201,146,42,0.4);
+  }
+
+  .ctrl-btn.play-btn { width: 42px; height: 42px; font-size: 18px; }
+
+  .time-display {
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--parchment-dark);
+    min-width: 95px;
+  }
+
+  .volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .vol-slider {
+    -webkit-appearance: none;
+    width: 70px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(201,146,42,0.3);
+    outline: none;
+    cursor: pointer;
+  }
+
+  .vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+  }
+
+  /* ========== SUBTITLES PANEL ========== */
+  .subtitle-area {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(201,146,42,0.3);
+    border-radius: 6px;
+    padding: 8px;
+    color: var(--parchment);
+    font-size: 12px;
+    font-family: 'IM Fell English', serif;
+    resize: vertical;
+    min-height: 80px;
+    margin-top: 6px;
+  }
+
+  .subtitle-area:focus { outline: none; border-color: var(--gold); }
+
+  /* ========== TRANSCRIPTION ========== */
+  .transcription-box {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(201,146,42,0.3);
+    border-radius: 6px;
+    padding: 10px;
+    min-height: 80px;
+    font-size: 12px;
+    color: var(--parchment-dark);
+    font-style: italic;
+    line-height: 1.6;
     overflow-y: auto;
+    max-height: 120px;
+  }
+
+  /* ========== HTML EXPORT ========== */
+  .code-area {
+    width: 100%;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(201,146,42,0.3);
+    border-radius: 6px;
+    padding: 10px;
+    color: #a8d8a8;
+    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+  }
+
+  .code-area:focus { outline: none; border-color: var(--gold); }
+
+  /* ========== BOTTOM ROW ========== */
+  .bottom-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ========== IFRAME EXPORT ========== */
+  .tab-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .tab-btn {
+    background: rgba(92,61,30,0.4);
+    border: 1px solid rgba(201,146,42,0.3);
+    border-radius: 6px 6px 0 0;
+    padding: 5px 10px;
+    color: var(--parchment-dark);
+    font-size: 10px;
+    cursor: pointer;
+    font-family: 'Cinzel Decorative', cursive;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    background: rgba(201,146,42,0.2);
+    border-color: var(--gold);
+    color: var(--gold-light);
+  }
+
+  /* ========== TOGGLE SWITCH ========== */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 38px;
+    height: 20px;
+  }
+
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: rgba(92,61,30,0.6);
+    border: 1px solid rgba(201,146,42,0.3);
+    border-radius: 20px;
+    transition: .3s;
+  }
+
+  .toggle-slider:before {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    left: 2px;
+    bottom: 2px;
+    background: var(--parchment-dark);
+    border-radius: 50%;
+    transition: .3s;
+  }
+
+  input:checked + .toggle-slider {
+    background: rgba(201,146,42,0.4);
+    border-color: var(--gold);
+  }
+
+  input:checked + .toggle-slider:before {
+    transform: translateX(18px);
+    background: var(--gold);
+  }
+
+  .toggle-label { font-size: 11px; color: var(--parchment-dark); }
+
+  /* ========== STATUS BAR ========== */
+  .status-bar {
+    grid-column: 1 / -1;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(201,146,42,0.2);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 11px;
+    color: var(--gold);
+    font-family: monospace;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  /* Notification toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--brown), var(--brown-dark));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 12px 18px;
+    color: var(--gold-light);
+    font-size: 13px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .editor-wrapper {
+      grid-template-columns: 1fr;
+    }
+    .player-panel { grid-column: 1; grid-row: auto; }
+    .bottom-row { grid-template-columns: 1fr; }
+  }
+
+  select {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(201,146,42,0.4);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: var(--parchment);
+    font-family: 'IM Fell English', serif;
+    font-size: 12px;
+    width: 100%;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+
+  select:focus { outline: none; border-color: var(--gold); }
+  select option { background: #3a2410; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(201,146,42,0.2);
+    margin: 10px 0;
+  }
+
+  .speed-btns { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+  .speed-btn {
+    background: rgba(92,61,30,0.5);
+    border: 1px solid rgba(201,146,42,0.3);
+    color: var(--parchment-dark);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .speed-btn:hover, .speed-btn.active {
+    background: rgba(201,146,42,0.3);
+    color: var(--gold-light);
+    border-color: var(--gold);
+  }
+
+  /* Genially badge */
+  .badge {
+    display: inline-block;
+    background: rgba(201,146,42,0.2);
+    border: 1px solid rgba(201,146,42,0.4);
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 10px;
+    color: var(--gold);
+    margin-left: 6px;
+    font-family: monospace;
   }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <img id="custom-logo" src="" alt="Логотип">
-
-  <div class="controls-panel">
-    <div>
-      <label data-i18n="logo_pc">Загрузить логотип (с ПК):</label>
-      <input type="file" id="logo-upload" accept="image/*">
-    </div>
-    <div>
-      <label data-i18n="logo_url">Вставить логотип (ссылка):</label>
-      <input type="url" id="logo-url" placeholder="https://...">
-    </div>
-    <div>
-      <label data-i18n="video_pc">Загрузить видео (с ПК):</label>
-      <input type="file" id="video-upload" accept="video/*">
-    </div>
-    <div>
-      <label data-i18n="video_url">Вставить видео (ссылка):</label>
-      <input type="url" id="video-url" placeholder="https://.../video.mp4">
-    </div>
-    <div>
-      <label data-i18n="bg_pc">Загрузить фон (с ПК):</label>
-      <input type="file" id="bg-upload" accept="image/*">
-    </div>
-    <div>
-      <label data-i18n="bg_url">Вставить фон (ссылка):</label>
-      <input type="url" id="bg-url" placeholder="https://...">
-    </div>
-    <div style="grid-column: span 2;">
-      <label data-i18n="lang_select">Выберите язык интерфейса и распознавания:</label>
-      <select id="language-select">
-        <option value="ru-RU">Русский (Russian)</option>
-        <option value="en-US">Английский (English)</option>
-        <option value="de-DE">Немецкий (German)</option>
-        <option value="es-ES">Испанский (Spanish)</option>
-        <option value="fr-FR">Французский (French)</option>
-        <option value="it-IT">Итальянский (Italian)</option>
-        <option value="pt-PT">Португальский (Portuguese)</option>
-        <option value="zh-CN">Китайский (Chinese)</option>
-        <option value="ja-JP">Японский (Japanese)</option>
-        <option value="fa-IR">Фарси (Farsi)</option>
-        <option value="prs-AF">Дари (Dari)</option>
-        <option value="ar-SA">Арабский (Arabic)</option>
-        <option value="hi-IN">Хинди (Hindi)</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="iframe-panel">
-    <label data-i18n="iframe_label">Код для встраивания (Iframe) в Genially и браузер:</label>
-    <div class="flex-row">
-      <input type="text" id="iframe-code" readonly>
-      <button id="copy-iframe-btn" data-i18n="copy_btn">Копировать</button>
-    </div>
-  </div>
-
-  <video id="video-player" controls crossorigin="anonymous">
-    <track id="caption-track" label="Титры" kind="subtitles" srclang="ru" src="">
-  </video>
-
-  <div>
-    <button id="transcribe-btn" data-i18n="start_trans">▶ Начать транскрибирование речи</button>
-    <div id="transcription-box" data-i18n="trans_box_text">Здесь будет появляться распознанный текст... Разрешите доступ к микрофону.</div>
-  </div>
+<!-- HEADER -->
+<div class="header">
+  <img src="/mnt/user-data/uploads/Логотип_ИгроМир_в_сундучке.png" alt="ИгроМир" class="header-logo"
+       onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block'">
+  <div id="logoFallback" style="display:none; font-size:48px; margin-bottom:4px;">🎮</div>
+  <h1 class="header-title">ИгроМир в Сундучке</h1>
+  <div class="ornament">❧ ✦ ❧</div>
+  <p class="header-subtitle">Видеоредактор для занятий, уроков, игр и семейного альбома</p>
 </div>
 
+<div class="editor-wrapper">
+
+  <!-- ===== LEFT SIDEBAR ===== -->
+  <div style="display:flex; flex-direction:column; gap:16px;">
+
+    <!-- LANGUAGE -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">🌐</span> Язык интерфейса</div>
+      <div class="lang-grid">
+        <button class="lang-btn active" onclick="setLang('ru',this)"><span class="lang-flag">🇷🇺</span>RU</button>
+        <button class="lang-btn" onclick="setLang('de',this)"><span class="lang-flag">🇩🇪</span>DE</button>
+        <button class="lang-btn" onclick="setLang('en',this)"><span class="lang-flag">🇬🇧</span>EN</button>
+        <button class="lang-btn" onclick="setLang('es',this)"><span class="lang-flag">🇪🇸</span>ES</button>
+        <button class="lang-btn" onclick="setLang('fr',this)"><span class="lang-flag">🇫🇷</span>FR</button>
+        <button class="lang-btn" onclick="setLang('it',this)"><span class="lang-flag">🇮🇹</span>IT</button>
+        <button class="lang-btn" onclick="setLang('zh',this)"><span class="lang-flag">🇨🇳</span>ZH</button>
+        <button class="lang-btn" onclick="setLang('ja',this)"><span class="lang-flag">🇯🇵</span>JA</button>
+      </div>
+    </div>
+
+    <!-- VIDEO SOURCE -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">🎬</span> <span data-i18n="videoSource">Источник видео</span></div>
+
+      <div class="section-label" data-i18n="uploadFromPC">📁 Загрузить с компьютера</div>
+      <div class="upload-zone" id="videoUploadZone">
+        <input type="file" id="videoFileInput" accept="video/*" onchange="loadLocalVideo(this)">
+        <span class="upload-icon">🎞️</span>
+        <div class="upload-label" data-i18n="dropVideo">Нажмите или перетащите видео</div>
+      </div>
+
+      <div class="section-label" data-i18n="videoByURL">🔗 Видео по ссылке / iframe</div>
+      <input type="text" class="url-input" id="videoUrlInput" placeholder="https://youtube.com/... или embed URL" />
+      <button class="btn" onclick="loadVideoUrl()">▶ <span data-i18n="loadVideo">Загрузить видео</span></button>
+
+      <hr class="divider">
+      <div class="section-label" data-i18n="platform">Платформа</div>
+      <select id="platformSelect" onchange="updatePlatform()">
+        <option value="direct">Прямое видео / Direct</option>
+        <option value="youtube">YouTube</option>
+        <option value="vimeo">Vimeo</option>
+        <option value="genially">Genially (iframe)</option>
+        <option value="github">GitHub Pages iframe</option>
+        <option value="custom">Custom iframe</option>
+      </select>
+    </div>
+
+    <!-- BACKGROUND -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">🖼️</span> <span data-i18n="background">Фон / Фоновое изображение</span></div>
+
+      <div class="section-label">📁 <span data-i18n="bgFromPC">Фон с компьютера</span></div>
+      <div class="upload-zone" id="bgUploadZone">
+        <input type="file" id="bgFileInput" accept="image/*" onchange="loadLocalBg(this)">
+        <span class="upload-icon">🌄</span>
+        <div class="upload-label" data-i18n="dropBg">Нажмите или перетащите изображение</div>
+      </div>
+
+      <div class="section-label">🔗 <span data-i18n="bgByURL">Фон по ссылке</span></div>
+      <input type="text" class="url-input" id="bgUrlInput" placeholder="https://... .jpg/.png" />
+      <button class="btn" onclick="loadBgUrl()"><span data-i18n="applyBg">Применить фон</span></button>
+      <button class="btn btn-outline" style="margin-top:6px" onclick="clearBg()">✕ <span data-i18n="clearBg">Убрать фон</span></button>
+    </div>
+
+  </div>
+
+  <!-- ===== VIDEO PLAYER ===== -->
+  <div class="player-panel panel">
+    <div class="panel-title"><span class="icon">📽️</span> <span data-i18n="player">Видеоплеер</span> <span class="badge" id="platformBadge">direct</span></div>
+
+    <div class="video-stage" id="videoStage">
+      <div class="bg-overlay" id="bgOverlay"></div>
+
+      <video id="videoPlayer" controls="false"></video>
+      <div id="iframeContainer"></div>
+
+      <div class="video-placeholder" id="videoPlaceholder">
+        <div class="ph-icon">🎬</div>
+        <p data-i18n="noVideo">Загрузите видео или вставьте ссылку</p>
+      </div>
+
+      <div class="subtitle-overlay" id="subtitleOverlay"></div>
+    </div>
+
+    <!-- CUSTOM CONTROLS -->
+    <div class="custom-controls">
+      <div class="progress-bar-wrap" id="progressWrap" onclick="seekVideo(event)">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+
+      <div class="controls-row">
+        <button class="ctrl-btn" onclick="skipVideo(-10)" title="−10s">⏪</button>
+        <button class="ctrl-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+        <button class="ctrl-btn" onclick="skipVideo(10)" title="+10s">⏩</button>
+        <button class="ctrl-btn" onclick="toggleMute()" id="muteBtn" title="Громкость">🔊</button>
+
+        <div class="volume-wrap">
+          <span style="font-size:14px">🔉</span>
+          <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.05" value="1" oninput="setVolume(this.value)">
+          <span style="font-size:14px">🔊</span>
+        </div>
+
+        <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+
+        <button class="ctrl-btn btn-outline btn-sm" onclick="toggleFullscreen()" title="Полный экран" style="border-radius:6px; width:auto; padding:4px 8px; font-size:12px">⛶</button>
+      </div>
+
+      <div style="margin-top:8px;">
+        <div class="section-label" data-i18n="playbackSpeed">Скорость воспроизведения</div>
+        <div class="speed-btns">
+          <button class="speed-btn" onclick="setSpeed(0.5)">0.5×</button>
+          <button class="speed-btn" onclick="setSpeed(0.75)">0.75×</button>
+          <button class="speed-btn active" onclick="setSpeed(1)">1×</button>
+          <button class="speed-btn" onclick="setSpeed(1.25)">1.25×</button>
+          <button class="speed-btn" onclick="setSpeed(1.5)">1.5×</button>
+          <button class="speed-btn" onclick="setSpeed(2)">2×</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BOTTOM ROW ===== -->
+  <div class="bottom-row">
+
+    <!-- SUBTITLES -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">💬</span> <span data-i18n="subtitles">Титры</span></div>
+      <div class="toggle-row">
+        <label class="toggle-switch">
+          <input type="checkbox" id="subtitleToggle" onchange="toggleSubtitles()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label" data-i18n="enableSubtitles">Включить титры</span>
+      </div>
+      <div class="section-label" data-i18n="subtitleText">Текст титров (каждая строка = 1 фраза)</div>
+      <textarea class="subtitle-area" id="subtitleText" placeholder="0:00 Добро пожаловать!&#10;0:05 Начинаем урок...&#10;0:10 Следующая фраза..." rows="5"></textarea>
+      <div class="section-label" style="margin-top:8px;" data-i18n="subtitleLang">Язык титров</div>
+      <select id="subtitleLangSelect">
+        <option value="ru">Русский</option>
+        <option value="de">Deutsch</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+        <option value="it">Italiano</option>
+        <option value="zh">中文</option>
+        <option value="ja">日本語</option>
+      </select>
+      <button class="btn" onclick="parseSubs()" style="margin-top:4px">✅ <span data-i18n="applySubs">Применить титры</span></button>
+    </div>
+
+    <!-- TRANSCRIPTION -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">📝</span> <span data-i18n="transcription">Транскрипция</span></div>
+      <div class="toggle-row">
+        <label class="toggle-switch">
+          <input type="checkbox" id="transcribeToggle" onchange="toggleTranscription()">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label" data-i18n="autoTranscribe">Авто-транскрипция (Web Speech)</span>
+      </div>
+      <div class="section-label" data-i18n="transcribeResult">Результат транскрипции</div>
+      <div class="transcription-box" id="transcriptionBox" data-i18n-placeholder="transcribeHint">
+        Транскрипция появится здесь при включении микрофона / Web Speech API...
+      </div>
+      <div style="display:flex; gap:6px; margin-top:8px;">
+        <button class="btn btn-outline btn-sm" onclick="clearTranscription()">🗑 <span data-i18n="clearTrans">Очистить</span></button>
+        <button class="btn btn-sm" onclick="copyTranscription()">📋 <span data-i18n="copyTrans">Копировать</span></button>
+      </div>
+      <hr class="divider">
+      <div class="section-label" data-i18n="manualTranscript">Ручная транскрипция</div>
+      <textarea class="subtitle-area" id="manualTranscript" placeholder="Введите транскрипцию вручную..." rows="3"></textarea>
+    </div>
+
+    <!-- HTML / IFRAME EXPORT -->
+    <div class="panel">
+      <div class="panel-title"><span class="icon">💻</span> <span data-i18n="htmlExport">HTML / Iframe Экспорт</span></div>
+      <div class="tab-row">
+        <button class="tab-btn active" id="tabGithub" onclick="switchTab('github')">GitHub Pages</button>
+        <button class="tab-btn" id="tabGenially" onclick="switchTab('genially')">Genially</button>
+        <button class="tab-btn" id="tabIframe" onclick="switchTab('iframe')">iFrame</button>
+      </div>
+      <div id="tabContentGithub">
+        <div class="section-label">HTML для GitHub Pages</div>
+        <textarea class="code-area" id="githubCode" rows="6" readonly></textarea>
+        <button class="btn" onclick="generateGithubCode()">⚙️ <span data-i18n="generate">Сгенерировать код</span></button>
+        <button class="btn btn-outline" onclick="copyCode('githubCode')" style="margin-top:6px">📋 <span data-i18n="copyCode">Копировать код</span></button>
+      </div>
+      <div id="tabContentGenially" style="display:none">
+        <div class="section-label">Embed для Genially</div>
+        <textarea class="code-area" id="geniallyCode" rows="6" readonly></textarea>
+        <button class="btn" onclick="generateGeniallyCode()">⚙️ <span data-i18n="generate">Сгенерировать</span></button>
+        <button class="btn btn-outline" onclick="copyCode('geniallyCode')" style="margin-top:6px">📋 <span data-i18n="copyCode">Копировать</span></button>
+      </div>
+      <div id="tabContentIframe" style="display:none">
+        <div class="section-label">Universal iFrame</div>
+        <textarea class="code-area" id="iframeCode" rows="6" readonly></textarea>
+        <button class="btn" onclick="generateIframeCode()">⚙️ <span data-i18n="generate">Сгенерировать</span></button>
+        <button class="btn btn-outline" onclick="copyCode('iframeCode')" style="margin-top:6px">📋 <span data-i18n="copyCode">Копировать</span></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <span id="statusText">ИгроМир Видеоредактор готов к работе ✦ ИгроМир в Сундучке</span>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
-  // Обновленный словарь переводов
-  const translations = {
-    "ru-RU": { logo_pc: "Загрузить логотип (с ПК):", logo_url: "Вставить логотип (ссылка):", video_pc: "Загрузить видео (с ПК):", video_url: "Вставить видео (ссылка):", bg_pc: "Загрузить фон (с ПК):", bg_url: "Вставить фон (ссылка):", lang_select: "Выберите язык интерфейса и распознавания:", start_trans: "▶ Начать транскрибирование", stop_trans: "⏹ Остановить", trans_box_text: "Здесь будет появляться распознанный текст...", iframe_label: "Код для встраивания (Iframe) в Genially и браузер:", copy_btn: "Копировать" },
-    "en-US": { logo_pc: "Upload Logo (PC):", logo_url: "Insert Logo (URL):", video_pc: "Upload Video (PC):", video_url: "Insert Video (URL):", bg_pc: "Upload Background (PC):", bg_url: "Insert Background (URL):", lang_select: "Select Language:", start_trans: "▶ Start Transcription", stop_trans: "⏹ Stop", trans_box_text: "Recognized text will appear here...", iframe_label: "Embed code (Iframe) for Genially & browser:", copy_btn: "Copy" },
-    "de-DE": { logo_pc: "Logo (PC):", logo_url: "Logo (URL):", video_pc: "Video (PC):", video_url: "Video (URL):", bg_pc: "Hintergrund (PC):", bg_url: "Hintergrund (URL):", lang_select: "Sprache auswählen:", start_trans: "▶ Transkription starten", stop_trans: "⏹ Stoppen", trans_box_text: "Text wird hier angezeigt...", iframe_label: "Einbettungscode (Iframe):", copy_btn: "Kopieren" },
-    "es-ES": { logo_pc: "Logo (PC):", logo_url: "Logo (URL):", video_pc: "Video (PC):", video_url: "Video (URL):", bg_pc: "Fondo (PC):", bg_url: "Fondo (URL):", lang_select: "Seleccionar idioma:", start_trans: "▶ Iniciar transcripción", stop_trans: "⏹ Detener", trans_box_text: "El texto aparecerá aquí...", iframe_label: "Código de inserción (Iframe):", copy_btn: "Copiar" },
-    "fr-FR": { logo_pc: "Logo (PC):", logo_url: "Logo (URL):", video_pc: "Vidéo (PC):", video_url: "Vidéo (URL):", bg_pc: "Fond (PC):", bg_url: "Fond (URL):", lang_select: "Sélectionner la langue:", start_trans: "▶ Démarrer la transcription", stop_trans: "⏹ Arrêter", trans_box_text: "Le texte apparaîtra ici...", iframe_label: "Code d'intégration (Iframe):", copy_btn: "Copier" },
-    "it-IT": { logo_pc: "Logo (PC):", logo_url: "Logo (URL):", video_pc: "Video (PC):", video_url: "Video (URL):", bg_pc: "Sfondo (PC):", bg_url: "Sfondo (URL):", lang_select: "Seleziona la lingua:", start_trans: "▶ Avvia trascrizione", stop_trans: "⏹ Ferma", trans_box_text: "Il testo apparirà qui...", iframe_label: "Codice di incorporamento (Iframe):", copy_btn: "Copia" },
-    "pt-PT": { logo_pc: "Logotipo (PC):", logo_url: "Logotipo (URL):", video_pc: "Vídeo (PC):", video_url: "Vídeo (URL):", bg_pc: "Fundo (PC):", bg_url: "Fundo (URL):", lang_select: "Selecione o idioma:", start_trans: "▶ Iniciar Transcrição", stop_trans: "⏹ Parar", trans_box_text: "O texto aparecerá aqui...", iframe_label: "Código de incorporação (Iframe):", copy_btn: "Copiar" },
-    "zh-CN": { logo_pc: "徽标 (电脑):", logo_url: "徽标 (链接):", video_pc: "视频 (电脑):", video_url: "视频 (链接):", bg_pc: "背景 (电脑):", bg_url: "背景 (链接):", lang_select: "选择语言:", start_trans: "▶ 开始转录", stop_trans: "⏹ 停止", trans_box_text: "识别的文本将显示在这里...", iframe_label: "嵌入代码 (Iframe):", copy_btn: "复制" },
-    "ja-JP": { logo_pc: "ロゴ (PC):", logo_url: "ロゴ (URL):", video_pc: "動画 (PC):", video_url: "動画 (URL):", bg_pc: "背景 (PC):", bg_url: "背景 (URL):", lang_select: "言語を選択:", start_trans: "▶ 文字起こしを開始", stop_trans: "⏹ 停止", trans_box_text: "テキストがここに表示されます...", iframe_label: "埋め込みコード (Iframe):", copy_btn: "コピー" },
-    "fa-IR": { logo_pc: "لوگو (رایانه):", logo_url: "لوگو (لینک):", video_pc: "ویدیو (رایانه):", video_url: "ویدیو (لینک):", bg_pc: "پس‌زمینه (رایانه):", bg_url: "پس‌زمینه (لینک):", lang_select: "انتخاب زبان:", start_trans: "▶ شروع رونویسی", stop_trans: "⏹ توقف", trans_box_text: "متن در اینجا ظاهر می شود...", iframe_label: "کد جاسازی (Iframe):", copy_btn: "کپی" },
-    "prs-AF": { logo_pc: "لوگو (کمپیوتر):", logo_url: "لوگو (لینک):", video_pc: "ویدیو (کمپیوتر):", video_url: "ویدیو (لینک):", bg_pc: "پس‌زمینه (کمپیوتر):", bg_url: "پس‌زمینه (لینک):", lang_select: "انتخاب زبان:", start_trans: "▶ شروع رونویسی", stop_trans: "⏹ توقف", trans_box_text: "متن در اینجا ظاهر می شود...", iframe_label: "کد جابجایی (Iframe):", copy_btn: "کاپي" },
-    "ar-SA": { logo_pc: "شعار (كمبيوتر):", logo_url: "شعار (رابط):", video_pc: "فيديو (كمبيوتر):", video_url: "فيديو (رابط):", bg_pc: "خلفية (كمبيوتر):", bg_url: "خلفية (رابط):", lang_select: "اختر اللغة:", start_trans: "▶ بدء النسخ", stop_trans: "⏹ إيقاف", trans_box_text: "سيظهر النص هنا...", iframe_label: "كود التضمين (Iframe):", copy_btn: "نسخ" },
-    "hi-IN": { logo_pc: "लोगो (PC):", logo_url: "लोगो (URL):", video_pc: "वीडियो (PC):", video_url: "वीडियो (URL):", bg_pc: "बैकग्राउंड (PC):", bg_url: "बैकग्राउंड (URL):", lang_select: "भाषा चुनें:", start_trans: "▶ ट्रांसक्रिप्शन शुरू करें", stop_trans: "⏹ रोकें", trans_box_text: "टेक्स्ट यहाँ दिखाई देगा...", iframe_label: "एंबेड कोड (Iframe):", copy_btn: "कॉपी करें" }
-  };
+// ======================================================
+// i18n
+// ======================================================
+const i18n = {
+  ru: {
+    videoSource:'Источник видео',uploadFromPC:'Загрузить с компьютера',dropVideo:'Нажмите или перетащите видео',
+    videoByURL:'Видео по ссылке / iframe',loadVideo:'Загрузить видео',platform:'Платформа',
+    background:'Фон',bgFromPC:'Фон с компьютера',dropBg:'Перетащите изображение',bgByURL:'Фон по ссылке',
+    applyBg:'Применить фон',clearBg:'Убрать фон',player:'Видеоплеер',noVideo:'Загрузите видео или вставьте ссылку',
+    playbackSpeed:'Скорость',subtitles:'Титры',enableSubtitles:'Включить титры',subtitleText:'Текст титров',
+    subtitleLang:'Язык титров',applySubs:'Применить',transcription:'Транскрипция',
+    autoTranscribe:'Авто-транскрипция',transcribeResult:'Результат',clearTrans:'Очистить',copyTrans:'Копировать',
+    manualTranscript:'Ручная транскрипция',htmlExport:'Экспорт HTML',generate:'Сгенерировать код',copyCode:'Копировать'
+  },
+  de: {
+    videoSource:'Videoquelle',uploadFromPC:'Vom Computer hochladen',dropVideo:'Video hierher ziehen',
+    videoByURL:'Video per URL / iframe',loadVideo:'Video laden',platform:'Plattform',
+    background:'Hintergrund',bgFromPC:'Hintergrundbild hochladen',dropBg:'Bild hierher ziehen',bgByURL:'Hintergrund per URL',
+    applyBg:'Hintergrund anwenden',clearBg:'Hintergrund entfernen',player:'Videoplayer',noVideo:'Video laden oder URL eingeben',
+    playbackSpeed:'Geschwindigkeit',subtitles:'Untertitel',enableSubtitles:'Untertitel aktivieren',subtitleText:'Untertiteltext',
+    subtitleLang:'Untertitelsprache',applySubs:'Anwenden',transcription:'Transkription',
+    autoTranscribe:'Auto-Transkription',transcribeResult:'Ergebnis',clearTrans:'Löschen',copyTrans:'Kopieren',
+    manualTranscript:'Manuelle Transkription',htmlExport:'HTML Export',generate:'Code generieren',copyCode:'Kopieren'
+  },
+  en: {
+    videoSource:'Video Source',uploadFromPC:'Upload from PC',dropVideo:'Click or drop video here',
+    videoByURL:'Video by URL / iframe',loadVideo:'Load Video',platform:'Platform',
+    background:'Background',bgFromPC:'Upload background image',dropBg:'Drop image here',bgByURL:'Background by URL',
+    applyBg:'Apply Background',clearBg:'Clear Background',player:'Video Player',noVideo:'Upload a video or enter URL',
+    playbackSpeed:'Playback Speed',subtitles:'Subtitles',enableSubtitles:'Enable Subtitles',subtitleText:'Subtitle Text',
+    subtitleLang:'Subtitle Language',applySubs:'Apply',transcription:'Transcription',
+    autoTranscribe:'Auto-Transcription',transcribeResult:'Result',clearTrans:'Clear',copyTrans:'Copy',
+    manualTranscript:'Manual Transcript',htmlExport:'HTML Export',generate:'Generate Code',copyCode:'Copy Code'
+  },
+  es: {
+    videoSource:'Fuente de video',uploadFromPC:'Subir desde PC',dropVideo:'Haga clic o arrastre el video',
+    videoByURL:'Video por URL / iframe',loadVideo:'Cargar video',platform:'Plataforma',
+    background:'Fondo',bgFromPC:'Subir imagen de fondo',dropBg:'Arrastre imagen aquí',bgByURL:'Fondo por URL',
+    applyBg:'Aplicar fondo',clearBg:'Quitar fondo',player:'Reproductor',noVideo:'Suba un video o ingrese URL',
+    playbackSpeed:'Velocidad',subtitles:'Subtítulos',enableSubtitles:'Activar subtítulos',subtitleText:'Texto de subtítulos',
+    subtitleLang:'Idioma subtítulos',applySubs:'Aplicar',transcription:'Transcripción',
+    autoTranscribe:'Auto-transcripción',transcribeResult:'Resultado',clearTrans:'Borrar',copyTrans:'Copiar',
+    manualTranscript:'Transcripción manual',htmlExport:'Exportar HTML',generate:'Generar código',copyCode:'Copiar'
+  },
+  fr: {
+    videoSource:'Source vidéo',uploadFromPC:'Télécharger depuis PC',dropVideo:'Cliquez ou déposez la vidéo',
+    videoByURL:'Vidéo par URL / iframe',loadVideo:'Charger vidéo',platform:'Plateforme',
+    background:'Arrière-plan',bgFromPC:'Télécharger image de fond',dropBg:'Déposer image ici',bgByURL:'Fond par URL',
+    applyBg:'Appliquer fond',clearBg:'Supprimer fond',player:'Lecteur vidéo',noVideo:'Chargez une vidéo ou entrez URL',
+    playbackSpeed:'Vitesse',subtitles:'Sous-titres',enableSubtitles:'Activer sous-titres',subtitleText:'Texte des sous-titres',
+    subtitleLang:'Langue sous-titres',applySubs:'Appliquer',transcription:'Transcription',
+    autoTranscribe:'Auto-transcription',transcribeResult:'Résultat',clearTrans:'Effacer',copyTrans:'Copier',
+    manualTranscript:'Transcription manuelle',htmlExport:'Export HTML',generate:'Générer code',copyCode:'Copier'
+  },
+  it: {
+    videoSource:'Sorgente video',uploadFromPC:'Carica dal PC',dropVideo:'Clicca o trascina il video',
+    videoByURL:'Video per URL / iframe',loadVideo:'Carica video',platform:'Piattaforma',
+    background:'Sfondo',bgFromPC:'Carica immagine di sfondo',dropBg:'Trascina immagine qui',bgByURL:'Sfondo per URL',
+    applyBg:'Applica sfondo',clearBg:'Rimuovi sfondo',player:'Lettore video',noVideo:'Carica un video o inserisci URL',
+    playbackSpeed:'Velocità',subtitles:'Sottotitoli',enableSubtitles:'Abilita sottotitoli',subtitleText:'Testo sottotitoli',
+    subtitleLang:'Lingua sottotitoli',applySubs:'Applica',transcription:'Trascrizione',
+    autoTranscribe:'Auto-trascrizione',transcribeResult:'Risultato',clearTrans:'Cancella',copyTrans:'Copia',
+    manualTranscript:'Trascrizione manuale',htmlExport:'Esporta HTML',generate:'Genera codice',copyCode:'Copia'
+  },
+  zh: {
+    videoSource:'视频来源',uploadFromPC:'从电脑上传',dropVideo:'点击或拖放视频',
+    videoByURL:'通过链接/iframe加载',loadVideo:'加载视频',platform:'平台',
+    background:'背景',bgFromPC:'上传背景图片',dropBg:'拖放图片至此',bgByURL:'通过链接加载背景',
+    applyBg:'应用背景',clearBg:'清除背景',player:'视频播放器',noVideo:'上传视频或输入链接',
+    playbackSpeed:'播放速度',subtitles:'字幕',enableSubtitles:'启用字幕',subtitleText:'字幕文本',
+    subtitleLang:'字幕语言',applySubs:'应用',transcription:'转录',
+    autoTranscribe:'自动转录',transcribeResult:'结果',clearTrans:'清除',copyTrans:'复制',
+    manualTranscript:'手动转录',htmlExport:'HTML导出',generate:'生成代码',copyCode:'复制'
+  },
+  ja: {
+    videoSource:'ビデオソース',uploadFromPC:'PCからアップロード',dropVideo:'クリックまたはドロップ',
+    videoByURL:'URL/iframeでビデオ',loadVideo:'ビデオを読み込む',platform:'プラットフォーム',
+    background:'背景',bgFromPC:'背景画像をアップロード',dropBg:'ここに画像をドロップ',bgByURL:'URLで背景',
+    applyBg:'背景を適用',clearBg:'背景を削除',player:'ビデオプレーヤー',noVideo:'ビデオをアップロードするかURLを入力',
+    playbackSpeed:'再生速度',subtitles:'字幕',enableSubtitles:'字幕を有効にする',subtitleText:'字幕テキスト',
+    subtitleLang:'字幕言語',applySubs:'適用',transcription:'文字起こし',
+    autoTranscribe:'自動文字起こし',transcribeResult:'結果',clearTrans:'クリア',copyTrans:'コピー',
+    manualTranscript:'手動文字起こし',htmlExport:'HTMLエクスポート',generate:'コード生成',copyCode:'コピー'
+  }
+};
 
-  const languageSelect = document.getElementById('language-select');
-  const transcribeBtn = document.getElementById('transcribe-btn');
-  const transcriptionBox = document.getElementById('transcription-box');
+let currentLang = 'ru';
 
-  // Логика Iframe
-  const iframeInput = document.getElementById('iframe-code');
-  const copyBtn = document.getElementById('copy-iframe-btn');
+function setLang(lang, btn) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyI18n();
+  showToast('🌐 ' + btn.textContent.trim());
+}
 
-  // Генерируем iframe на основе адреса, где открыт этот файл
-  const currentUrl = window.location.href;
-  if (currentUrl.startsWith('file://')) {
-    iframeInput.value = 'Загрузите этот файл на GitHub Pages, чтобы получить рабочую ссылку.';
+function applyI18n() {
+  const t = i18n[currentLang] || i18n.ru;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+}
+
+// ======================================================
+// VIDEO LOADING
+// ======================================================
+let currentVideoUrl = '';
+let subsData = [];
+let recognition = null;
+
+function loadLocalVideo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  showDirectVideo(url);
+  currentVideoUrl = file.name;
+  setStatus('📁 Видео загружено: ' + file.name);
+  showToast('🎬 Видео загружено!');
+}
+
+function loadVideoUrl() {
+  const url = document.getElementById('videoUrlInput').value.trim();
+  if (!url) { showToast('⚠️ Введите URL'); return; }
+  const platform = document.getElementById('platformSelect').value;
+
+  if (platform === 'youtube') {
+    const id = extractYouTubeId(url);
+    if (id) showIframe(`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`);
+    else showToast('⚠️ Не удалось определить YouTube ID');
+  } else if (platform === 'vimeo') {
+    const id = url.match(/vimeo\.com\/(\d+)/);
+    if (id) showIframe(`https://player.vimeo.com/video/${id[1]}`);
+    else showIframe(url);
+  } else if (platform === 'genially' || platform === 'github' || platform === 'custom') {
+    showIframe(url);
   } else {
-    iframeInput.value = `<iframe src="${currentUrl.split('?')[0]}" width="100%" height="800px" frameborder="0" allow="microphone; autoplay; fullscreen"></iframe>`;
+    showDirectVideo(url);
   }
+  currentVideoUrl = url;
+  setStatus('🔗 Загружен: ' + url.substring(0, 60) + '...');
+  showToast('▶ Источник видео установлен!');
+}
 
-  copyBtn.addEventListener('click', () => {
-    iframeInput.select();
-    document.execCommand('copy');
-    const originalText = copyBtn.innerText;
-    copyBtn.innerText = '✔ Скопировано!';
-    setTimeout(() => { copyBtn.innerText = originalText; updateLanguage(); }, 2000);
+function extractYouTubeId(url) {
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^?&\s]+)/);
+  return m ? m[1] : null;
+}
+
+function showDirectVideo(url) {
+  const vp = document.getElementById('videoPlayer');
+  const ic = document.getElementById('iframeContainer');
+  const ph = document.getElementById('videoPlaceholder');
+  vp.src = url;
+  vp.style.display = 'block';
+  ic.style.display = 'none';
+  ph.style.display = 'none';
+  vp.addEventListener('timeupdate', updateProgress);
+  vp.addEventListener('loadedmetadata', updateProgress);
+  document.getElementById('platformBadge').textContent = 'local';
+}
+
+function showIframe(url) {
+  const vp = document.getElementById('videoPlayer');
+  const ic = document.getElementById('iframeContainer');
+  const ph = document.getElementById('videoPlaceholder');
+  vp.style.display = 'none';
+  ph.style.display = 'none';
+  ic.innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; encrypted-media; fullscreen" loading="lazy"></iframe>`;
+  ic.style.display = 'block';
+  document.getElementById('platformBadge').textContent = document.getElementById('platformSelect').value;
+}
+
+function updatePlatform() {
+  const platform = document.getElementById('platformSelect').value;
+  document.getElementById('platformBadge').textContent = platform;
+}
+
+// ======================================================
+// BACKGROUND
+// ======================================================
+function loadLocalBg(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  applyBackground(url);
+  showToast('🖼️ Фон загружен!');
+}
+
+function loadBgUrl() {
+  const url = document.getElementById('bgUrlInput').value.trim();
+  if (!url) { showToast('⚠️ Введите URL изображения'); return; }
+  applyBackground(url);
+}
+
+function applyBackground(url) {
+  const overlay = document.getElementById('bgOverlay');
+  overlay.style.backgroundImage = `url("${url}")`;
+  overlay.style.opacity = '0.25';
+  setStatus('🖼️ Фон обновлён');
+  showToast('🌄 Фон применён!');
+}
+
+function clearBg() {
+  document.getElementById('bgOverlay').style.backgroundImage = '';
+  showToast('✕ Фон убран');
+}
+
+// ======================================================
+// PLAYER CONTROLS
+// ======================================================
+function getVideo() { return document.getElementById('videoPlayer'); }
+
+function togglePlay() {
+  const v = getVideo();
+  if (!v.src) return;
+  const btn = document.getElementById('playBtn');
+  if (v.paused) { v.play(); btn.textContent = '⏸'; }
+  else { v.pause(); btn.textContent = '▶'; }
+}
+
+function skipVideo(sec) {
+  const v = getVideo();
+  if (v.src) v.currentTime = Math.max(0, v.currentTime + sec);
+}
+
+function toggleMute() {
+  const v = getVideo();
+  v.muted = !v.muted;
+  document.getElementById('muteBtn').textContent = v.muted ? '🔇' : '🔊';
+}
+
+function setVolume(val) {
+  getVideo().volume = val;
+  document.getElementById('muteBtn').textContent = val < 0.1 ? '🔇' : (val < 0.5 ? '🔉' : '🔊');
+}
+
+function setSpeed(s) {
+  getVideo().playbackRate = s;
+  document.querySelectorAll('.speed-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === s + '×');
   });
+}
 
-  function updateLanguage() {
-    const lang = languageSelect.value;
-    const dict = translations[lang] || translations["ru-RU"];
-    
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      if (dict[key]) {
-        if (el.tagName === 'BUTTON' && recognitionIsRunning && key === 'start_trans') {
-           el.innerText = dict["stop_trans"];
-        } else if (el.tagName === 'BUTTON' && el.innerText === '✔ Скопировано!') {
-           // Не переводим в момент анимации копирования
-        } else {
-           el.innerText = dict[key];
-        }
-      }
-    });
-    
-    if(lang === 'fa-IR' || lang === 'ar-SA' || lang === 'prs-AF') {
-        document.body.style.direction = "rtl";
-    } else {
-        document.body.style.direction = "ltr";
+function seekVideo(e) {
+  const v = getVideo();
+  if (!v.duration) return;
+  const wrap = document.getElementById('progressWrap');
+  const rect = wrap.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  v.currentTime = ratio * v.duration;
+}
+
+function updateProgress() {
+  const v = getVideo();
+  if (!v.duration) return;
+  const pct = (v.currentTime / v.duration) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('timeDisplay').textContent = formatTime(v.currentTime) + ' / ' + formatTime(v.duration);
+  updateSubtitleOverlay(v.currentTime);
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function toggleFullscreen() {
+  const stage = document.getElementById('videoStage');
+  if (!document.fullscreenElement) stage.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+// ======================================================
+// SUBTITLES
+// ======================================================
+function toggleSubtitles() {
+  const on = document.getElementById('subtitleToggle').checked;
+  document.getElementById('subtitleOverlay').style.display = on ? 'block' : 'none';
+  if (!on) document.getElementById('subtitleOverlay').textContent = '';
+}
+
+function parseSubs() {
+  const raw = document.getElementById('subtitleText').value;
+  const lines = raw.split('\n').filter(l => l.trim());
+  subsData = [];
+  lines.forEach(line => {
+    const m = line.match(/^(\d+):(\d+)\s+(.*)/);
+    if (m) {
+      const t = parseInt(m[1]) * 60 + parseInt(m[2]);
+      subsData.push({ time: t, text: m[3] });
     }
-  }
-
-  languageSelect.addEventListener('change', updateLanguage);
-
-  function handleUpload(inputId, targetId, isBackground, isLogo) {
-    document.getElementById(inputId).addEventListener('change', function(e) {
-      if(e.target.files[0]) {
-        const url = URL.createObjectURL(e.target.files[0]);
-        if(isBackground) document.body.style.backgroundImage = `url(${url})`;
-        else {
-            const el = document.getElementById(targetId);
-            el.src = url;
-            if(isLogo) el.style.display = 'inline-block';
-        }
-      }
-    });
-  }
-  function handleUrl(inputId, targetId, isBackground, isLogo) {
-    document.getElementById(inputId).addEventListener('change', function(e) {
-      if(e.target.value) {
-        if(isBackground) document.body.style.backgroundImage = `url(${e.target.value})`;
-        else {
-            const el = document.getElementById(targetId);
-            el.src = e.target.value;
-            if(isLogo) el.style.display = 'inline-block';
-        }
-      }
-    });
-  }
-
-  handleUpload('logo-upload', 'custom-logo', false, true);
-  handleUrl('logo-url', 'custom-logo', false, true);
-  handleUpload('video-upload', 'video-player', false, false);
-  handleUrl('video-url', 'video-player', false, false);
-  handleUpload('bg-upload', '', true, false);
-  handleUrl('bg-url', '', true, false);
-
-  let recognition;
-  let recognitionIsRunning = false;
-
-  transcribeBtn.addEventListener('click', () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const dict = translations[languageSelect.value] || translations["ru-RU"];
-
-    if (!SpeechRecognition) {
-      alert('Ваш браузер не поддерживает распознавание речи. Используйте Google Chrome.');
-      return;
-    }
-
-    if(recognitionIsRunning) {
-        recognition.stop();
-        return;
-    }
-
-    recognition = new SpeechRecognition();
-    recognition.lang = languageSelect.value;
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onstart = function() {
-      recognitionIsRunning = true;
-      transcribeBtn.innerText = dict["stop_trans"];
-      transcriptionBox.innerHTML = '<em>...</em><br>';
-    };
-
-    recognition.onresult = function(event) {
-      let finalTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript + ' ';
-      }
-      if(finalTranscript) {
-         transcriptionBox.innerHTML += finalTranscript + '<br>';
-         transcriptionBox.scrollTop = transcriptionBox.scrollHeight;
-      }
-    };
-
-    recognition.onerror = function(event) {
-      if(event.error === 'not-allowed') alert('Доступ к микрофону запрещен!');
-      recognitionIsRunning = false;
-      transcribeBtn.innerText = dict["start_trans"];
-    };
-
-    recognition.onend = function() {
-      recognitionIsRunning = false;
-      transcribeBtn.innerText = dict["start_trans"];
-    };
-
-    try { recognition.start(); } catch(e) {}
   });
+  showToast('💬 Титры загружены: ' + subsData.length + ' фраз');
+  if (!document.getElementById('subtitleToggle').checked) {
+    document.getElementById('subtitleToggle').checked = true;
+    toggleSubtitles();
+  }
+}
 
-  updateLanguage();
+function updateSubtitleOverlay(currentTime) {
+  if (!document.getElementById('subtitleToggle').checked) return;
+  const overlay = document.getElementById('subtitleOverlay');
+  let current = '';
+  subsData.forEach(s => {
+    if (currentTime >= s.time) current = s.text;
+  });
+  overlay.textContent = current;
+}
+
+// ======================================================
+// TRANSCRIPTION
+// ======================================================
+function toggleTranscription() {
+  const on = document.getElementById('transcribeToggle').checked;
+  if (on) startTranscription();
+  else stopTranscription();
+}
+
+function startTranscription() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast('⚠️ Web Speech API не поддерживается браузером');
+    document.getElementById('transcribeToggle').checked = false;
+    return;
+  }
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = getLangCode();
+  recognition.onresult = e => {
+    let text = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      text += e.results[i][0].transcript;
+    }
+    const box = document.getElementById('transcriptionBox');
+    box.textContent = (box.textContent || '') + ' ' + text;
+    box.scrollTop = box.scrollHeight;
+  };
+  recognition.onerror = err => {
+    showToast('⚠️ Ошибка транскрипции: ' + err.error);
+    document.getElementById('transcribeToggle').checked = false;
+  };
+  recognition.start();
+  setStatus('🎤 Транскрипция активна...');
+  showToast('🎤 Транскрипция включена');
+}
+
+function getLangCode() {
+  const codes = { ru:'ru-RU', de:'de-DE', en:'en-US', es:'es-ES', fr:'fr-FR', it:'it-IT', zh:'zh-CN', ja:'ja-JP' };
+  return codes[currentLang] || 'ru-RU';
+}
+
+function stopTranscription() {
+  if (recognition) { recognition.stop(); recognition = null; }
+  setStatus('⏹ Транскрипция остановлена');
+  showToast('⏹ Транскрипция остановлена');
+}
+
+function clearTranscription() {
+  document.getElementById('transcriptionBox').textContent = '';
+}
+
+function copyTranscription() {
+  const text = document.getElementById('transcriptionBox').textContent
+              + '\n' + document.getElementById('manualTranscript').value;
+  navigator.clipboard.writeText(text).then(() => showToast('📋 Скопировано!'));
+}
+
+// ======================================================
+// HTML / IFRAME EXPORT
+// ======================================================
+function switchTab(tab) {
+  ['github','genially','iframe'].forEach(t => {
+    document.getElementById('tabContent' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = (t === tab) ? 'block' : 'none';
+    document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
+  });
+}
+
+function generateGithubCode() {
+  const url = currentVideoUrl || 'YOUR_VIDEO_URL';
+  const subs = document.getElementById('subtitleText').value;
+  const code = `<!DOCTYPE html>
+<html lang="${currentLang}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ИгроМир в Сундучке — Видео</title>
+<style>
+  body{margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;}
+  video{max-width:100%;max-height:90vh;border:2px solid #c9922a;}
+  .subs{color:#fff;background:rgba(0,0,0,.7);padding:8px 20px;font-size:18px;text-align:center;margin-top:8px;border-radius:4px;}
+</style>
+</head>
+<body>
+  <video src="${url}" controls autoplay style="max-width:900px;width:100%"></video>
+  <div class="subs" id="subs"></div>
+<script>
+  // Subtitles
+  const subs = [${subs.split('\n').filter(l=>l.match(/^\d+:\d+/)).map(l=>{const m=l.match(/^(\d+):(\d+)\s+(.*)/);return m?`{t:${parseInt(m[1])*60+parseInt(m[2])},text:"${m[3].replace(/"/g,"'")}"}`:''}).filter(Boolean).join(',')}];
+  const v=document.querySelector('video'),s=document.getElementById('subs');
+  v.addEventListener('timeupdate',()=>{let cur='';subs.forEach(x=>{if(v.currentTime>=x.t)cur=x.text;});s.textContent=cur;});
+<\/script>
+</body>
+</html>`;
+  document.getElementById('githubCode').value = code;
+  showToast('✅ GitHub HTML сгенерирован!');
+}
+
+function generateGeniallyCode() {
+  const url = currentVideoUrl || 'YOUR_VIDEO_URL';
+  const platform = document.getElementById('platformSelect').value;
+  const isIframe = ['youtube','vimeo','genially','github','custom'].includes(platform);
+  let code;
+  if (isIframe) {
+    code = `<!-- Genially: Вставьте этот iframe в блок HTML -->
+<iframe 
+  src="${url}"
+  width="100%" 
+  height="100%"
+  style="border:none;border-radius:8px;"
+  allowfullscreen
+  allow="autoplay; encrypted-media; fullscreen"
+  loading="lazy">
+</iframe>`;
+  } else {
+    code = `<!-- Genially: Видео через HTML-блок -->
+<video 
+  src="${url}" 
+  controls 
+  autoplay 
+  width="100%" 
+  height="100%"
+  style="border-radius:8px;object-fit:cover;"
+  preload="metadata">
+  Ваш браузер не поддерживает HTML5 видео.
+</video>`;
+  }
+  document.getElementById('geniallyCode').value = code;
+  showToast('✅ Genially embed сгенерирован!');
+}
+
+function generateIframeCode() {
+  const url = currentVideoUrl || 'YOUR_VIDEO_URL';
+  const code = `<!-- Universal iFrame embed -->
+<iframe 
+  src="${url}"
+  width="800" 
+  height="450"
+  frameborder="0"
+  allowfullscreen
+  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+  style="border:2px solid #c9922a;border-radius:8px;max-width:100%;"
+  loading="lazy"
+  title="ИгроМир в Сундучке">
+</iframe>`;
+  document.getElementById('iframeCode').value = code;
+  showToast('✅ iFrame код сгенерирован!');
+}
+
+function copyCode(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.value).then(() => showToast('📋 Код скопирован!'));
+}
+
+// ======================================================
+// UTILS
+// ======================================================
+function setStatus(msg) {
+  document.getElementById('statusText').textContent = msg;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Drag & drop zones
+function setupDrag(zoneId, handler) {
+  const zone = document.getElementById(zoneId);
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = '#c9922a'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.style.borderColor = '';
+    if (e.dataTransfer.files[0]) handler({ files: e.dataTransfer.files });
+  });
+}
+
+setupDrag('videoUploadZone', loadLocalVideo);
+setupDrag('bgUploadZone', loadLocalBg);
+
+// Init
+applyI18n();
+setStatus('✦ ИгроМир Видеоредактор готов — Детский сад, Школа, ВУЗ, Семья, Игра ✦');
 </script>
 </body>
 </html>
