@@ -241,4 +241,91 @@
 
   function handleUpload(inputId, targetId, isBackground, isLogo) {
     document.getElementById(inputId).addEventListener('change', function(e) {
-      if(
+      if(e.target.files[0]) {
+        const url = URL.createObjectURL(e.target.files[0]);
+        if(isBackground) document.body.style.backgroundImage = `url(${url})`;
+        else {
+            const el = document.getElementById(targetId);
+            el.src = url;
+            if(isLogo) el.style.display = 'inline-block';
+        }
+      }
+    });
+  }
+  function handleUrl(inputId, targetId, isBackground, isLogo) {
+    document.getElementById(inputId).addEventListener('change', function(e) {
+      if(e.target.value) {
+        if(isBackground) document.body.style.backgroundImage = `url(${e.target.value})`;
+        else {
+            const el = document.getElementById(targetId);
+            el.src = e.target.value;
+            if(isLogo) el.style.display = 'inline-block';
+        }
+      }
+    });
+  }
+
+  handleUpload('logo-upload', 'custom-logo', false, true);
+  handleUrl('logo-url', 'custom-logo', false, true);
+  handleUpload('video-upload', 'video-player', false, false);
+  handleUrl('video-url', 'video-player', false, false);
+  handleUpload('bg-upload', '', true, false);
+  handleUrl('bg-url', '', true, false);
+
+  let recognition;
+  let recognitionIsRunning = false;
+
+  transcribeBtn.addEventListener('click', () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const dict = translations[languageSelect.value] || translations["ru-RU"];
+
+    if (!SpeechRecognition) {
+      alert('Ваш браузер не поддерживает распознавание речи. Используйте Google Chrome.');
+      return;
+    }
+
+    if(recognitionIsRunning) {
+        recognition.stop();
+        return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = languageSelect.value;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = function() {
+      recognitionIsRunning = true;
+      transcribeBtn.innerText = dict["stop_trans"];
+      transcriptionBox.innerHTML = '<em>...</em><br>';
+    };
+
+    recognition.onresult = function(event) {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript + ' ';
+      }
+      if(finalTranscript) {
+         transcriptionBox.innerHTML += finalTranscript + '<br>';
+         transcriptionBox.scrollTop = transcriptionBox.scrollHeight;
+      }
+    };
+
+    recognition.onerror = function(event) {
+      if(event.error === 'not-allowed') alert('Доступ к микрофону запрещен!');
+      recognitionIsRunning = false;
+      transcribeBtn.innerText = dict["start_trans"];
+    };
+
+    recognition.onend = function() {
+      recognitionIsRunning = false;
+      transcribeBtn.innerText = dict["start_trans"];
+    };
+
+    try { recognition.start(); } catch(e) {}
+  });
+
+  updateLanguage();
+</script>
+</body>
+</html>
