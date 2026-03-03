@@ -10,25 +10,25 @@
     margin: 0; 
     padding: 20px; 
     text-align: center; 
-    transition: background 0.5s ease; 
+    background-color: #eef2f5;
     background-size: cover; 
     background-position: center;
     background-attachment: fixed;
-    background-color: #eef2f5;
+    transition: background 0.5s ease;
   }
   .container { 
     background: rgba(255, 255, 255, 0.95); 
     padding: 25px; 
     border-radius: 12px; 
-    max-width: 800px; 
+    max-width: 900px; 
     margin: auto; 
     box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
   }
-  /* Логотип вашей группы */
-  #logo { 
+  #custom-logo { 
     max-height: 80px; 
     margin-bottom: 20px; 
     border-radius: 8px;
+    display: none; /* Скрыт, пока не загрузят */
   }
   .controls-panel { 
     display: grid; 
@@ -36,17 +36,18 @@
     gap: 15px; 
     text-align: left; 
     margin-bottom: 25px; 
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
   }
-  .controls-panel > div {
-    display: flex;
-    flex-direction: column;
-  }
-  label { font-size: 0.9em; font-weight: bold; margin-bottom: 5px; color: #333; }
+  .controls-panel > div { display: flex; flex-direction: column; }
+  label { font-size: 0.85em; font-weight: bold; margin-bottom: 5px; color: #333; }
   input, select, button { 
-    padding: 10px; 
+    padding: 8px; 
     border: 1px solid #ccc; 
     border-radius: 6px; 
-    font-size: 14px;
+    font-size: 13px;
     width: 100%; 
     box-sizing: border-box; 
   }
@@ -58,10 +59,9 @@
     font-weight: bold; 
     transition: background 0.3s;
     margin-top: 10px;
+    padding: 12px;
   }
   button:hover { background: #45a049; }
-  
-  /* HTML5 Видеоплеер (включает время, прокрутку, громкость) */
   video { 
     width: 100%; 
     border-radius: 10px; 
@@ -75,125 +75,175 @@
     background: #fdfdfd; 
     border: 1px solid #ddd; 
     min-height: 80px; 
+    max-height: 150px;
     border-radius: 6px; 
     text-align: left;
     font-size: 0.95em;
     color: #444;
-    max-height: 150px;
     overflow-y: auto;
   }
 </style>
 </head>
 <body>
 
-<div class="container" id="main-container">
-  <img id="logo" src="https://via.placeholder.com/400x100?text=ЛОГОТИП+ВАШЕЙ+ГРУППЫ" alt="Логотип группы">
+<div class="container">
+  <img id="custom-logo" src="" alt="Логотип">
 
   <div class="controls-panel">
     <div>
-      <label>1. Загрузить видео (с ПК):</label>
+      <label data-i18n="logo_pc">Загрузить логотип (с ПК):</label>
+      <input type="file" id="logo-upload" accept="image/*">
+    </div>
+    <div>
+      <label data-i18n="logo_url">Вставить логотип (ссылка):</label>
+      <input type="url" id="logo-url" placeholder="https://...">
+    </div>
+
+    <div>
+      <label data-i18n="video_pc">Загрузить видео (с ПК):</label>
       <input type="file" id="video-upload" accept="video/*">
     </div>
     <div>
-      <label>2. Вставить видео (по ссылке):</label>
+      <label data-i18n="video_url">Вставить видео (ссылка):</label>
       <input type="url" id="video-url" placeholder="https://.../video.mp4">
     </div>
+
     <div>
-      <label>3. Загрузить фон (с ПК):</label>
+      <label data-i18n="bg_pc">Загрузить фон (с ПК):</label>
       <input type="file" id="bg-upload" accept="image/*">
     </div>
     <div>
-      <label>4. Вставить фон (по ссылке):</label>
-      <input type="url" id="bg-url" placeholder="https://.../background.jpg">
+      <label data-i18n="bg_url">Вставить фон (ссылка):</label>
+      <input type="url" id="bg-url" placeholder="https://...">
     </div>
+
     <div style="grid-column: span 2;">
-      <label>5. Выберите язык интерфейса/распознавания:</label>
+      <label data-i18n="lang_select">Выберите язык интерфейса и распознавания:</label>
       <select id="language-select">
-        <option value="ru-RU">Русский</option>
-        <option value="de-DE">Немецкий</option>
-        <option value="en-US">Английский</option>
-        <option value="es-ES">Испанский</option>
-        <option value="fr-FR">Французский</option>
-        <option value="it-IT">Итальянский</option>
-        <option value="zh-CN">Китайский</option>
-        <option value="ja-JP">Японский</option>
-        <option value="fa-IR">Фарси</option>
-        <option value="hi-IN">Хинди</option>
-        <option value="prs-AF">Дари</option>
-        <option value="ar-SA">Арабский</option>
-        <option value="pt-PT">Португальский</option>
+        <option value="ru-RU">Русский (Russian)</option>
+        <option value="en-US">Английский (English)</option>
+        <option value="de-DE">Немецкий (German)</option>
+        <option value="es-ES">Испанский (Spanish)</option>
+        <option value="fr-FR">Французский (French)</option>
+        <option value="it-IT">Итальянский (Italian)</option>
+        <option value="pt-PT">Португальский (Portuguese)</option>
+        <option value="zh-CN">Китайский (Chinese)</option>
+        <option value="ja-JP">Японский (Japanese)</option>
+        <option value="fa-IR">Фарси (Farsi)</option>
+        <option value="prs-AF">Дари (Dari)</option>
+        <option value="ar-SA">Арабский (Arabic)</option>
+        <option value="hi-IN">Хинди (Hindi)</option>
       </select>
     </div>
   </div>
 
   <video id="video-player" controls crossorigin="anonymous">
     <track id="caption-track" label="Титры" kind="subtitles" srclang="ru" src="">
-    Ваш браузер не поддерживает HTML5 видео.
   </video>
 
   <div>
-    <button id="transcribe-btn">▶ Начать транскрибирование речи (Web Speech API)</button>
-    <div id="transcription-box">Здесь будет появляться распознанный текст видео...</div>
+    <button id="transcribe-btn" data-i18n="start_trans">▶ Начать транскрибирование речи</button>
+    <div id="transcription-box" data-i18n="trans_box_text">Здесь будет появляться распознанный текст... Разрешите доступ к микрофону.</div>
   </div>
 </div>
 
 <script>
-  const videoPlayer = document.getElementById('video-player');
-  const videoUpload = document.getElementById('video-upload');
-  const videoUrl = document.getElementById('video-url');
-  
-  const body = document.body;
-  const bgUpload = document.getElementById('bg-upload');
-  const bgUrl = document.getElementById('bg-url');
+  // 1. Словарь переводов интерфейса
+  const translations = {
+    "ru-RU": { logo_pc: "Загрузить логотип (с ПК):", logo_url: "Вставить логотип (ссылка):", video_pc: "Загрузить видео (с ПК):", video_url: "Вставить видео (ссылка):", bg_pc: "Загрузить фон (с ПК):", bg_url: "Вставить фон (ссылка):", lang_select: "Выберите язык интерфейса и распознавания:", start_trans: "▶ Начать транскрибирование речи", stop_trans: "⏹ Остановить транскрибирование", trans_box_text: "Здесь будет появляться распознанный текст... Разрешите доступ к микрофону." },
+    "en-US": { logo_pc: "Upload Logo (PC):", logo_url: "Insert Logo (URL):", video_pc: "Upload Video (PC):", video_url: "Insert Video (URL):", bg_pc: "Upload Background (PC):", bg_url: "Insert Background (URL):", lang_select: "Select Interface & Recognition Language:", start_trans: "▶ Start Transcription", stop_trans: "⏹ Stop Transcription", trans_box_text: "Recognized text will appear here... Please allow microphone access." },
+    "de-DE": { logo_pc: "Logo hochladen (PC):", logo_url: "Logo einfügen (URL):", video_pc: "Video hochladen (PC):", video_url: "Video einfügen (URL):", bg_pc: "Hintergrund hochladen (PC):", bg_url: "Hintergrund einfügen (URL):", lang_select: "Sprache auswählen:", start_trans: "▶ Transkription starten", stop_trans: "⏹ Transkription stoppen", trans_box_text: "Erkannter Text wird hier angezeigt..." },
+    "es-ES": { logo_pc: "Subir logo (PC):", logo_url: "Insertar logo (URL):", video_pc: "Subir video (PC):", video_url: "Insertar video (URL):", bg_pc: "Subir fondo (PC):", bg_url: "Insertar fondo (URL):", lang_select: "Seleccionar idioma:", start_trans: "▶ Iniciar transcripción", stop_trans: "⏹ Detener transcripción", trans_box_text: "El texto reconocido aparecerá aquí..." },
+    "fr-FR": { logo_pc: "Télécharger le logo (PC):", logo_url: "Insérer le logo (URL):", video_pc: "Télécharger la vidéo (PC):", video_url: "Insérer la vidéo (URL):", bg_pc: "Télécharger le fond (PC):", bg_url: "Insérer le fond (URL):", lang_select: "Sélectionner la langue:", start_trans: "▶ Démarrer la transcription", stop_trans: "⏹ Arrêter la transcription", trans_box_text: "Le texte reconnu apparaîtra ici..." },
+    "it-IT": { logo_pc: "Carica logo (PC):", logo_url: "Inserisci logo (URL):", video_pc: "Carica video (PC):", video_url: "Inserisci video (URL):", bg_pc: "Carica sfondo (PC):", bg_url: "Inserisci sfondo (URL):", lang_select: "Seleziona la lingua:", start_trans: "▶ Avvia trascrizione", stop_trans: "⏹ Ferma trascrizione", trans_box_text: "Il testo riconosciuto apparirà qui..." },
+    "pt-PT": { logo_pc: "Enviar logotipo (PC):", logo_url: "Inserir logotipo (URL):", video_pc: "Enviar vídeo (PC):", video_url: "Inserir vídeo (URL):", bg_pc: "Enviar fundo (PC):", bg_url: "Inserir fundo (URL):", lang_select: "Selecione o idioma:", start_trans: "▶ Iniciar Transcrição", stop_trans: "⏹ Parar Transcrição", trans_box_text: "O texto reconhecido aparecerá aqui..." },
+    "zh-CN": { logo_pc: "上传徽标 (电脑):", logo_url: "插入徽标 (链接):", video_pc: "上传视频 (电脑):", video_url: "插入视频 (链接):", bg_pc: "上传背景 (电脑):", bg_url: "插入背景 (链接):", lang_select: "选择语言:", start_trans: "▶ 开始转录", stop_trans: "⏹ 停止转录", trans_box_text: "识别的文本将显示在这里..." },
+    "ja-JP": { logo_pc: "ロゴをアップロード (PC):", logo_url: "ロゴを挿入 (URL):", video_pc: "動画をアップロード (PC):", video_url: "動画を挿入 (URL):", bg_pc: "背景をアップロード (PC):", bg_url: "背景を挿入 (URL):", lang_select: "言語を選択:", start_trans: "▶ 文字起こしを開始", stop_trans: "⏹ 文字起こしを停止", trans_box_text: "認識されたテキストがここに表示されます..." },
+    "fa-IR": { logo_pc: "آپلود لوگو (رایانه):", logo_url: "درج لوگو (لینک):", video_pc: "آپلود ویدیو (رایانه):", video_url: "درج ویدیو (لینک):", bg_pc: "آپلود پس‌زمینه (رایانه):", bg_url: "درج پس‌زمینه (لینک):", lang_select: "انتخاب زبان:", start_trans: "▶ شروع رونویسی", stop_trans: "⏹ توقف رونویسی", trans_box_text: "متن شناخته شده در اینجا ظاهر می شود..." },
+    "prs-AF": { logo_pc: "آپلود لوگو (کمپیوتر):", logo_url: "درج لوگو (لینک):", video_pc: "آپلود ویدیو (کمپیوتر):", video_url: "درج ویدیو (لینک):", bg_pc: "آپلود پس‌زمینه (کمپیوتر):", bg_url: "درج پس‌زمینه (لینک):", lang_select: "انتخاب زبان:", start_trans: "▶ شروع رونویسی", stop_trans: "⏹ توقف رونویسی", trans_box_text: "متن شناخته شده در اینجا ظاهر می شود..." },
+    "ar-SA": { logo_pc: "تحميل الشعار (كمبيوتر):", logo_url: "إدراج الشعار (رابط):", video_pc: "تحميل فيديو (كمبيوتر):", video_url: "إدراج فيديو (رابط):", bg_pc: "تحميل خلفية (كمبيوتر):", bg_url: "إدراج خلفية (رابط):", lang_select: "اختر اللغة:", start_trans: "▶ بدء النسخ", stop_trans: "⏹ إيقاف النسخ", trans_box_text: "سيظهر النص المتعرف عليه هنا..." },
+    "hi-IN": { logo_pc: "लोगो अपलोड करें (PC):", logo_url: "लोगो डालें (URL):", video_pc: "वीडियो अपलोड करें (PC):", video_url: "वीडियो डालें (URL):", bg_pc: "बैकग्राउंड अपलोड करें (PC):", bg_url: "बैकग्राउंड डालें (URL):", lang_select: "भाषा चुनें:", start_trans: "▶ ट्रांसक्रिप्शन शुरू करें", stop_trans: "⏹ ट्रांसक्रिप्शन रोकें", trans_box_text: "पहचाना गया टेक्स्ट यहाँ दिखाई देगा..." }
+  };
 
+  const languageSelect = document.getElementById('language-select');
   const transcribeBtn = document.getElementById('transcribe-btn');
   const transcriptionBox = document.getElementById('transcription-box');
-  const languageSelect = document.getElementById('language-select');
 
-  // 1. Загрузка видео с компьютера
-  videoUpload.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if(file) {
-      videoPlayer.src = URL.createObjectURL(file);
-    }
-  });
-
-  // 2. Вставка видео по ссылке (важно: ссылка должна оканчиваться на .mp4, .webm и позволять CORS)
-  videoUrl.addEventListener('change', function(e) {
-    if(e.target.value) {
-      videoPlayer.src = e.target.value;
-    }
-  });
-
-  // 3. Загрузка фона с компьютера
-  bgUpload.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if(file) {
-      body.style.backgroundImage = `url(${URL.createObjectURL(file)})`;
-    }
-  });
-
-  // 4. Вставка фона по ссылке
-  bgUrl.addEventListener('change', function(e) {
-    if(e.target.value) {
-      body.style.backgroundImage = `url(${e.target.value})`;
-    }
-  });
-
-  // 8. Транскрибация (распознавание речи через микрофон/системный звук)
-  let recognition;
-  transcribeBtn.addEventListener('click', () => {
-    // Проверка поддержки браузером (лучше всего работает в Chrome/Edge)
-    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  // Функция смены языка интерфейса
+  function updateLanguage() {
+    const lang = languageSelect.value;
+    const dict = translations[lang] || translations["ru-RU"];
     
-    if (!window.SpeechRecognition) {
-      alert('Ваш браузер не поддерживает встроенное распознавание речи. Рекомендуется использовать Google Chrome.');
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key]) {
+        if (el.tagName === 'BUTTON' && recognitionIsRunning) {
+           el.innerText = dict["stop_trans"];
+        } else {
+           el.innerText = dict[key];
+        }
+      }
+    });
+    // Меняем направление текста برای زبان های راست-چین
+    if(lang === 'fa-IR' || lang === 'ar-SA' || lang === 'prs-AF') {
+        document.body.style.direction = "rtl";
+    } else {
+        document.body.style.direction = "ltr";
+    }
+  }
+
+  languageSelect.addEventListener('change', updateLanguage);
+
+  // 2. Логика загрузки файлов (Лого, Видео, Фон)
+  function handleUpload(inputId, targetId, isBackground, isLogo) {
+    document.getElementById(inputId).addEventListener('change', function(e) {
+      if(e.target.files[0]) {
+        const url = URL.createObjectURL(e.target.files[0]);
+        if(isBackground) document.body.style.backgroundImage = `url(${url})`;
+        else {
+            const el = document.getElementById(targetId);
+            el.src = url;
+            if(isLogo) el.style.display = 'inline-block';
+        }
+      }
+    });
+  }
+  function handleUrl(inputId, targetId, isBackground, isLogo) {
+    document.getElementById(inputId).addEventListener('change', function(e) {
+      if(e.target.value) {
+        if(isBackground) document.body.style.backgroundImage = `url(${e.target.value})`;
+        else {
+            const el = document.getElementById(targetId);
+            el.src = e.target.value;
+            if(isLogo) el.style.display = 'inline-block';
+        }
+      }
+    });
+  }
+
+  handleUpload('logo-upload', 'custom-logo', false, true);
+  handleUrl('logo-url', 'custom-logo', false, true);
+  handleUpload('video-upload', 'video-player', false, false);
+  handleUrl('video-url', 'video-player', false, false);
+  handleUpload('bg-upload', '', true, false);
+  handleUrl('bg-url', '', true, false);
+
+  // 3. Исправленная транскрибация
+  let recognition;
+  let recognitionIsRunning = false;
+
+  transcribeBtn.addEventListener('click', () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const langKey = languageSelect.value;
+    const dict = translations[langKey] || translations["ru-RU"];
+
+    if (!SpeechRecognition) {
+      alert('Ваш браузер не поддерживает распознавание речи. Используйте Google Chrome или Edge.');
       return;
     }
 
-    if(recognition && transcribeBtn.innerText.includes('Остановить')) {
+    if(recognitionIsRunning) {
         recognition.stop();
-        transcribeBtn.innerText = '▶ Начать транскрибирование речи';
         return;
     }
 
@@ -203,30 +253,45 @@
     recognition.interimResults = true;
 
     recognition.onstart = function() {
-      transcribeBtn.innerText = '⏹ Остановить транскрибирование';
-      transcriptionBox.innerHTML = '<em>Слушаю звук... Воспроизведите видео (возможно потребуется направить звук видео в микрофон или использовать стерео-микшер ПК).</em><br>';
+      recognitionIsRunning = true;
+      transcribeBtn.innerText = dict["stop_trans"];
+      transcriptionBox.innerHTML = '<em>Слушаю...</em><br>';
     };
 
     recognition.onresult = function(event) {
       let finalTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + ' ';
-        }
+        if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript + ' ';
       }
       if(finalTranscript) {
          transcriptionBox.innerHTML += finalTranscript + '<br>';
-         // Автоскролл вниз
          transcriptionBox.scrollTop = transcriptionBox.scrollHeight;
       }
     };
 
     recognition.onerror = function(event) {
       console.error("Ошибка распознавания: ", event.error);
+      if(event.error === 'not-allowed') {
+          alert('Доступ к микрофону запрещен! Разрешите его в настройках браузера (значок замочка в адресной строке).');
+      }
+      recognitionIsRunning = false;
+      transcribeBtn.innerText = dict["start_trans"];
     };
 
-    recognition.start();
+    recognition.onend = function() {
+      recognitionIsRunning = false;
+      transcribeBtn.innerText = dict["start_trans"];
+    };
+
+    try {
+        recognition.start();
+    } catch(e) {
+        console.error("Не удалось запустить микрофон", e);
+    }
   });
+
+  // Инициализация языка при загрузке
+  updateLanguage();
 </script>
 </body>
 </html>
