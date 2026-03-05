@@ -457,8 +457,7 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:8px 0;}
       <div class="ptitle">📝 <span id="t_trans">Транскрипция</span></div>
       <div class="tstat" id="tstat"></div>
       <div class="warn-box" id="transWarn">
-        ⚠️ Только Chrome/Edge · Требуется <b>HTTPS</b> или localhost
-        (с file:// не работает) · Разрешите микрофон
+        <span id="t_transWarn">⚠️ Только Chrome/Edge · Требуется <b>HTTPS</b> или localhost (c file:// не работает) · Разрешите микрофон</span>
       </div>
       <div class="trow">
         <label class="tsw"><input type="checkbox" id="transTog"><span class="tsl"></span></label>
@@ -577,7 +576,8 @@ var TR={
     subs:'Титры',ensubs:'Включить титры',subtxt:'Формат: 0:05 Текст (мин:сек пробел текст)',
     trans:'Транскрипция',autotrans:'Авто (Web Speech API)',transcont:'Непрерывно',
     transres:'Результат',mantrans:'Ручной ввод',exp:'Экспорт кода',
-    hdrSub:'Видеоредактор · Детский сад · Школа · ВУЗ · Семья · Игра'},
+    hdrSub:'Видеоредактор · Детский сад · Школа · ВУЗ · Семья · Игра',
+    transWarn:'⚠️ Только Chrome/Edge · Требуется <b>HTTPS</b> или localhost (c file:// не работает) · Разрешите микрофон'},
   de:{vs:'Videoquelle',uppc:'📁 Vom Computer',dropv:'Video hierher ziehen',
     vurl:'🔗 Per URL',asp:'Seitenverhältnis',autoAsp:'Auto nach Video',
     bg:'Hintergrund',bgpc:'📁 Hochladen',dropb:'Bild ziehen',
@@ -586,7 +586,8 @@ var TR={
     subs:'Untertitel',ensubs:'Aktivieren',subtxt:'Format: 0:05 Text (min:sek text)',
     trans:'Transkription',autotrans:'Auto (Web Speech)',transcont:'Kontinuierlich',
     transres:'Ergebnis',mantrans:'Manuelle Eingabe',exp:'Code Export',
-    hdrSub:'Videoeditor · Kindergarten · Schule · Uni · Familie'},
+    hdrSub:'Videoeditor · Kindergarten · Schule · Uni · Familie',
+    transWarn:'⚠️ Nur Chrome/Edge · <b>HTTPS</b> oder localhost erforderlich (file:// funktioniert nicht) · Mikrofon erlauben'},
   en:{vs:'Video Source',uppc:'📁 From PC',dropv:'Click or drop video',
     vurl:'🔗 By URL',asp:'Aspect Ratio',autoAsp:'Auto from video',
     bg:'Player Background',bgpc:'📁 Upload',dropb:'Click or drop image',
@@ -595,7 +596,8 @@ var TR={
     subs:'Subtitles',ensubs:'Enable Subtitles',subtxt:'Format: 0:05 Phrase (min:sec text)',
     trans:'Transcription',autotrans:'Auto (Web Speech)',transcont:'Continuous',
     transres:'Result',mantrans:'Manual input',exp:'Code Export',
-    hdrSub:'Video Editor · Kindergarten · School · University · Family'},
+    hdrSub:'Video Editor · Kindergarten · School · University · Family',
+    transWarn:'⚠️ Chrome/Edge only · Requires <b>HTTPS</b> or localhost (file:// not supported) · Allow microphone'},
   es:{vs:'Fuente de video',uppc:'📁 Del PC',dropv:'Arrastra el video',
     vurl:'🔗 Por URL',asp:'Relación de aspecto',autoAsp:'Auto del video',
     bg:'Fondo',bgpc:'📁 Subir',dropb:'Arrastre imagen',
@@ -604,7 +606,8 @@ var TR={
     subs:'Subtítulos',ensubs:'Activar',subtxt:'Formato: 0:05 Frase (min:seg texto)',
     trans:'Transcripción',autotrans:'Auto (Web Speech)',transcont:'Continuo',
     transres:'Resultado',mantrans:'Entrada manual',exp:'Exportar código',
-    hdrSub:'Editor de video · Jardín · Escuela · Universidad · Familia'},
+    hdrSub:'Editor de video · Jardín · Escuela · Universidad · Familia',
+    transWarn:'⚠️ Solo Chrome/Edge · Requiere <b>HTTPS</b> o localhost (file:// no funciona) · Permitir micrófono'},
   fr:{vs:'Source vidéo',uppc:'📁 Du PC',dropv:'Déposer la vidéo',
     vurl:'🔗 Par URL',asp:"Format d'image",autoAsp:'Auto depuis vidéo',
     bg:'Arrière-plan',bgpc:'📁 Télécharger',dropb:'Déposer image',
@@ -613,7 +616,8 @@ var TR={
     subs:'Sous-titres',ensubs:'Activer',subtxt:'Format: 0:05 Phrase (min:sec texte)',
     trans:'Transcription',autotrans:'Auto (Web Speech)',transcont:'Continu',
     transres:'Résultat',mantrans:'Saisie manuelle',exp:'Export code',
-    hdrSub:'Éditeur vidéo · Maternelle · École · Université · Famille'},
+    hdrSub:'Éditeur vidéo · Maternelle · École · Université · Famille',
+    transWarn:'⚠️ Chrome/Edge uniquement · <b>HTTPS</b> ou localhost requis (file:// non supporté) · Autoriser le micro'},
   it:{vs:'Sorgente video',uppc:'📁 Dal PC',dropv:'Trascina il video',
     vurl:'🔗 Per URL',asp:'Proporzioni',autoAsp:'Auto dal video',
     bg:'Sfondo',bgpc:'📁 Carica',dropb:'Trascina immagine',
@@ -622,7 +626,8 @@ var TR={
     subs:'Sottotitoli',ensubs:'Attiva',subtxt:'Formato: 0:05 Frase (min:sec testo)',
     trans:'Trascrizione',autotrans:'Auto (Web Speech)',transcont:'Continuo',
     transres:'Risultato',mantrans:'Immissione manuale',exp:'Esporta codice',
-    hdrSub:'Editor video · Asilo · Scuola · Università · Famiglia'},
+    hdrSub:'Editor video · Asilo · Scuola · Università · Famiglia',
+    transWarn:'⚠️ Solo Chrome/Edge · <b>HTTPS</b> o localhost richiesto (file:// non supportato) · Consentire microfono'},
   zh:{vs:'视频来源',uppc:'📁 从电脑',dropv:'点击或拖放视频',
     vurl:'🔗 通过链接',asp:'宽高比',autoAsp:'自动适应',
     bg:'背景',bgpc:'📁 上传',dropb:'拖放图片',
@@ -631,7 +636,8 @@ var TR={
     subs:'字幕',ensubs:'启用字幕',subtxt:'格式：0:05 短语（分:秒 文本）',
     trans:'转录',autotrans:'自动转录',transcont:'连续',
     transres:'结果',mantrans:'手动输入',exp:'代码导出',
-    hdrSub:'视频编辑器 · 幼儿园 · 学校 · 大学 · 家庭'},
+    hdrSub:'视频编辑器 · 幼儿园 · 学校 · 大学 · 家庭',
+    transWarn:'⚠️ 仅支持Chrome/Edge · 需要<b>HTTPS</b>或localhost（file://不支持）· 请允许麦克风'},
   ja:{vs:'ビデオソース',uppc:'📁 PCから',dropv:'クリックまたはドロップ',
     vurl:'🔗 URLで',asp:'アスペクト比',autoAsp:'自動検出',
     bg:'背景',bgpc:'📁 アップロード',dropb:'画像をドロップ',
@@ -640,7 +646,8 @@ var TR={
     subs:'字幕',ensubs:'字幕を有効化',subtxt:'形式：0:05 フレーズ（分:秒 テキスト）',
     trans:'文字起こし',autotrans:'自動文字起こし',transcont:'継続',
     transres:'結果',mantrans:'手動入力',exp:'コードエクスポート',
-    hdrSub:'動画エディター · 幼稚園 · 学校 · 大学 · 家族'}
+    hdrSub:'動画エディター · 幼稚園 · 学校 · 大学 · 家族',
+    transWarn:'⚠️ Chrome/Edgeのみ · <b>HTTPS</b>またはlocalhostが必要（file://は非対応）· マイクを許可してください'}
 };
 var LANG_NAMES={ru:'Русский',de:'Deutsch',en:'English',es:'Español',
   fr:'Français',it:'Italiano',zh:'中文',ja:'日本語'};
@@ -672,6 +679,9 @@ function applyI18n(){
     t_exp:'exp',hdrSub:'hdrSub'};
   Object.keys(m).forEach(function(id){
     var el=document.getElementById(id),v=t[m[id]];if(el&&v)el.textContent=v;});
+  /* transWarn uses innerHTML (has <b> tags) */
+  var wb=document.getElementById('t_transWarn');
+  if(wb&&t.transWarn)wb.innerHTML=t.transWarn;
 }
 document.getElementById('langToggle').addEventListener('click',function(e){
   e.stopPropagation();document.getElementById('langDrop').classList.toggle('open');});
@@ -892,8 +902,20 @@ function parseSubs(){
   /* Show immediate result at current video position */
   updSubOv(vEl.currentTime);
 
-  if(subsArr.length>0)showToast('💬 Загружено '+subsArr.length+' фраз!');
-  else showToast('⚠️ Формат: 0:05 Текст  (не 0:5 — нужно 0:05)');
+  if(subsArr.length>0){
+    showToast('💬 Загружено '+subsArr.length+' фраз!');
+    /* ── KEY FIX: show first subtitle as preview for 3s so user sees it works ── */
+    var ov=document.getElementById('subOv');
+    ov.textContent='▶ '+subsArr[0].tx;
+    ov.style.display='block';
+    setTimeout(function(){
+      updSubOv(vEl.currentTime);
+    },3000);
+  } else {
+    showToast('⚠️ Формат: 0:05 Текст (две цифры секунды!)');
+    var ov=document.getElementById('subOv');
+    ov.style.display='none';
+  }
   setStatus('💬 Титры: '+subsArr.length+' фраз');
 }
 
@@ -920,10 +942,22 @@ function updSubOv(ct){
 ═══════════════════════════════════════════════ */
 var recog=null,transActive=false,finalTxt='';
 
-/* Detect if running from file:// and warn */
+/* Detect if running from file:// and warn — uses translated text */
 if(window.location.protocol==='file:'){
-  var wb=document.getElementById('transWarn');
-  if(wb)wb.innerHTML='🚫 <b>file:// не поддерживается.</b> Откройте файл через веб-сервер (localhost, GitHub Pages, HTTPS) для работы транскрипции.';
+  var _wb=document.getElementById('t_transWarn');
+  if(_wb){
+    var _fileMsg={
+      ru:'🚫 <b>file:// не поддерживается.</b> Откройте через HTTPS, localhost или GitHub Pages.',
+      de:'🚫 <b>file:// nicht unterstützt.</b> Bitte HTTPS, localhost oder GitHub Pages verwenden.',
+      en:'🚫 <b>file:// not supported.</b> Open via HTTPS, localhost or GitHub Pages.',
+      es:'🚫 <b>file:// no soportado.</b> Abrir con HTTPS, localhost o GitHub Pages.',
+      fr:'🚫 <b>file:// non supporté.</b> Ouvrir via HTTPS, localhost ou GitHub Pages.',
+      it:'🚫 <b>file:// non supportato.</b> Aprire con HTTPS, localhost o GitHub Pages.',
+      zh:'🚫 <b>file://不支持。</b>请通过HTTPS、localhost或GitHub Pages打开。',
+      ja:'🚫 <b>file://は非対応。</b>HTTPS・localhost・GitHub Pages経由で開いてください。'
+    };
+    _wb.innerHTML=_fileMsg[curLang]||_fileMsg.ru;
+  }
 }
 
 document.getElementById('transTog').addEventListener('change',function(){
