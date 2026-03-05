@@ -1,30 +1,142 @@
-function updSubOv(ct){
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Video with Subtitles</title>
 
-  if(!document.getElementById("subTog").checked){
-    subOv.style.display="none";
-    return;
-  }
+<style>
 
-  if(!subsArr.length) return;
+body{
+background:#111;
+color:white;
+font-family:Arial;
+text-align:center;
+}
 
-  let txt = "";
+#player{
+position:relative;
+width:640px;
+margin:auto;
+}
 
-  for(let i = 0; i < subsArr.length; i++){
+video{
+width:100%;
+}
 
-    let next = subsArr[i+1];
+#subOv{
+position:absolute;
+bottom:40px;
+left:0;
+right:0;
+font-size:28px;
+font-weight:bold;
+text-shadow:0 0 10px black;
+display:none;
+}
 
-    if(ct >= subsArr[i].t && (!next || ct < next.t)){
-      txt = subsArr[i].tx;
-      break;
-    }
+</style>
+</head>
 
-  }
+<body>
 
-  if(txt){
-    subOv.textContent = txt;
-    subOv.style.display = "block";
-  }else{
-    subOv.style.display = "none";
-  }
+<h2>Video subtitles test</h2>
+
+<div id="player">
+
+<video id="vp" controls>
+</video>
+
+<div id="subOv"></div>
+
+</div>
+
+<br>
+
+<input type="checkbox" id="subTog" checked>
+Show subtitles
+
+<br><br>
+
+<textarea id="subTxt" rows="6" cols="60">
+0:01 Hello
+0:04 This is subtitles test
+0:07 Works on GitHub Pages
+</textarea>
+
+<br><br>
+
+<button onclick="parseSubs()">Load subtitles</button>
+
+<script>
+
+const vEl = document.getElementById("vp");
+const subOv = document.getElementById("subOv");
+
+let subsArr = [];
+
+function parseSubs(){
+
+let txt = document.getElementById("subTxt").value.trim();
+
+subsArr = [];
+
+let lines = txt.split("\n");
+
+for(let line of lines){
+
+let m = line.match(/^(\d+):(\d+)\s+(.+)/);
+
+if(!m) continue;
+
+let t = parseInt(m[1])*60 + parseInt(m[2]);
+
+subsArr.push({
+t:t,
+tx:m[3]
+});
 
 }
+
+}
+
+function updSubOv(ct){
+
+if(!document.getElementById("subTog").checked){
+subOv.style.display="none";
+return;
+}
+
+if(!subsArr.length) return;
+
+let txt = "";
+
+for(let i = 0; i < subsArr.length; i++){
+
+let next = subsArr[i+1];
+
+if(ct >= subsArr[i].t && (!next || ct < next.t)){
+txt = subsArr[i].tx;
+break;
+}
+
+}
+
+if(txt){
+subOv.textContent = txt;
+subOv.style.display = "block";
+}else{
+subOv.style.display = "none";
+}
+
+}
+
+vEl.addEventListener("timeupdate",function(){
+updSubOv(vEl.currentTime);
+});
+
+parseSubs();
+
+</script>
+
+</body>
+</html>
