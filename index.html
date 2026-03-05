@@ -1,1007 +1,1102 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<meta name="theme-color" content="#c2185b">
-<meta name="description" content="ИгроМир в Сундучке — Видеоредактор с субтитрами и транскрипцией">
-<title>ИгроМир в Сундучке — Видеоредактор</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
-<style>
-:root{
---rose:#c2185b;--rose2:#e91e63;--rose-l:#f48fb1;--pk3:#fce4ec;
---pur:#7b1fa2;--pur2:#ce93d8;
---gold:#b8860b;--gold-l:#d4a017;
---cream:#fff8f0;--cream2:#fdeee4;
---border:#f0c0cc;--border2:#e8a0b4;
---txt:#3a1020;--txt2:#6a2840;--txt3:#9a4060;
---shadow:rgba(180,40,80,.13);
---success:#4caf50;--warning:#ff9800;--error:#f44336;
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow-x:hidden;}
-body{
-min-height:100vh;font-family:'IM Fell English',serif;color:var(--txt);
-background:linear-gradient(150deg,#fff5f8 0%,#fef0e8 35%,#f8f0ff 65%,#f0fff5 100%);
-overflow-x:hidden;
-}
-#bgCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.3;}
-.hdr{position:relative;z-index:10;text-align:center;padding:8px 16px 6px;
-background:linear-gradient(135deg,rgba(255,240,248,.97),rgba(255,248,240,.97));
-border-bottom:2px solid var(--rose-l);box-shadow:0 2px 20px var(--shadow);
-backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
-.hdr-logo{width:68px;height:68px;border-radius:50%;border:3px solid var(--rose2);
-object-fit:cover;pointer-events:none;user-select:none;
-animation:lglow 3s ease-in-out infinite alternate;}
-@keyframes lglow{
-from{box-shadow:0 0 8px var(--rose-l),0 0 0 3px rgba(233,30,99,.1);}
-to{box-shadow:0 0 22px var(--rose2),0 0 0 5px rgba(233,30,99,.2);}}
-.hdr-title{font-family:'Cinzel Decorative',cursive;font-size:clamp(13px,2vw,22px);
-color:var(--rose);text-shadow:1px 1px 0 #fff,0 0 20px rgba(194,24,91,.25);
-margin-top:3px;letter-spacing:2px;}
-.march8{display:inline-block;background:linear-gradient(90deg,var(--rose),var(--pur),#e64a19);
-border-radius:30px;padding:2px 14px;font-size:10px;color:#fff;letter-spacing:1px;
-margin-top:3px;animation:m8 2s ease-in-out infinite alternate;}
-@keyframes m8{from{box-shadow:0 2px 8px rgba(194,24,91,.3);}
-to{box-shadow:0 4px 20px rgba(194,24,91,.5);}}
-.hdr-sub{font-style:italic;color:var(--txt3);font-size:10px;margin-top:2px;}
-.orn{color:var(--rose2);font-size:13px;letter-spacing:6px;margin:2px 0;opacity:.5;}
-.hdr-tools{position:absolute;top:10px;right:12px;}
-.icon-btn{background:rgba(194,24,91,.08);border:1px solid var(--rose-l);color:var(--rose);
-border-radius:8px;width:34px;height:34px;display:flex;align-items:center;
-justify-content:center;cursor:pointer;font-size:17px;transition:all .2s;position:relative;}
-.icon-btn:hover{background:rgba(194,24,91,.18);border-color:var(--rose2);transform:scale(1.05);}
-.icon-btn:active{transform:scale(0.95);}
-.lang-drop{position:absolute;top:40px;right:0;
-background:linear-gradient(135deg,#fff5f8,#fff8f0);
-border:1px solid var(--border);border-radius:10px;padding:7px;
-display:none;grid-template-columns:repeat(4,1fr);gap:4px;
-z-index:300;min-width:190px;box-shadow:0 8px 30px var(--shadow);
-animation:slideDown .2s ease;}
-@keyframes slideDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
-.lang-drop.open{display:grid;}
-.lbtn{background:rgba(194,24,91,.06);border:1px solid var(--border);
-border-radius:5px;padding:4px 2px;color:var(--txt2);
-font-size:9px;cursor:pointer;text-align:center;transition:all .2s;}
-.lbtn:hover,.lbtn.active{background:rgba(194,24,91,.15);border-color:var(--rose2);color:var(--rose);transform:scale(1.05);}
-.lflag{font-size:14px;display:block;}
-.wrap{position:relative;z-index:1;max-width:1500px;margin:0 auto;
-padding:10px;display:grid;
-grid-template-columns:230px 1fr 230px;
-grid-template-rows:auto auto auto;
-gap:10px;}
-.col-left{grid-column:1;grid-row:1/4;display:flex;flex-direction:column;gap:10px;}
-.col-right{grid-column:3;grid-row:1/4;display:flex;flex-direction:column;gap:10px;}
-.player-panel{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;}
-.sbar{grid-column:1/-1;}
-.panel{background:rgba(255,248,245,.93);border:1px solid var(--border);
-border-radius:10px;padding:11px;box-shadow:0 2px 14px var(--shadow);
-transition:box-shadow .3s;}
-.panel:hover{box-shadow:0 4px 20px var(--shadow);}
-.ptitle{font-family:'Cinzel Decorative',cursive;font-size:9px;color:var(--rose);
-text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:5px;
-border-bottom:1px solid var(--border);display:flex;align-items:center;gap:5px;}
-.slbl{font-size:8px;color:var(--pur);text-transform:uppercase;letter-spacing:1px;
-margin:7px 0 3px;font-family:'Cinzel Decorative',cursive;}
-.hint{font-size:8px;color:var(--txt3);opacity:.75;margin-bottom:3px;line-height:1.4;}
-.url-in{width:100%;background:#fff;border:1px solid var(--border);border-radius:5px;
-padding:5px 7px;color:var(--txt);font-size:10px;font-family:monospace;
-margin-bottom:4px;transition:border-color .2s;}
-.url-in:focus{outline:none;border-color:var(--rose2);box-shadow:0 0 0 2px rgba(233,30,99,.1);}
-.url-in::placeholder{color:rgba(106,40,64,.28);}
-select{background:#fff;border:1px solid var(--border);border-radius:5px;
-padding:4px 7px;color:var(--txt);font-size:10px;width:100%;cursor:pointer;margin-bottom:5px;
-transition:border-color .2s;}
-select:focus{outline:none;border-color:var(--rose2);}
-.btn{background:linear-gradient(135deg,var(--rose),#ad1457);border:none;
-border-radius:5px;padding:6px 8px;color:#fff;font-family:'Cinzel Decorative',cursive;
-font-size:8px;font-weight:700;cursor:pointer;width:100%;transition:all .2s;
-letter-spacing:1px;margin-top:3px;box-shadow:0 2px 7px rgba(194,24,91,.3);}
-.btn:hover{background:linear-gradient(135deg,var(--rose2),var(--rose));
-transform:translateY(-1px);box-shadow:0 4px 14px rgba(194,24,91,.45);}
-.btn:active{transform:translateY(0);box-shadow:0 2px 7px rgba(194,24,91,.3);}
-.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
-.btn-ol{background:#fff;border:1px solid var(--border2);color:var(--rose);box-shadow:none;}
-.btn-ol:hover{background:rgba(194,24,91,.05);}
-.btn-sm{padding:4px 6px;font-size:7.5px;}
-.upzone{border:2px dashed var(--border2);border-radius:7px;padding:9px 4px;
-text-align:center;cursor:pointer;transition:all .3s;margin-bottom:5px;
-background:rgba(255,240,248,.4);position:relative;overflow:hidden;}
-.upzone:hover{border-color:var(--rose2);background:rgba(233,30,99,.05);}
-.upzone.dragover{border-color:var(--rose2);background:rgba(233,30,99,.1);transform:scale(1.02);}
-.upzone input[type=file]{position:absolute;top:0;left:0;right:0;bottom:0;
-opacity:0;cursor:pointer;width:100%;height:100%;}
-.up-ic{font-size:18px;display:block;}
-.up-lbl{font-size:9px;color:var(--txt3);margin-top:1px;}
-.asp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px;}
-.asp-btn{background:#fff;border:1px solid var(--border);border-radius:5px;
-padding:4px 2px;color:var(--txt2);font-size:9px;cursor:pointer;text-align:center;transition:all .2s;}
-.asp-btn:hover,.asp-btn.active{background:rgba(194,24,91,.1);border-color:var(--rose2);color:var(--rose);}
-.custom-asp{display:none;gap:3px;align-items:center;margin-bottom:5px;}
-.custom-asp.show{display:flex;}
-.custom-asp input{width:44px;background:#fff;border:1px solid var(--border);
-border-radius:4px;padding:3px 4px;color:var(--txt);font-size:10px;
-font-family:monospace;text-align:center;}
-#vstage{
-position:relative;width:100%;
-background:#0d0d0d;
-border-radius:8px 8px 0 0;overflow:hidden;
-border:2px solid var(--border2);border-bottom:none;
-box-shadow:0 0 0 1px rgba(194,24,91,.1),0 4px 24px rgba(0,0,0,.2);
-transition:box-shadow .3s;}
-#vstage:hover{box-shadow:0 0 0 1px rgba(194,24,91,.2),0 6px 30px rgba(0,0,0,.3);}
-#vstage-sizer{display:block;width:100%;padding-bottom:56.25%;}
-.vslayer{position:absolute;top:0;left:0;width:100%;height:100%;}
-#bgOv{z-index:1;background-size:cover;background-position:center;pointer-events:none;
-transition:opacity .3s;}
-#vp{
-display:none;
-object-fit:contain;
-z-index:2;
-background:transparent;
-transform:translateZ(0);
--webkit-transform:translateZ(0);}
-#ifc{display:none;z-index:2;}
-#ifc iframe{width:100%;height:100%;border:none;display:block;}
-#vph{
-display:flex;flex-direction:column;align-items:center;justify-content:center;
-z-index:3;pointer-events:none;
-background:linear-gradient(135deg,#1a0a0e,#2d0a1e);}
-#vph .phi{font-size:44px;opacity:.35;animation:pulse 2s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:.35;}50%{opacity:.5;}}
-#vph p{font-size:11px;color:rgba(255,255,255,.35);margin-top:5px;font-style:italic;}
-#subOv{
-display:none;
-position:absolute;
-bottom:0;left:0;right:0;
-width:100%;
-padding:10px 6% 12px;
-background:linear-gradient(to top,
-rgba(0,0,0,.9) 0%,
-rgba(0,0,0,.6) 60%,
-transparent 100%);
-font-size:clamp(10px,2cqw,20px);
-text-align:center;
-white-space:pre-wrap;word-break:break-word;
-z-index:25;
-line-height:1.5;
-text-shadow:
-0 0 6px #000,
-1px 1px 0 rgba(0,0,0,.9),
--1px -1px 0 rgba(0,0,0,.9),
-1px -1px 0 rgba(0,0,0,.9),
--1px  1px 0 rgba(0,0,0,.9),
-0  3px 10px rgba(0,0,0,.95);
-color:#fff;
-pointer-events:none;
-opacity:1;
-transition:opacity .35s ease;
-box-sizing:border-box;}
-#subOv.sub-fade{opacity:0;}
-#subLangBadge{
-display:inline-block;
-font-size:9px;
-background:rgba(194,24,91,.8);
-color:#fff;
-border-radius:3px;
-padding:0 4px;
-margin-right:6px;
-vertical-align:middle;
-text-shadow:none;}
-.ctrls{background:linear-gradient(135deg,rgba(255,248,245,.97),rgba(255,240,248,.97));
-border:2px solid var(--border);border-top:none;border-radius:0 0 8px 8px;
-padding:7px 10px;box-shadow:0 4px 14px var(--shadow);}
-.pbwrap{height:5px;background:rgba(194,24,91,.15);border-radius:3px;
-cursor:pointer;margin-bottom:7px;position:relative;transition:height .2s;}
-.pbwrap:hover{height:7px;}
-.pbfill{height:100%;background:linear-gradient(90deg,var(--rose),var(--rose2));
-border-radius:3px;width:0%;transition:width .1s;position:relative;}
-.pbfill::after{content:'';position:absolute;right:-5px;top:-4px;
-width:12px;height:12px;background:#fff;border-radius:50%;
-box-shadow:0 0 0 3px var(--rose2);transition:transform .2s;}
-.pbwrap:hover .pbfill::after{transform:scale(1.2);}
-.crow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-.cbtn{background:#fff;border:1px solid var(--border2);color:var(--rose);
-border-radius:50%;width:30px;height:30px;display:flex;align-items:center;
-justify-content:center;cursor:pointer;font-size:12px;transition:all .2s;flex-shrink:0;}
-.cbtn:hover{background:rgba(194,24,91,.1);border-color:var(--rose2);transform:scale(1.1);}
-.cbtn:active{transform:scale(0.95);}
-.cbtn.pbtn{width:36px;height:36px;font-size:15px;}
-.tdsp{font-family:monospace;font-size:10px;color:var(--txt3);min-width:84px;text-align:center;}
-.vwrap{display:flex;align-items:center;gap:4px;margin-left:auto;}
-.vsldr{-webkit-appearance:none;width:55px;height:4px;border-radius:2px;
-background:rgba(194,24,91,.2);outline:none;cursor:pointer;transition:width .2s;}
-.vsldr:hover{width:65px;}
-.vsldr::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;
-border-radius:50%;background:var(--rose2);cursor:pointer;transition:transform .2s;}
-.vsldr::-webkit-slider-thumb:hover{transform:scale(1.2);}
-.sbtn{background:#fff;border:1px solid var(--border);color:var(--txt2);
-border-radius:3px;padding:2px 5px;font-size:9px;cursor:pointer;transition:all .2s;}
-.sbtn:hover,.sbtn.active{background:rgba(194,24,91,.1);color:var(--rose);border-color:var(--rose2);}
-.spd-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;}
-.trow{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
-.tsw{position:relative;width:32px;height:17px;}
-.tsw input{opacity:0;width:0;height:0;}
-.tsl{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;
-background:rgba(194,24,91,.15);border:1px solid var(--border2);
-border-radius:20px;transition:.3s;}
-.tsl:before{content:'';position:absolute;width:11px;height:11px;left:2px;bottom:2px;
-background:var(--border2);border-radius:50%;transition:.3s;}
-input:checked+.tsl{background:rgba(194,24,91,.3);border-color:var(--rose2);}
-input:checked+.tsl:before{transform:translateX(15px);background:var(--rose2);}
-.tlbl{font-size:9px;color:var(--txt2);}
-.txta{width:100%;background:#fff;border:1px solid var(--border);border-radius:5px;
-padding:5px;color:var(--txt);font-size:10px;font-family:monospace;
-resize:vertical;min-height:65px;transition:border-color .2s;}
-.txta:focus{outline:none;border-color:var(--rose2);}
-.tbox{background:#fff;border:1px solid var(--border);border-radius:5px;
-padding:6px;min-height:55px;font-size:10px;color:var(--txt3);
-line-height:1.6;overflow-y:auto;max-height:90px;word-break:break-word;}
-.code-a{width:100%;background:#1a0a14;border:1px solid var(--border2);border-radius:5px;
-padding:7px;color:#a8e6cf;font-size:9px;font-family:'Courier New',monospace;
-resize:vertical;min-height:80px;line-height:1.5;}
-.code-a:focus{outline:none;border-color:var(--rose2);}
-.tabrow{display:flex;gap:3px;margin-bottom:6px;}
-.tabbtn{background:#fff;border:1px solid var(--border);border-radius:4px 4px 0 0;
-padding:3px 7px;color:var(--txt3);font-size:8px;cursor:pointer;
-font-family:'Cinzel Decorative',cursive;transition:all .2s;}
-.tabbtn.active{background:rgba(194,24,91,.1);border-color:var(--rose2);color:var(--rose);}
-.row2{display:flex;gap:4px;margin-top:4px;}
-.row2 .btn{width:auto;flex:1;}
-hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
-.sbar{position:relative;z-index:1;
-background:linear-gradient(135deg,rgba(255,248,245,.92),rgba(255,240,248,.92));
-border:1px solid var(--border);border-radius:6px;padding:4px 10px;
-font-size:9px;color:var(--txt3);font-family:monospace;
-display:flex;align-items:center;gap:7px;box-shadow:0 2px 8px var(--shadow);}
-.sdot{width:6px;height:6px;border-radius:50%;background:var(--rose2);
-animation:blink 2s ease-in-out infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
-.toast{position:fixed;bottom:14px;right:14px;
-background:linear-gradient(135deg,#fff0f4,#fff8f0);
-border:1px solid var(--border2);border-radius:8px;padding:8px 13px;
-color:var(--rose);font-size:11px;z-index:9999;opacity:0;
-transform:translateY(14px);transition:all .3s;pointer-events:none;max-width:280px;
-box-shadow:0 4px 18px var(--shadow);display:flex;align-items:center;gap:6px;}
-.toast.show{opacity:1;transform:translateY(0);}
-.toast-icon{font-size:14px;}
-.badge{display:inline-block;background:rgba(194,24,91,.1);
-border:1px solid var(--border2);border-radius:20px;
-padding:1px 5px;font-size:8px;color:var(--rose);margin-left:3px;font-family:monospace;}
-.tstat{font-size:9px;padding:3px 6px;border-radius:4px;margin-bottom:4px;text-align:center;display:none;}
-.tstat.on{display:block;background:rgba(50,150,50,.08);border:1px solid rgba(50,180,50,.3);color:#1a6a1a;}
-.tstat.err{display:block;background:rgba(200,50,50,.08);border:1px solid rgba(200,50,50,.3);color:#8b1a1a;}
-.warn-box{background:#fff8f0;border:1px solid #ffb74d;border-radius:4px;
-padding:4px 7px;font-size:8px;color:#7a4000;margin-bottom:5px;line-height:1.4;}
-.sub-info{font-size:8px;color:var(--txt3);font-style:italic;margin-top:2px;}
-.loading{position:relative;}
-.loading::after{content:'';position:absolute;top:50%;left:50%;
-width:20px;height:20px;margin:-10px 0 0 -10px;
-border:2px solid var(--rose-l);border-top-color:var(--rose);
-border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-@media(max-width:1100px){
-.wrap{grid-template-columns:200px 1fr 200px;}
-}
-@media(max-width:800px){
-.wrap{grid-template-columns:1fr;grid-template-rows:auto;}
-.col-left,.col-right{grid-column:1;grid-row:auto;}
-.player-panel{grid-column:1;grid-row:auto;}
-.sbar{grid-column:1;}
-.hdr-tools{position:static;margin-top:5px;}
-.lang-drop{right:50%;transform:translateX(50%);top:45px;}
-}
-@media(max-width:480px){
-.hdr-title{font-size:14px;}
-.hdr-logo{width:50px;height:50px;}
-.panel{padding:8px;}
-.cbtn{width:28px;height:28px;font-size:11px;}
-.cbtn.pbtn{width:32px;height:32px;}
-.vsldr{width:45px;}
-}
-@media print{
-#bgCanvas,.hdr-tools,.ctrls,.col-left,.col-right{display:none;}
-.wrap{display:block;}
-.player-panel{width:100%;}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎬 Super Video Editor</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      --radius: 12px;
+      --transition: all 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Logo Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 0 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      max-height: 60px;
+      border-radius: 8px;
+      transition: var(--transition);
+    }
+
+    .logo:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+    }
+
+    /* Main Grid */
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .editor-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+
+    .panel {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .panel-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.05rem;
+    }
+
+    .panel-title::before {
+      content: "•";
+      color: var(--primary);
+      font-size: 1.4rem;
+      line-height: 0.5;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      transition: var(--transition);
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      width: auto;
+    }
+
+    .language-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* Video Area */
+    .video-area {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed var(--border);
+    }
+
+    .video-container.has-video {
+      border-style: solid;
+      border-color: var(--primary);
+    }
+
+    #mainVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: none;
+    }
+
+    .video-placeholder {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 20px;
+    }
+
+    .video-placeholder svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #progressBar {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #progressFill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      border-radius: 3px;
+      transition: width 0.1s linear;
+    }
+
+    .time-display {
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-btn {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1.1rem;
+    }
+
+    .control-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .control-btn:active {
+      transform: scale(0.98);
+    }
+
+    .control-btn.play-pause {
+      width: 50px;
+      height: 50px;
+      font-size: 1.3rem;
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .control-btn.play-pause:hover {
+      background: var(--primary-hover);
+    }
+
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #volumeSlider {
+      width: 80px;
+      height: 4px;
+      accent-color: var(--primary);
+    }
+
+    /* Subtitles & Transcription */
+    .subtitle-area {
+      background: rgba(30, 41, 59, 0.4);
+      border-radius: 8px;
+      padding: 12px;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      border-left: 3px solid var(--primary);
+    }
+
+    .transcription-area {
+      background: rgba(30, 41, 59, 0.4);
+      border-radius: 8px;
+      padding: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      border-left: 3px solid var(--success);
+    }
+
+    .feature-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .feature-toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+    }
+
+    /* Status & Messages */
+    .status {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .status.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .status.success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid var(--success);
+      color: #86efac;
+    }
+
+    .status.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--danger);
+      color: #fca5a5;
+    }
+
+    .status.info {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid var(--primary);
+      color: #a5b4fc;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive iframe support */
+    @media (max-width: 600px) {
+      .control-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .time-display {
+        min-width: auto;
+      }
+      .volume-control {
+        justify-content: center;
+      }
+      .language-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Hide file input visually */
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      font-size: 100px;
+      right: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* Transcription loading */
+    .transcribing {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--warning);
+      font-size: 0.9rem;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(245, 158, 11, 0.3);
+      border-top-color: var(--warning);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-<canvas id="bgCanvas"></canvas>
-<div class="hdr">
-<img src="https://img.genially.com/63a7016fe7745e0013a04f69/a5b6a171-06c6-47b1-92a2-5755e52e415b.png" alt="ИгроМир" class="hdr-logo" draggable="false" ondragstart="return false;">
-<h1 class="hdr-title">ИгроМир в Сундучке</h1>
-<div class="orn">✿ ❤ ✿</div>
-<div class="march8">🌹 С 8 Марта! · Happy Women's Day! · Alles Liebe zum 8. März!</div>
-<p class="hdr-sub" id="hdrSub">Видеоредактор · Детский сад · Школа · ВУЗ · Семья · Игра</p>
-<div class="hdr-tools">
-<div class="icon-btn" id="langToggle" title="Язык" role="button" aria-label="Выбрать язык">🌐
-<div class="lang-drop" id="langDrop">
-<button class="lbtn active" id="lb_ru" aria-label="Русский"><span class="lflag">🇷🇺</span>RU</button>
-<button class="lbtn" id="lb_de" aria-label="Deutsch"><span class="lflag">🇩🇪</span>DE</button>
-<button class="lbtn" id="lb_en" aria-label="English"><span class="lflag">🇬🇧</span>EN</button>
-<button class="lbtn" id="lb_es" aria-label="Español"><span class="lflag">🇪🇸</span>ES</button>
-<button class="lbtn" id="lb_fr" aria-label="Français"><span class="lflag">🇫🇷</span>FR</button>
-<button class="lbtn" id="lb_it" aria-label="Italiano"><span class="lflag">🇮🇹</span>IT</button>
-<button class="lbtn" id="lb_zh" aria-label="中文"><span class="lflag">🇨🇳</span>ZH</button>
-<button class="lbtn" id="lb_ja" aria-label="日本語"><span class="lflag">🇯🇵</span>JA</button>
-</div>
-</div>
-</div>
-</div>
-<div class="wrap">
-<div class="col-left">
-<div class="panel">
-<div class="ptitle">🎬 <span id="t_vs">Источник видео</span></div>
-<div class="slbl" id="t_uppc">📁 С компьютера</div>
-<div class="upzone" id="vidZone" role="button" aria-label="Загрузить видео">
-<input type="file" id="vidFile" accept="video/*,audio/*" aria-label="Выбрать видео файл">
-<span class="up-ic">🎞️</span>
-<div class="up-lbl" id="t_dropv">Нажмите или перетащите</div>
-</div>
-<div class="slbl" id="t_vurl">🔗 По ссылке</div>
-<input type="text" class="url-in" id="vidUrl" placeholder="YouTube, Vimeo, mp4…" aria-label="URL видео">
-<select id="platSel" aria-label="Платформа">
-<option value="direct">Прямое видео (mp4/webm/ogg)</option>
-<option value="youtube">YouTube</option>
-<option value="vimeo">Vimeo</option>
-<option value="genially">Genially (iframe)</option>
-<option value="github">GitHub Pages</option>
-<option value="custom">Custom iframe</option>
-</select>
-<button class="btn" id="btnLoadVid">▶ Загрузить</button>
-</div>
-<div class="panel">
-<div class="ptitle">📐 <span id="t_asp">Соотношение сторон</span></div>
-<div class="asp-grid">
-<button class="asp-btn active" id="asp_169" aria-label="16:9">16:9</button>
-<button class="asp-btn" id="asp_916" aria-label="9:16">9:16</button>
-<button class="asp-btn" id="asp_43" aria-label="4:3">4:3</button>
-<button class="asp-btn" id="asp_32" aria-label="3:2">3:2</button>
-<button class="asp-btn" id="asp_23" aria-label="2:3">2:3</button>
-<button class="asp-btn" id="asp_cust" aria-label="Своё">Своё</button>
-</div>
-<div class="custom-asp" id="customAsp">
-<input type="number" id="aspW" value="16" min="1" max="99" aria-label="Ширина">
-<span style="color:var(--rose2);font-size:13px;">:</span>
-<input type="number" id="aspH" value="9" min="1" max="99" aria-label="Высота">
-</div>
-<div class="trow" style="margin-top:4px;">
-<label class="tsw"><input type="checkbox" id="autoAspChk"><span class="tsl"></span></label>
-<span class="tlbl" id="t_autoAsp">Авто по видео</span>
-</div>
-</div>
-<div class="panel">
-<div class="ptitle">🖼️ <span id="t_bg">Фон плеера</span></div>
-<div class="slbl" id="t_bgpc">📁 С компьютера</div>
-<div class="upzone" id="bgZone" role="button" aria-label="Загрузить фон">
-<input type="file" id="bgFile" accept="image/*" aria-label="Выбрать изображение">
-<span class="up-ic">🌸</span>
-<div class="up-lbl" id="t_dropb">Нажмите или перетащите</div>
-</div>
-<div class="slbl" id="t_bgurl">🔗 По ссылке</div>
-<input type="text" class="url-in" id="bgUrl" placeholder="https://… .jpg/.png" aria-label="URL изображения">
-<div style="display:flex;align-items:center;gap:6px;margin:4px 0;">
-<span class="tlbl" id="t_bgOp">Прозрач.:</span>
-<input type="range" id="bgOp" min="0" max="1" step="0.05" value="1"
-style="-webkit-appearance:none;flex:1;height:4px;border-radius:2px;
-background:rgba(194,24,91,.2);outline:none;cursor:pointer;" aria-label="Прозрачность фона">
-<span id="bgOpVal" style="font-size:8px;color:var(--txt3);min-width:24px;">100%</span>
-</div>
-<button class="btn" id="btnApplyBg">🌸 Применить</button>
-<button class="btn btn-ol" id="btnClearBg" style="margin-top:3px;">✕ Убрать фон</button>
-</div>
-<div class="panel">
-<div class="ptitle">💻 <span id="t_exp">Экспорт кода</span></div>
-<div class="tabrow" role="tablist">
-<button class="tabbtn active" id="tGH" role="tab" aria-selected="true">GitHub</button>
-<button class="tabbtn" id="tGN" role="tab" aria-selected="false">Genially</button>
-<button class="tabbtn" id="tIF" role="tab" aria-selected="false">iFrame</button>
-</div>
-<div id="tcGH">
-<div class="hint">HTML для GitHub Pages с субтитрами</div>
-<textarea class="code-a" id="ghCode" rows="5" readonly placeholder="Нажмите ⚙️" aria-label="Код GitHub"></textarea>
-<button class="btn btn-sm" id="btnGenGH">⚙️ Сгенерировать</button>
-<button class="btn btn-ol btn-sm" id="btnCpyGH" style="margin-top:3px;">📋 Копировать</button>
-<button class="btn btn-ol btn-sm" id="btnDwnGH" style="margin-top:3px;">💾 Скачать</button>
-</div>
-<div id="tcGN" style="display:none;">
-<div class="hint">Добавить элемент → HTML-код в Genially</div>
-<textarea class="code-a" id="gnCode" rows="5" readonly placeholder="Нажмите ⚙️" aria-label="Код Genially"></textarea>
-<button class="btn btn-sm" id="btnGenGN">⚙️ Сгенерировать</button>
-<button class="btn btn-ol btn-sm" id="btnCpyGN" style="margin-top:3px;">📋 Копировать</button>
-</div>
-<div id="tcIF" style="display:none;">
-<div class="hint">Универсальный iFrame для LMS, Moodle, сайта</div>
-<textarea class="code-a" id="ifCode" rows="5" readonly placeholder="Нажмите ⚙️" aria-label="Код iFrame"></textarea>
-<button class="btn btn-sm" id="btnGenIF">⚙️ Сгенерировать</button>
-<button class="btn btn-ol btn-sm" id="btnCpyIF" style="margin-top:3px;">📋 Копировать</button>
-</div>
-</div>
-</div>
-<div class="player-panel panel">
-<div class="ptitle">📽️ <span id="t_plr">Видеоплеер</span>
-<span class="badge" id="pBadge">16:9</span></div>
-<div id="vstage">
-<div id="vstage-sizer"></div>
-<div id="bgOv" class="vslayer"></div>
-<video id="vp" class="vslayer"
-preload="metadata"
-playsinline
-webkit-playsinline
-x5-playsinline
-aria-label="Видео плеер">
-<p id="t_novideo" style="color:#fff;padding:20px;text-align:center;">
-Ваш браузер не поддерживает HTML5 видео.
-Попробуйте Chrome, Firefox, Safari или Edge.
-</p>
-</video>
-<div id="ifc" class="vslayer"></div>
-<div id="vph" class="vslayer">
-<div class="phi">🎬</div>
-<p id="t_nov">Загрузите видео или вставьте ссылку</p>
-</div>
-<div id="subOv" aria-live="polite"></div>
-</div>
-<div class="ctrls">
-<div class="pbwrap" id="pbwrap" role="slider" aria-label="Прогресс видео" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="pbfill" id="pbfill"></div></div>
-<div class="crow">
-<button class="cbtn" id="btnSkipBack" title="-10с (←)" aria-label="Назад 10 секунд">⏪</button>
-<button class="cbtn pbtn" id="pbtn" title="Пробел" aria-label="Воспроизвести/Пауза">▶</button>
-<button class="cbtn" id="btnSkipFwd" title="+10с (→)" aria-label="Вперёд 10 секунд">⏩</button>
-<button class="cbtn" id="mbtn" title="M" aria-label="Звук">🔊</button>
-<div class="vwrap">
-<input type="range" class="vsldr" id="vsldr" min="0" max="1" step="0.05" value="1" aria-label="Громкость">
-</div>
-<div class="tdsp" id="tdsp">0:00 / 0:00</div>
-<button class="cbtn" id="btnFS" style="border-radius:5px;width:auto;padding:3px 7px;font-size:10px;" title="F" aria-label="Полный экран">⛶</button>
-</div>
-<div style="margin-top:4px;">
-<div class="slbl" id="t_spd">Скорость</div>
-<div class="spd-row" id="spdRow" role="group" aria-label="Скорость воспроизведения"></div>
-</div>
-</div>
-</div>
-<div class="col-right">
-<div class="panel">
-<div class="ptitle">💬 <span id="t_subs">Титры</span></div>
-<div class="trow">
-<label class="tsw"><input type="checkbox" id="subTog"><span class="tsl"></span></label>
-<span class="tlbl" id="t_ensubs">Включить титры</span>
-</div>
-<div class="slbl" id="t_subLangLbl">🌐 Язык субтитров</div>
-<div class="hint" id="t_subLangHint">Выберите язык субтитров (независимо от языка интерфейса)</div>
-<select id="subLangSel" aria-label="Язык субтитров">
-<option value="ru">🇷🇺 Русский</option>
-<option value="de">🇩🇪 Deutsch</option>
-<option value="en">🇬🇧 English</option>
-<option value="es">🇪🇸 Español</option>
-<option value="fr">🇫🇷 Français</option>
-<option value="it">🇮🇹 Italiano</option>
-<option value="zh">🇨🇳 中文</option>
-<option value="ja">🇯🇵 日本語</option>
-<option value="other">✏️ Другой</option>
-</select>
-<input type="text" class="url-in" id="subLangCustom" placeholder="Введите язык…"
-style="display:none;margin-bottom:5px;" aria-label="Пользовательский язык">
-<div class="slbl" id="t_subFormatLbl">Формат строк:</div>
-<div class="hint" id="t_subtxt">0:05 Текст · мин:сек пробел текст</div>
-<textarea class="txta" id="subTxt" rows="5"
-placeholder="0:00 Добро пожаловать!&#10;0:05 С праздником!&#10;0:12 Следующая фраза..." aria-label="Текст субтитров"></textarea>
-<div class="sub-info">
-Язык: <span id="subLangName">Русский</span> · Фраз: <span id="subCount">0</span>
-</div>
-<div style="display:flex;gap:4px;margin-top:5px;align-items:center;">
-<select id="subFont" style="flex:1;margin-bottom:0;font-size:9px;" aria-label="Шрифт">
-<option value="sans-serif">Sans-serif</option>
-<option value="serif">Serif</option>
-<option value="monospace">Mono</option>
-<option value="cursive">Cursive</option>
-</select>
-<input type="color" id="subColor" value="#ffffff" title="Цвет"
-style="width:24px;height:24px;border:1px solid var(--border);border-radius:3px;
-background:none;cursor:pointer;padding:0;flex-shrink:0;" aria-label="Цвет текста">
-<input type="range" id="subSize" min="8" max="32" value="14" title="Размер"
-style="-webkit-appearance:none;width:50px;height:4px;border-radius:2px;
-background:rgba(194,24,91,.2);outline:none;cursor:pointer;flex-shrink:0;" aria-label="Размер шрифта">
-</div>
-<button class="btn" id="btnApplySubs" style="margin-top:6px;">✅ Применить</button>
-<button class="btn btn-ol btn-sm" id="btnExpSubs" style="margin-top:3px;">💾 Экспорт .srt</button>
-</div>
-<div class="panel">
-<div class="ptitle">📝 <span id="t_trans">Транскрипция</span></div>
-<div class="tstat" id="tstat"></div>
-<div class="warn-box" id="transWarn">
-<span id="t_transWarn">⚠️ Только Chrome/Edge · Требуется HTTPS или localhost</span>
-</div>
-<div class="trow">
-<label class="tsw"><input type="checkbox" id="transTog"><span class="tsl"></span></label>
-<span class="tlbl" id="t_autotrans">Авто (Web Speech API)</span>
-</div>
-<div class="trow">
-<label class="tsw"><input type="checkbox" id="transContTog" checked><span class="tsl"></span></label>
-<span class="tlbl" id="t_transcont">Непрерывно</span>
-</div>
-<select id="transLangSel" style="margin-bottom:5px;" aria-label="Язык транскрипции">
-<option value="ru-RU">🇷🇺 Русский</option>
-<option value="de-DE">🇩🇪 Deutsch</option>
-<option value="en-US">🇬🇧 English</option>
-<option value="es-ES">🇪🇸 Español</option>
-<option value="fr-FR">🇫🇷 Français</option>
-<option value="it-IT">🇮🇹 Italiano</option>
-<option value="zh-CN">🇨🇳 中文</option>
-<option value="ja-JP">🇯🇵 日本語</option>
-</select>
-<div class="slbl" id="t_transres">Результат</div>
-<div class="tbox" id="transBox"
-style="font-family:monospace;font-size:9px;line-height:1.8;" aria-live="polite"></div>
-<div class="row2">
-<button class="btn btn-ol btn-sm" id="btnClrTrans" aria-label="Очистить">🗑</button>
-<button class="btn btn-sm" id="btnCpyTrans" aria-label="Копировать">📋 Копировать</button>
-<button class="btn btn-ol btn-sm" id="btnExpTrans" aria-label="Экспорт">💾 TXT</button>
-</div>
-<hr class="dv">
-<div class="slbl" id="t_mantrans">Ручной ввод</div>
-<textarea class="txta" id="manTrans" rows="2" placeholder="Введите вручную…" aria-label="Ручной ввод транскрипции"></textarea>
-<button class="btn btn-ol btn-sm" id="btnSubsFromTrans" style="margin-top:3px;">→ В титры</button>
-</div>
-</div>
-<div class="sbar"><div class="sdot"></div><span id="stxt">✦ ИгроМир Видеоредактор · С Праздником 8 Марта! 🌹 ✦</span></div>
-</div>
-<div class="toast" id="toast" role="alert" aria-live="assertive"><span class="toast-icon"></span><span class="toast-msg"></span></div>
-<script>
-/* ═══ CANVAS ANIMATION ═══ */
-(function(){
-var cv=document.getElementById('bgCanvas'),ctx=cv.getContext('2d'),W,H;
-var resizeTimer=null;
-function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
-resize();
-window.addEventListener('resize',function(){
-clearTimeout(resizeTimer);
-resizeTimer=setTimeout(resize,100);
-});
-var items=[];
-for(var i=0;i<55;i++){
-items.push({type:i%4===0?'heart':'petal',x:Math.random()*W,y:Math.random()*H,
-r:3+Math.random()*8,dx:-0.15-Math.random()*0.35,dy:0.25+Math.random()*0.65,
-rot:Math.random()*6.28,drot:(Math.random()-.5)*.02,hue:300+Math.random()*60,a:0.2+Math.random()*0.38});
-}
-function drawP(x,y,r,rot){ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(r,-r,r*2,r*.5,0,r*2);ctx.bezierCurveTo(-r*2,r*.5,-r,-r,0,0);ctx.closePath();ctx.fill();ctx.restore();}
-function drawH(x,y,r){ctx.save();ctx.translate(x,y);ctx.beginPath();ctx.moveTo(0,-r*.3);ctx.bezierCurveTo(r*.5,-r,r,-r*.3,0,r*.5);ctx.bezierCurveTo(-r,-r*.3,-r*.5,-r,0,-r*.3);ctx.closePath();ctx.fill();ctx.restore();}
-function frame(){
-ctx.clearRect(0,0,W,H);
-items.forEach(function(p){p.x+=p.dx;p.y+=p.dy;p.rot+=p.drot;if(p.y>H+20){p.y=-20;p.x=Math.random()*W;}if(p.x<-20){p.x=W+20;}ctx.globalAlpha=p.a;ctx.fillStyle='hsl('+p.hue+',75%,72%)';if(p.type==='heart')drawH(p.x,p.y,p.r);else drawP(p.x,p.y,p.r,p.rot);});
-ctx.globalAlpha=1;requestAnimationFrame(frame);
-}
-frame();
-})();
-/* ═══ i18n ═══ */
-var TR={
-ru:{vs:'Источник видео',uppc:'📁 С компьютера',dropv:'Нажмите или перетащите',vurl:'🔗 По ссылке',asp:'Соотношение сторон',autoAsp:'Авто по видео',bg:'Фон плеера',bgpc:'📁 Изображение',dropb:'Нажмите или перетащите',bgurl:'🔗 По ссылке',bgOp:'Прозрач.:',plr:'Видеоплеер',nov:'Загрузите видео или вставьте ссылку',spd:'Скорость',subs:'Титры',ensubs:'Включить титры',subtxt:'0:05 Текст · мин:сек пробел текст',subLangLbl:'🌐 Язык субтитров',subLangHint:'Выберите язык субтитров (независимо от языка интерфейса)',subFormatLbl:'Формат строк:',trans:'Транскрипция',autotrans:'Авто (Web Speech API)',transcont:'Непрерывно',transres:'Результат',mantrans:'Ручной ввод',exp:'Экспорт кода',hdrSub:'Видеоредактор · Детский сад · Школа · ВУЗ · Семья · Игра',transWarn:'⚠️ Только Chrome/Edge · Требуется HTTPS или localhost (c file:// не работает) · Разрешите микрофон'},
-de:{vs:'Videoquelle',uppc:'📁 Vom Computer',dropv:'Video hierher ziehen',vurl:'🔗 Per URL',asp:'Seitenverhältnis',autoAsp:'Auto nach Video',bg:'Hintergrund',bgpc:'📁 Hochladen',dropb:'Bild ziehen',bgurl:'🔗 URL',bgOp:'Opazität:',plr:'Videoplayer',nov:'Video laden oder URL eingeben',spd:'Geschwindigkeit',subs:'Untertitel',ensubs:'Aktivieren',subtxt:'0:05 Text · min:sek text',subLangLbl:'🌐 Untertitelsprache',subLangHint:'Sprache der Untertitel wählen (unabhängig von der Oberflächensprache)',subFormatLbl:'Format:',trans:'Transkription',autotrans:'Auto (Web Speech)',transcont:'Kontinuierlich',transres:'Ergebnis',mantrans:'Manuelle Eingabe',exp:'Code Export',hdrSub:'Videoeditor · Kindergarten · Schule · Uni · Familie',transWarn:'⚠️ Nur Chrome/Edge · HTTPS oder localhost erforderlich (file:// funktioniert nicht) · Mikrofon erlauben'},
-en:{vs:'Video Source',uppc:'📁 From PC',dropv:'Click or drop video',vurl:'🔗 By URL',asp:'Aspect Ratio',autoAsp:'Auto from video',bg:'Player Background',bgpc:'📁 Upload',dropb:'Click or drop image',bgurl:'🔗 URL',bgOp:'Opacity:',plr:'Video Player',nov:'Upload video or enter URL',spd:'Speed',subs:'Subtitles',ensubs:'Enable Subtitles',subtxt:'0:05 Phrase · min:sec text',subLangLbl:'🌐 Subtitle Language',subLangHint:'Choose subtitle language (independent of UI language)',subFormatLbl:'Format:',trans:'Transcription',autotrans:'Auto (Web Speech)',transcont:'Continuous',transres:'Result',mantrans:'Manual input',exp:'Code Export',hdrSub:'Video Editor · Kindergarten · School · University · Family',transWarn:'⚠️ Chrome/Edge only · HTTPS or localhost required (file:// not supported) · Allow microphone'},
-es:{vs:'Fuente de video',uppc:'📁 Del PC',dropv:'Arrastra el video',vurl:'🔗 Por URL',asp:'Relación de aspecto',autoAsp:'Auto del video',bg:'Fondo',bgpc:'📁 Subir',dropb:'Arrastre imagen',bgurl:'🔗 URL',bgOp:'Opacidad:',plr:'Reproductor',nov:'Sube video o URL',spd:'Velocidad',subs:'Subtítulos',ensubs:'Activar',subtxt:'0:05 Frase · min:seg texto',subLangLbl:'🌐 Idioma de subtítulos',subLangHint:'Elige el idioma de los subtítulos (independiente del idioma de la interfaz)',subFormatLbl:'Formato:',trans:'Transcripción',autotrans:'Auto (Web Speech)',transcont:'Continuo',transres:'Resultado',mantrans:'Entrada manual',exp:'Exportar código',hdrSub:'Editor de video · Jardín · Escuela · Universidad · Familia',transWarn:'⚠️ Solo Chrome/Edge · Se requiere HTTPS o localhost (file:// no funciona) · Permitir micrófono'},
-fr:{vs:'Source vidéo',uppc:'📁 Du PC',dropv:'Déposer la vidéo',vurl:'🔗 Par URL',asp:"Format d'image",autoAsp:'Auto depuis vidéo',bg:'Arrière-plan',bgpc:'📁 Télécharger',dropb:'Déposer image',bgurl:'🔗 URL',bgOp:'Opacité:',plr:'Lecteur',nov:'Chargez vidéo ou URL',spd:'Vitesse',subs:'Sous-titres',ensubs:'Activer',subtxt:'0:05 Phrase · min:sec texte',subLangLbl:'🌐 Langue des sous-titres',subLangHint:'Choisir la langue des sous-titres (indépendamment de la langue de l\'interface)',subFormatLbl:'Format:',trans:'Transcription',autotrans:'Auto (Web Speech)',transcont:'Continu',transres:'Résultat',mantrans:'Saisie manuelle',exp:'Export code',hdrSub:'Éditeur vidéo · Maternelle · École · Université · Famille',transWarn:'⚠️ Chrome/Edge uniquement · HTTPS ou localhost requis (file:// non supporté) · Autoriser le micro'},
-it:{vs:'Sorgente video',uppc:'📁 Dal PC',dropv:'Trascina il video',vurl:'🔗 Per URL',asp:'Proporzioni',autoAsp:'Auto dal video',bg:'Sfondo',bgpc:'📁 Carica',dropb:'Trascina immagine',bgurl:'🔗 URL',bgOp:'Opacità:',plr:'Lettore',nov:'Carica video o URL',spd:'Velocità',subs:'Sottotitoli',ensubs:'Attiva',subtxt:'0:05 Frase · min:sec testo',subLangLbl:'🌐 Lingua sottotitoli',subLangHint:'Scegli la lingua dei sottotitoli (indipendente dalla lingua dell\'interfaccia)',subFormatLbl:'Formato:',trans:'Trascrizione',autotrans:'Auto (Web Speech)',transcont:'Continuo',transres:'Risultato',mantrans:'Immissione manuale',exp:'Esporta codice',hdrSub:'Editor video · Asilo · Scuola · Università · Famiglia',transWarn:'⚠️ Solo Chrome/Edge · HTTPS o localhost richiesto (file:// non supportato) · Consentire microfono'},
-zh:{vs:'视频来源',uppc:'📁 从电脑',dropv:'点击或拖放视频',vurl:'🔗 通过链接',asp:'宽高比',autoAsp:'自动适应',bg:'背景',bgpc:'📁 上传',dropb:'拖放图片',bgurl:'🔗 链接',bgOp:'透明度:',plr:'视频播放器',nov:'上传视频或输入链接',spd:'速度',subs:'字幕',ensubs:'启用字幕',subtxt:'0:05 短语 · 分：秒 文本',subLangLbl:'🌐 字幕语言',subLangHint:'选择字幕语言（与界面语言无关）',subFormatLbl:'格式：',trans:'转录',autotrans:'自动转录',transcont:'连续',transres:'结果',mantrans:'手动输入',exp:'代码导出',hdrSub:'视频编辑器 · 幼儿园 · 学校 · 大学 · 家庭',transWarn:'⚠️ 仅支持 Chrome/Edge · 需要 HTTPS 或 localhost（file://不支持）· 请允许麦克风'},
-ja:{vs:'ビデオソース',uppc:'📁 PC から',dropv:'クリックまたはドロップ',vurl:'🔗 URL で',asp:'アスペクト比',autoAsp:'自動検出',bg:'背景',bgpc:'📁 アップロード',dropb:'画像をドロップ',bgurl:'🔗 URL',bgOp:'透明度:',plr:'プレーヤー',nov:'動画をアップロードまたは URL 入力',spd:'速度',subs:'字幕',ensubs:'字幕を有効化',subtxt:'0:05 フレーズ · 分：秒 テキスト',subLangLbl:'🌐 字幕言語',subLangHint:'字幕の言語を選択（UI 言語とは独立）',subFormatLbl:'書式：',trans:'文字起こし',autotrans:'自動文字起こし',transcont:'継続',transres:'結果',mantrans:'手動入力',exp:'コードエクスポート',hdrSub:'動画エディター · 幼稚園 · 学校 · 大学 · 家族',transWarn:'⚠️ Chrome/Edge のみ · HTTPS または localhost が必要（file://は非対応）· マイクを許可'}
-};
-var LANG_NAMES={ru:'Русский',de:'Deutsch',en:'English',es:'Español',fr:'Français',it:'Italiano',zh:'中文',ja:'日本語'};
-var LANG_CODES={ru:'ru-RU',de:'de-DE',en:'en-US',es:'es-ES',fr:'fr-FR',it:'it-IT',zh:'zh-CN',ja:'ja-JP'};
-var curLang='ru';
-function setLang(l){
-curLang=l;
-document.querySelectorAll('.lbtn').forEach(function(b){b.classList.remove('active');});
-var lb=document.getElementById('lb_'+l);if(lb)lb.classList.add('active');
-applyI18n();
-var tls=document.getElementById('transLangSel');
-if(tls){var code=LANG_CODES[l]||'ru-RU';for(var i=0;i<tls.options.length;i++){if(tls.options[i].value===code){tls.selectedIndex=i;break;}}}
-document.getElementById('langDrop').classList.remove('open');
-showToast('🌐 '+(LANG_NAMES[l]||l));
-saveSettings();
-}
-function applyI18n(){
-var t=TR[curLang]||TR.ru;
-var map={t_vs:'vs',t_uppc:'uppc',t_dropv:'dropv',t_vurl:'vurl',t_asp:'asp',t_autoAsp:'autoAsp',
-t_bg:'bg',t_bgpc:'bgpc',t_dropb:'dropb',t_bgurl:'bgurl',t_bgOp:'bgOp',t_plr:'plr',
-t_nov:'nov',t_spd:'spd',t_subs:'subs',t_ensubs:'ensubs',t_subtxt:'subtxt',
-t_subLangLbl:'subLangLbl',t_subLangHint:'subLangHint',t_subFormatLbl:'subFormatLbl',
-t_trans:'trans',t_autotrans:'autotrans',t_transcont:'transcont',
-t_transres:'transres',t_mantrans:'mantrans',t_exp:'exp',hdrSub:'hdrSub'};
-Object.keys(map).forEach(function(id){var el=document.getElementById(id),v=t[map[id]];if(el&&v)el.textContent=v;});
-var wb=document.getElementById('t_transWarn');if(wb&&t.transWarn)wb.textContent=t.transWarn;
-}
-document.getElementById('langToggle').addEventListener('click',function(e){e.stopPropagation();document.getElementById('langDrop').classList.toggle('open');});
-document.addEventListener('click',function(){document.getElementById('langDrop').classList.remove('open');});
-['ru','de','en','es','fr','it','zh','ja'].forEach(function(l){
-var b=document.getElementById('lb_'+l);if(b)b.addEventListener('click',function(e){e.stopPropagation();setLang(l);});
-});
-if(window.location.protocol==='file:'){
-var _wb=document.getElementById('t_transWarn');
-var _fmsg={ru:'🚫 file:// не поддерживается. Откройте через HTTPS, localhost или GitHub Pages.',de:'🚫 file:// nicht unterstützt. Bitte HTTPS oder localhost verwenden.',en:'🚫 file:// not supported. Open via HTTPS, localhost or GitHub Pages.',es:'🚫 file:// no soportado. Abrir con HTTPS o localhost.',fr:'🚫 file:// non supporté. Ouvrir via HTTPS ou localhost.',it:'🚫 file:// non supportato. Aprire con HTTPS o localhost.',zh:'🚫 file://不支持。请通过 HTTPS 或 localhost 打开。',ja:'🚫 file://は非対応。HTTPS か localhost で開いてください。'};
-if(_wb)_wb.textContent=_fmsg[curLang]||_fmsg.ru;
-}
-/* ═══ SUBTITLE LANGUAGE ═══ */
-var subLang='ru';
-var SUB_LANG_NAMES={ru:'RU',de:'DE',en:'EN',es:'ES',fr:'FR',it:'IT',zh:'ZH',ja:'JA',other:'?'};
-document.getElementById('subLangSel').addEventListener('change',function(){
-subLang=this.value;
-var custom=document.getElementById('subLangCustom');
-custom.style.display=(this.value==='other')?'block':'none';
-updateSubLangBadge();
-var sln=document.getElementById('subLangName');
-if(sln) sln.textContent=LANG_NAMES[subLang]||subLang;
-});
-document.getElementById('subLangCustom').addEventListener('input',function(){
-subLang=this.value||'other';updateSubLangBadge();
-});
-function updateSubLangBadge(){
-var badge=document.getElementById('subLangBadge');
-if(!badge)return;
-var code=subLang.toUpperCase().substring(0,3);
-badge.textContent=code;
-badge.style.display=code?'inline-block':'none';
-}
-/* ═══ ASPECT RATIO ═══ */
-var curAspect='16:9';
-function setAspect(w,h){
-document.getElementById('vstage-sizer').style.paddingBottom=((h/w)*100).toFixed(4)+'%';
-curAspect=w+':'+h;document.getElementById('pBadge').textContent=curAspect;
-}
-var aspDefs={asp_169:[16,9],asp_916:[9,16],asp_43:[4,3],asp_32:[3,2],asp_23:[2,3]};
-Object.keys(aspDefs).forEach(function(id){
-var btn=document.getElementById(id);if(!btn)return;
-btn.addEventListener('click',function(){
-document.querySelectorAll('.asp-btn').forEach(function(b){b.classList.remove('active');});
-btn.classList.add('active');document.getElementById('customAsp').classList.remove('show');
-var v=aspDefs[id];setAspect(v[0],v[1]);saveSettings();});
-});
-document.getElementById('asp_cust').addEventListener('click',function(){
-document.querySelectorAll('.asp-btn').forEach(function(b){b.classList.remove('active');});
-this.classList.add('active');document.getElementById('customAsp').classList.add('show');applyCustomAsp();
-});
-['aspW','aspH'].forEach(function(id){document.getElementById(id).addEventListener('input',applyCustomAsp);});
-function applyCustomAsp(){var w=parseFloat(document.getElementById('aspW').value)||16,h=parseFloat(document.getElementById('aspH').value)||9;setAspect(w,h);}
-function gcd(a,b){return b?gcd(b,a%b):a;}
-function autoDetectAspect(v){
-if(!document.getElementById('autoAspChk').checked)return;
-var w=v.videoWidth,h=v.videoHeight;if(!w||!h)return;
-var g=gcd(Math.round(w),Math.round(h));setAspect(w/g,h/g);showToast('📐 '+curAspect);
-}
-/* ═══ SPEED ═══ */
-[0.5,0.75,1,1.25,1.5,2].forEach(function(s){
-var b=document.createElement('button');b.className='sbtn'+(s===1?' active':'');b.textContent=s+'×';
-b.setAttribute('role','button');b.setAttribute('aria-label','Скорость '+s);
-b.addEventListener('click',function(){document.getElementById('vp').playbackRate=s;document.querySelectorAll('.sbtn').forEach(function(x){x.classList.remove('active');});b.classList.add('active');saveSettings();});
-document.getElementById('spdRow').appendChild(b);
-});
-/* ═══ VIDEO LOADING ═══ */
-var curUrl='';
-var subsArr=[];
-var loadTimeout=null;
-document.getElementById('vidFile').addEventListener('change',function(){
-var f=this.files&&this.files[0];if(!f)return;
-var url=URL.createObjectURL(f);
-showDirect(url,f.type||'');
-curUrl=f.name;setStatus('📁 '+f.name);showToast('🎬 '+f.name);
-saveSettings();
-});
-document.getElementById('btnLoadVid').addEventListener('click',loadVidUrl);
-document.getElementById('vidUrl').addEventListener('keydown',function(e){if(e.key==='Enter')loadVidUrl();});
-function loadVidUrl(){
-var raw=document.getElementById('vidUrl').value.trim();if(!raw){showToast('⚠️ Введите URL');return;}
-var plat=document.getElementById('platSel').value;var embed=raw;
-if(plat==='youtube'){var yid=ytId(raw);if(yid)embed='https://www.youtube.com/embed/'+yid+'?rel=0&modestbranding=1';else{showToast('⚠️ Не удалось определить YouTube ID');return;}}
-else if(plat==='vimeo'){var vm=raw.match(/vimeo\.com\/(\d+)/);embed=vm?'https://player.vimeo.com/video/'+vm[1]:raw;}
-if(plat==='direct')showDirect(raw,''); else showIframe(embed);
-curUrl=raw;setStatus('🔗 '+raw.substring(0,70));showToast('▶ Загружено!');
-saveSettings();
-}
-function ytId(u){var m=u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^?&\s]+)/);return m?m[1]:null;}
-function showDirect(url, mime){
-var ic=document.getElementById('ifc');
-ic.style.display='none';ic.innerHTML='';
-document.getElementById('vph').style.display='none';
-var v=document.getElementById('vp');
-v.removeAttribute('src');
-while(v.firstChild&&v.firstChild.tagName==='SOURCE'){v.removeChild(v.firstChild);}
-v.src=url;
-if(mime)v.setAttribute('type',mime);
-v.style.display='block';
-v.load();
-}
-function showIframe(url){
-var v=document.getElementById('vp');v.style.display='none';v.src='';v.load();
-document.getElementById('vph').style.display='none';
-var ic=document.getElementById('ifc');
-var fr=document.createElement('iframe');
-fr.src=url;fr.setAttribute('allowfullscreen','');
-fr.setAttribute('allow','autoplay; encrypted-media; fullscreen; picture-in-picture; web-share');
-fr.setAttribute('referrerpolicy','no-referrer-when-downgrade');
-fr.style.cssText='width:100%;height:100%;border:none;display:block;';
-ic.innerHTML='';ic.appendChild(fr);ic.style.display='block';
-}
-/* ── Player events ── */
-var vEl=document.getElementById('vp');
-vEl.addEventListener('timeupdate',updProg);
-vEl.addEventListener('loadedmetadata',function(){updProg();autoDetectAspect(vEl);});
-vEl.addEventListener('play',function(){document.getElementById('pbtn').textContent='⏸';});
-vEl.addEventListener('pause',function(){document.getElementById('pbtn').textContent='▶';});
-vEl.addEventListener('ended',function(){document.getElementById('pbtn').textContent='▶';});
-vEl.addEventListener('error',function(){
-if(vEl.error){
-var msg={1:'Загрузка прервана',2:'Ошибка сети',3:'Ошибка декодирования (формат не поддерживается?)',4:'Формат не поддерживается браузером'};
-showToast('⚠️ '+(msg[vEl.error.code]||vEl.error.message||'Ошибка видео'));
-}
-});
-vEl.addEventListener('canplay',function(){setStatus('✅ Готово к воспроизведению');});
-document.getElementById('pbtn').addEventListener('click',function(){
-if(!vEl.src&&!vEl.currentSrc){showToast('⚠️ Сначала загрузите видео');return;}
-vEl.paused?vEl.play().catch(function(e){showToast('⚠️ Автовоспроизведение заблокировано браузером. Нажмите ▶ ещё раз.');}):vEl.pause();
-});
-document.getElementById('btnSkipBack').addEventListener('click',function(){vEl.currentTime=Math.max(0,vEl.currentTime-10);});
-document.getElementById('btnSkipFwd').addEventListener('click',function(){vEl.currentTime=Math.min(vEl.duration||0,vEl.currentTime+10);});
-document.getElementById('mbtn').addEventListener('click',function(){vEl.muted=!vEl.muted;this.textContent=vEl.muted?'🔇':'🔊';});
-document.getElementById('vsldr').addEventListener('input',function(){vEl.volume=parseFloat(this.value);document.getElementById('mbtn').textContent=this.value<0.1?'🔇':this.value<0.5?'🔉':'🔊';});
-document.getElementById('pbwrap').addEventListener('click',function(e){if(!vEl.duration)return;var r=this.getBoundingClientRect();vEl.currentTime=((e.clientX-r.left)/r.width)*vEl.duration;});
-document.getElementById('btnFS').addEventListener('click',function(){var s=document.getElementById('vstage');document.fullscreenElement?document.exitFullscreen():s.requestFullscreen&&s.requestFullscreen()||s.webkitRequestFullscreen&&s.webkitRequestFullscreen();});
-function updProg(){
-if(!vEl.duration)return;
-document.getElementById('pbfill').style.width=((vEl.currentTime/vEl.duration)*100)+'%';
-document.getElementById('tdsp').textContent=fmt(vEl.currentTime)+' / '+fmt(vEl.duration);
-document.getElementById('pbwrap').setAttribute('aria-valuenow',Math.round((vEl.currentTime/vEl.duration)*100));
-updSubOv(vEl.currentTime);
-}
-function fmt(s){var m=Math.floor(s/60),sc=Math.floor(s%60);return m+':'+(sc<10?'0':'')+sc;}
-function fmtTc(s){if(!s||isNaN(s))s=0;var m=Math.floor(s/60),sc=Math.floor(s%60);return(m<10?'0':'')+m+':'+(sc<10?'0':'')+sc;}
-/* ═══ BACKGROUND ═══ */
-document.getElementById('bgOp').addEventListener('input',function(){document.getElementById('bgOv').style.opacity=this.value;document.getElementById('bgOpVal').textContent=Math.round(this.value*100)+'%';});
-document.getElementById('bgFile').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;applyBg(URL.createObjectURL(f));});
-document.getElementById('btnApplyBg').addEventListener('click',function(){var u=document.getElementById('bgUrl').value.trim();if(u)applyBg(u);else showToast('⚠️ Введите URL');});
-document.getElementById('btnClearBg').addEventListener('click',function(){document.getElementById('bgOv').style.backgroundImage='';showToast('✕ Фон убран');});
-function applyBg(url){var o=document.getElementById('bgOv');o.style.backgroundImage='url("'+url+'")';o.style.backgroundSize='cover';o.style.backgroundPosition='center';o.style.opacity=document.getElementById('bgOp').value;showToast('🌸 Фон применён!');saveSettings();}
-/* ═══ SUBTITLES ═══ */
-var _subHideTimer=null,_subLastTxt='',_subLastShownAt=-1;
-document.getElementById('subTog').addEventListener('change',function(){
-var ov=document.getElementById('subOv');
-if(!this.checked){_hideSubOv(ov);}else{updSubOv(vEl.currentTime);}
-});
-['subFont','subColor','subSize'].forEach(function(id){
-var ev=id==='subColor'?'input':'change';
-document.getElementById(id).addEventListener(ev,updateSubStyle);
-});
-document.getElementById('subSize').addEventListener('input',updateSubStyle);
-document.getElementById('btnApplySubs').addEventListener('click',parseSubs);
-function parseSubs(){
-var raw=document.getElementById('subTxt').value;
-subsArr=[];
-var sel=document.getElementById('subLangSel');
-var selVal=sel.value;
-if(selVal==='other'){
-var custom=document.getElementById('subLangCustom').value.trim();
-subLang=custom||'other';
-}else{subLang=selVal;}
-updateSubLangBadge();
-var sln=document.getElementById('subLangName');
-if(sln)sln.textContent=LANG_NAMES[subLang]||subLang;
-var lines=raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
-for(var i=0;i<lines.length;i++){
-var line=lines[i].trim();if(!line)continue;
-var m=line.match(/^(\d{1,2}):(\d{1,2})\s+(.+)$/);
-if(m){subsArr.push({t:parseInt(m[1],10)*60+parseInt(m[2],10),tx:m[3].trim()});}
-}
-document.getElementById('subCount').textContent=subsArr.length;
-updateSubStyle();
-document.getElementById('subTog').checked=true;
-var ov=document.getElementById('subOv');
-if(subsArr.length>0){
-showToast('💬 '+subsArr.length+' фраз · '+( LANG_NAMES[subLang]||subLang));
-_subLastTxt='';
-ov.innerHTML='<span id="subLangBadge" style="display:inline-block;font-size:9px;background:rgba(194,24,91,.8);color:#fff;border-radius:3px;padding:0 4px;margin-right:5px;vertical-align:middle;text-shadow:none;">'+subLang.toUpperCase().substring(0,3)+'</span>'+escHtml(subsArr[0].tx);
-ov.style.display='block';ov.classList.remove('sub-fade');
-clearTimeout(_subHideTimer);
-_subHideTimer=setTimeout(function(){_fadeSubOv(ov);},3000);
-}else{
-showToast('⚠️ Строк не найдено. Формат: 0:05 Текст');
-_hideSubOv(ov);
-}
-setStatus('💬 Титры ('+( LANG_NAMES[subLang]||subLang)+'): '+subsArr.length+' фраз');
-saveSettings();
-}
-function updateSubStyle(){
-var ov=document.getElementById('subOv');
-ov.style.fontFamily=document.getElementById('subFont').value;
-ov.style.color=document.getElementById('subColor').value;
-ov.style.fontSize=document.getElementById('subSize').value+'px';
-}
-function updSubOv(ct){
-var tog=document.getElementById('subTog');
-var ov=document.getElementById('subOv');
-if(!tog.checked){_hideSubOv(ov);return;}
-if(!subsArr.length)return;
-var cur='',curT=-1;
-for(var i=0;i<subsArr.length;i++){if(ct>=subsArr[i].t){cur=subsArr[i].tx;curT=subsArr[i].t;}}
-if(!cur){_hideSubOv(ov);return;}
-if(cur!==_subLastTxt){
-_subLastTxt=cur;_subLastShownAt=ct;
-ov.classList.remove('sub-fade');
-var badge='<span style="display:inline-block;font-size:9px;background:rgba(194,24,91,.75);color:#fff;border-radius:3px;padding:0 4px;margin-right:5px;vertical-align:middle;text-shadow:none;">'+subLang.toUpperCase().substring(0,3)+'</span>';
-ov.innerHTML=badge+escHtml(cur);
-ov.style.display='block';
-clearTimeout(_subHideTimer);
-_subHideTimer=setTimeout(function(){if(ov.dataset.txt===cur){_fadeSubOv(ov);}},5000);
-ov.dataset.txt=cur;return;
-}
-if(ct-_subLastShownAt>5&&!ov.classList.contains('sub-fade')){_fadeSubOv(ov);}
-}
-function _fadeSubOv(ov){ov.classList.add('sub-fade');clearTimeout(_subHideTimer);_subHideTimer=setTimeout(function(){ov.style.display='none';ov.classList.remove('sub-fade');ov.innerHTML='';_subLastTxt='';},380);}
-function _hideSubOv(ov){clearTimeout(_subHideTimer);ov.classList.remove('sub-fade');ov.style.display='none';ov.innerHTML='';_subLastTxt='';}
-/* ═══ TRANSCRIPTION ═══ */
-var recog=null,transActive=false,transLines=[],transInterim='';
-if(window.location.protocol==='file:'){var _wb2=document.getElementById('t_transWarn');if(_wb2){var _fm={ru:'🚫 file:// не поддерживается — откройте через HTTPS или localhost.',de:'🚫 file:// nicht unterstützt — bitte HTTPS verwenden.',en:'🚫 file:// not supported — open via HTTPS or localhost.',es:'🚫 file:// no soportado — usar HTTPS.',fr:'🚫 file:// non supporté — utiliser HTTPS.',it:'🚫 file:// non supportato — usare HTTPS.',zh:'🚫 file://不支持，请使用 HTTPS。',ja:'🚫 file://非対応、HTTPS を使用してください。'};_wb2.textContent=_fm[curLang]||_fm.ru;}}
-document.getElementById('transTog').addEventListener('change',function(){if(this.checked)startTrans();else stopTrans();});
-function startTrans(){
-var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(!SR){setTstat('err','⚠️ Только Chrome/Edge');showToast('⚠️ Web Speech API: только Chrome/Edge');document.getElementById('transTog').checked=false;return;}
-transLines=[];transInterim='';document.getElementById('transBox').innerHTML='';
-try{
-recog=new SR();recog.lang=document.getElementById('transLangSel').value;
-recog.continuous=true;recog.interimResults=true;recog.maxAlternatives=1;
-recog.onstart=function(){transActive=true;setTstat('on','🎙 '+recog.lang);setStatus('🎙 Транскрипция...');};
-recog.onresult=function(e){
-transInterim='';
-for(var i=e.resultIndex;i<e.results.length;i++){
-var phrase=e.results[i][0].transcript.trim();if(!phrase)continue;
-if(e.results[i].isFinal){transLines.push({tc:fmtTc(vEl.currentTime),txt:phrase});transInterim='';}
-else transInterim+=phrase;
-}
-renderTransBox();
-};
-recog.onerror=function(e){if(e.error==='aborted'||e.error==='no-speech')return;setTstat('err','⚠️ '+e.error);showToast('⚠️ '+e.error);if(e.error==='not-allowed'||e.error==='service-not-allowed'){transActive=false;document.getElementById('transTog').checked=false;setTstat('err','⚠️ Микрофон запрещён');}};
-recog.onend=function(){if(transActive&&document.getElementById('transContTog').checked&&document.getElementById('transTog').checked){try{recog.start();}catch(ex){}}else{transActive=false;setTstat('','');document.getElementById('transTog').checked=false;setStatus('⏹ Остановлено');}};
-recog.start();
-}catch(ex){setTstat('err','⚠️ '+ex.message);document.getElementById('transTog').checked=false;}
-}
-function stopTrans(){transActive=false;if(recog){try{recog.abort();}catch(ex){}recog=null;}setTstat('','');setStatus('⏹ Остановлено');showToast('⏹ Остановлено');}
-function setTstat(type,msg){var s=document.getElementById('tstat');s.className='tstat'+(type?' '+type:'');s.textContent=msg;}
-function renderTransBox(){
-var box=document.getElementById('transBox');var html='';
-transLines.forEach(function(l){html+='<span style="color:#b5006b;font-weight:bold;">['+l.tc+']</span> <span style="color:#3a1020;">'+escHtml(l.txt)+'</span><br>';});
-if(transInterim){html+='<span style="color:#b5006b;opacity:.45;">[…]</span> <span style="color:#888;font-style:italic;">'+escHtml(transInterim)+'</span>';}
-if(!html){html='<span style="color:#aaa;font-style:italic;">Здесь появится транскрипция с таймкодами…</span>';}
-box.innerHTML=html;box.scrollTop=box.scrollHeight;
-}
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-document.getElementById('btnClrTrans').addEventListener('click',function(){transLines=[];transInterim='';renderTransBox();});
-document.getElementById('btnCpyTrans').addEventListener('click',function(){
-var lines=transLines.map(function(l){return '['+l.tc+'] '+l.txt;});
-var man=document.getElementById('manTrans').value.trim();if(man)lines.push(man);
-var txt=lines.join('\n').trim();if(!txt){showToast('⚠️ Нет текста');return;}
-navigator.clipboard.writeText(txt).then(function(){showToast('📋 Скопировано '+lines.length+' строк!');});
-});
-document.getElementById('btnExpTrans').addEventListener('click',function(){
-var lines=transLines.map(function(l){return '['+l.tc+'] '+l.txt;});
-var txt=lines.join('\n').trim();if(!txt){showToast('⚠️ Нет текста');return;}
-downloadFile(txt,'transcription.txt','text/plain');
-showToast('💾 Экспортировано!');
-});
-document.getElementById('btnSubsFromTrans').addEventListener('click',function(){
-var res='';
-if(transLines.length>0){res=transLines.map(function(l){return l.tc+' '+l.txt;}).join('\n');}
-else{var t=document.getElementById('manTrans').value.trim();if(!t){showToast('⚠️ Нет текста');return;}var sents=t.split(/[.!?]+/).map(function(s){return s.trim();}).filter(Boolean);sents.forEach(function(s,i){var mn=Math.floor((i*5)/60),sc=(i*5)%60;res+=mn+':'+(sc<10?'0':'')+sc+' '+s+'\n';});}
-document.getElementById('subTxt').value=res.trim();
-showToast('→ Конвертировано в титры!');
-});
-/* ═══ EXPORT ═══ */
-['GH','GN','IF'].forEach(function(tab){
-document.getElementById('t'+tab).addEventListener('click',function(){
-['GH','GN','IF'].forEach(function(x){document.getElementById('tc'+x).style.display=(x===tab)?'block':'none';document.getElementById('t'+x).classList.toggle('active',x===tab);document.getElementById('t'+x).setAttribute('aria-selected',x===tab);});
-});
-});
-function buildSubsJS(){return '['+subsArr.map(function(s){return '{t:'+s.t+',tx:'+JSON.stringify(s.tx)+'}'}).join(',')+']';}
-document.getElementById('btnGenGH').addEventListener('click',genGH);
-document.getElementById('btnCpyGH').addEventListener('click',function(){cpyCode('ghCode');});
-document.getElementById('btnDwnGH').addEventListener('click',function(){
-var v=document.getElementById('ghCode').value;if(!v){showToast('⚠️ Сначала Сгенерировать');return;}
-downloadFile(v,'video.html','text/html');
-});
-document.getElementById('btnGenGN').addEventListener('click',genGN);
-document.getElementById('btnCpyGN').addEventListener('click',function(){cpyCode('gnCode');});
-document.getElementById('btnGenIF').addEventListener('click',genIF);
-document.getElementById('btnCpyIF').addEventListener('click',function(){cpyCode('ifCode');});
-function genGH(){
-var url=curUrl||'YOUR_VIDEO_URL',sj=buildSubsJS(),pts=curAspect.split(':');
-var pct=((parseFloat(pts[1])/parseFloat(pts[0]))*100).toFixed(4)+'%';
-var out=['<!DOCTYPE html>','<html lang="'+curLang+'"><head>','<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">','<title>ИгроМир в Сундучке</title>','<style>','body{margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;}','.stage{position:relative;width:min(960px,100%);}','.sizer{padding-bottom:'+pct+';}','video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;display:block;}','.sub{position:absolute;bottom:0;left:0;right:0;padding:8px 5% 12px;background:linear-gradient(to top,rgba(0,0,0,.88),transparent);color:#fff;font-size:clamp(12px,2vw,18px);text-align:center;pointer-events:none;display:none;text-shadow:0 0 6px #000,1px 1px 0 #000,-1px -1px 0 #000;}','</style></head><body>','<div class="stage"><div class="sizer"></div>','  <video src="'+url+'" controls playsinline preload="metadata"></video>','  <div class="sub" id="s"></div>','</div>','<script>','var subs='+sj+';','var v=document.querySelector("video"),s=document.getElementById("s");','v.addEventListener("timeupdate",function(){var c="",ct=v.currentTime;subs.forEach(function(x){if(ct>=x.t)c=x.tx;});s.textContent=c;s.style.display=c?"block":"none";});','<\/script></body></html>'];
-document.getElementById('ghCode').value=out.join('\n');showToast('✅ GitHub HTML готов!');
-}
-function genGN(){
-var url=curUrl||'YOUR_URL',plat=document.getElementById('platSel').value;
-var isI=['youtube','vimeo','genially','github','custom'].indexOf(plat)>=0;
-var out=isI?
-['<!-- Genially → Добавить элемент → HTML-код -->','<div style="position:relative;width:100%;height:100%;overflow:hidden;background:#000;">','  <iframe','    src="'+url+'"','    style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"','    frameborder="0" allowfullscreen','    allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share"','    referrerpolicy="no-referrer-when-downgrade"','  ></iframe>','</div>']:
-['<!-- Genially → Добавить элемент → HTML-код -->','<div style="position:relative;width:100%;height:100%;overflow:hidden;background:#000;">','  <video','    src="'+url+'"','    style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;"','    controls autoplay muted playsinline preload="metadata"','  ></video>','</div>'];
-document.getElementById('gnCode').value=out.join('\n');showToast('✅ Genially код готов!');
-}
-function genIF(){
-var url=curUrl||'YOUR_URL',pts=curAspect.split(':'),asp=pts[0]+'/'+pts[1];
-var out=['<!-- Универсальный iFrame -->','<div style="position:relative;width:100%;max-width:960px;aspect-ratio:'+asp+';margin:0 auto;">','  <iframe src="'+url+'"','    style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:8px;"','    frameborder="0" allowfullscreen','    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"','    referrerpolicy="no-referrer-when-downgrade">','  </iframe>','</div>'];
-document.getElementById('ifCode').value=out.join('\n');showToast('✅ iFrame готов!');
-}
-function cpyCode(id){var v=document.getElementById(id).value;if(!v){showToast('⚠️ Сначала Сгенерировать');return;}navigator.clipboard.writeText(v).then(function(){showToast('📋 Скопировано!');});}
-function downloadFile(content,filename,type){
-var blob=new Blob([content],{type:type});
-var url=URL.createObjectURL(blob);
-var a=document.createElement('a');a.href=url;a.download=filename;
-document.body.appendChild(a);a.click();
-document.body.removeChild(a);URL.revokeObjectURL(url);
-}
-/* ═══ DRAG & DROP ═══ */
-function setupDD(zoneId,handler){
-var z=document.getElementById(zoneId);
-['dragover','dragenter'].forEach(function(ev){z.addEventListener(ev,function(e){e.preventDefault();z.classList.add('dragover');});});
-z.addEventListener('dragleave',function(){z.classList.remove('dragover');});
-z.addEventListener('drop',function(e){e.preventDefault();z.classList.remove('dragover');if(e.dataTransfer.files&&e.dataTransfer.files[0])handler(e.dataTransfer.files[0]);});
-}
-setupDD('vidZone',function(f){showDirect(URL.createObjectURL(f),f.type||'');curUrl=f.name;setStatus('📁 '+f.name);showToast('🎬 '+f.name);saveSettings();});
-setupDD('bgZone',function(f){applyBg(URL.createObjectURL(f));showToast('🌸 Фон применён!');});
-/* ═══ KEYBOARD SHORTCUTS ═══ */
-document.addEventListener('keydown',function(e){
-if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
-switch(e.key){
-case' ':e.preventDefault();document.getElementById('pbtn').click();break;
-case'ArrowLeft':e.preventDefault();document.getElementById('btnSkipBack').click();break;
-case'ArrowRight':e.preventDefault();document.getElementById('btnSkipFwd').click();break;
-case'm':case'M':e.preventDefault();document.getElementById('mbtn').click();break;
-case'f':case'F':e.preventDefault();document.getElementById('btnFS').click();break;
-case'0':case'1':case'2':case'3':case'4':case'5':case'6':case'7':case'8':case'9':
-e.preventDefault();var spd=[0.5,0.75,1,1.25,1.5,2][parseInt(e.key)];if(spd){vEl.playbackRate=spd;showToast('⚡ '+spd+'×');}
-break;
-}
-});
-/* ═══ LOCAL STORAGE ═══ */
-function saveSettings(){
-try{
-var settings={
-lang:curLang,aspect:curAspect,subLang:subLang,
-subTxt:document.getElementById('subTxt').value,
-subFont:document.getElementById('subFont').value,
-subColor:document.getElementById('subColor').value,
-subSize:document.getElementById('subSize').value,
-bgOp:document.getElementById('bgOp').value
-};
-localStorage.setItem('igromir_settings',JSON.stringify(settings));
-}catch(ex){}
-}
-function loadSettings(){
-try{
-var saved=localStorage.getItem('igromir_settings');
-if(saved){
-var s=JSON.parse(saved);
-if(s.lang)setLang(s.lang);
-if(s.aspect){var pts=s.aspect.split(':');setAspect(parseInt(pts[0]),parseInt(pts[1]));}
-if(s.subLang){document.getElementById('subLangSel').value=s.subLang;subLang=s.subLang;}
-if(s.subTxt)document.getElementById('subTxt').value=s.subTxt;
-if(s.subFont)document.getElementById('subFont').value=s.subFont;
-if(s.subColor)document.getElementById('subColor').value=s.subColor;
-if(s.subSize)document.getElementById('subSize').value=s.subSize;
-if(s.bgOp){document.getElementById('bgOp').value=s.bgOp;document.getElementById('bgOv').style.opacity=s.bgOp;document.getElementById('bgOpVal').textContent=Math.round(s.bgOp*100)+'%';}
-}
-}catch(ex){}
-}
-/* ═══ UTILS ═══ */
-function setStatus(m){document.getElementById('stxt').textContent=m;}
-function showToast(m){
-var t=document.getElementById('toast');
-var icon=m.charAt(0);
-var msg=m.substring(1).trim();
-t.querySelector('.toast-icon').textContent=icon;
-t.querySelector('.toast-msg').textContent=msg;
-t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},2800);
-}
-applyI18n();
-renderTransBox();
-loadSettings();
-</script>
+  <div class="container">
+    <!-- Logo Header -->
+    <header class="header">
+      <img 
+        src="https://img.genially.com/63a7016fe7745e0013a04f69/a5b6a171-06c6-47b1-92a2-5755e52e415b.png" 
+        alt="Group Logo" 
+        class="logo"
+        onerror="this.style.display='none'; console.log('Logo not loaded')"
+      />
+    </header>
+
+    <div class="editor-grid">
+      <!-- Sidebar: Upload & Settings -->
+      <aside class="sidebar">
+        <!-- Video Upload -->
+        <div class="panel">
+          <div class="panel-title">📹 Видео</div>
+          <div class="input-group">
+            <label>Загрузить с компьютера</label>
+            <div class="file-input-wrapper">
+              <button class="btn btn-outline">📁 Выбрать файл</button>
+              <input type="file" id="videoFile" accept="video/*" />
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Или вставить ссылку</label>
+            <input type="url" id="videoUrl" placeholder="https://example.com/video.mp4" />
+            <button class="btn" id="loadUrlBtn" style="margin-top:8px">🔗 Загрузить</button>
+          </div>
+        </div>
+
+        <!-- Background -->
+        <div class="panel">
+          <div class="panel-title">🎨 Фон</div>
+          <div class="input-group">
+            <label>Загрузить с компьютера</label>
+            <div class="file-input-wrapper">
+              <button class="btn btn-outline">📁 Выбрать изображение</button>
+              <input type="file" id="bgFile" accept="image/*" />
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Или вставить ссылку</label>
+            <input type="url" id="bgUrl" placeholder="https://example.com/background.jpg" />
+            <button class="btn" id="loadBgUrlBtn" style="margin-top:8px">🔗 Загрузить</button>
+          </div>
+        </div>
+
+        <!-- Language Selection -->
+        <div class="panel">
+          <div class="panel-title">🌐 Язык</div>
+          <div class="input-group">
+            <label>Для интерфейса, титров и транскрипции</label>
+            <select id="languageSelect">
+              <option value="ru">🇷🇺 Русский</option>
+              <option value="de">🇩🇪 Deutsch</option>
+              <option value="en" selected>🇬🇧 English</option>
+              <option value="es">🇪🇸 Español</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="it">🇮🇹 Italiano</option>
+              <option value="zh">🇨🇳 中文</option>
+              <option value="ja">🇯🇵 日本語</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Титры (файл .vtt)</label>
+            <div class="file-input-wrapper">
+              <button class="btn btn-outline btn-sm">📄 Загрузить .vtt</button>
+              <input type="file" id="subtitleFile" accept=".vtt,.srt" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Features -->
+        <div class="panel">
+          <div class="panel-title">⚙️ Функции</div>
+          <label class="feature-toggle">
+            <input type="checkbox" id="subtitlesToggle" />
+            <span>Показывать титры</span>
+          </label>
+          <label class="feature-toggle" style="margin-top:10px">
+            <input type="checkbox" id="transcribeToggle" />
+            <span>Транскрибировать (экспериментально)</span>
+          </label>
+          <div id="transcribeStatus" class="status info" style="margin-top:10px">
+            💡 Транскрипция работает через Web Speech API (только Chrome/Edge)
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Video Area -->
+      <main class="video-area">
+        <div class="video-container" id="videoContainer">
+          <video id="mainVideo" controlslist="nodownload" preload="metadata"></video>
+          <div class="video-placeholder" id="videoPlaceholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h1.447a1 1 0 00.894-.553L10 14M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/>
+            </svg>
+            <p>Загрузите видео или вставьте ссылку</p>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+          <div class="progress-container">
+            <span class="time-display" id="currentTime">0:00</span>
+            <div id="progressBar">
+              <div id="progressFill"></div>
+            </div>
+            <span class="time-display" id="duration">0:00</span>
+          </div>
+
+          <div class="control-row">
+            <div class="control-group">
+              <button class="control-btn" id="rewindBtn" title="Назад 10 сек">⏪</button>
+              <button class="control-btn play-pause" id="playPauseBtn">▶️</button>
+              <button class="control-btn" id="forwardBtn" title="Вперёд 10 сек">⏩</button>
+            </div>
+
+            <div class="control-group volume-control">
+              <button class="control-btn" id="muteBtn" title="Громкость">🔊</button>
+              <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" />
+            </div>
+
+            <div class="control-group">
+              <button class="btn btn-sm" id="downloadBtn" disabled>💾 Скачать проект</button>
+            </div>
+          </div>
+
+          <!-- Subtitles Display -->
+          <div class="subtitle-area" id="subtitleDisplay" style="display:none">
+            <!-- Subtitles will appear here -->
+          </div>
+
+          <!-- Transcription Output -->
+          <div class="transcription-area" id="transcriptionOutput" style="display:none">
+            <!-- Transcription text will appear here -->
+          </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="statusMessage" class="status"></div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // ==================== CONFIG & STATE ====================
+    const state = {
+      video: null,
+      isPlaying: false,
+      currentLang: 'en',
+      subtitles: [],
+      isTranscribing: false,
+      recognition: null,
+      backgroundUrl: null
+    };
+
+    // Translations for UI
+    const translations = {
+      ru: { placeholder: 'Загрузите видео или вставьте ссылку', play: '▶️', pause: '⏸️', mute: '🔇', unmute: '🔊' },
+      de: { placeholder: 'Video hochladen oder Link einfügen', play: '▶️', pause: '⏸️', mute: '🔇', unmute: '🔊' },
+      en: { placeholder: 'Upload video or paste link', play: '▶️', pause: '⏸️', mute: '🔇', unmute: '🔊' },
+      es: { placeholder: 'Sube un video o pega un enlace', play: '▶️', pause: '⏸️', mute: '🔇', unmute: '🔊' },
+      fr: { placeholder: 'Télécharger une vidéo ou coller un lien', play: '▶️', pause: '⏸️', mute: '🔇', unmute: '🔊' },
+      it: { placeholder: 'Carica un video o incolla un link', play: '▶️', pause: '⏸️', mute: '🔇', unmute: '🔊' },
+      zh: { placeholder: '上传视频或粘贴链接', play: '▶️', pause: '⏸️', mute: '🔇', unmute: '🔊' },
+      ja: { placeholder: '動画をアップロードまたはリンクを貼り付け', play: '▶️', pause: '⏸️', mute: '🔇', unmute: '🔊' }
+    };
+
+    // ==================== DOM ELEMENTS ====================
+    const els = {
+      video: document.getElementById('mainVideo'),
+      container: document.getElementById('videoContainer'),
+      placeholder: document.getElementById('videoPlaceholder'),
+      playPause: document.getElementById('playPauseBtn'),
+      rewind: document.getElementById('rewindBtn'),
+      forward: document.getElementById('forwardBtn'),
+      mute: document.getElementById('muteBtn'),
+      volume: document.getElementById('volumeSlider'),
+      progress: document.getElementById('progressBar'),
+      progressFill: document.getElementById('progressFill'),
+      currentTime: document.getElementById('currentTime'),
+      duration: document.getElementById('duration'),
+      videoFile: document.getElementById('videoFile'),
+      videoUrl: document.getElementById('videoUrl'),
+      loadUrlBtn: document.getElementById('loadUrlBtn'),
+      bgFile: document.getElementById('bgFile'),
+      bgUrl: document.getElementById('bgUrl'),
+      loadBgUrlBtn: document.getElementById('loadBgUrlBtn'),
+      langSelect: document.getElementById('languageSelect'),
+      subtitleFile: document.getElementById('subtitleFile'),
+      subtitlesToggle: document.getElementById('subtitlesToggle'),
+      subtitleDisplay: document.getElementById('subtitleDisplay'),
+      transcribeToggle: document.getElementById('transcribeToggle'),
+      transcribeOutput: document.getElementById('transcriptionOutput'),
+      transcribeStatus: document.getElementById('transcribeStatus'),
+      statusMsg: document.getElementById('statusMessage'),
+      downloadBtn: document.getElementById('downloadBtn')
+    };
+
+    // ==================== UTILITIES ====================
+    function formatTime(seconds) {
+      if (isNaN(seconds) || seconds < 0) return '0:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function showStatus(message, type = 'info', duration = 3000) {
+      els.statusMsg.textContent = message;
+      els.statusMsg.className = `status ${type} show`;
+      if (duration) {
+        setTimeout(() => {
+          els.statusMsg.classList.remove('show');
+        }, duration);
+      }
+    }
+
+    function updateUIForLanguage(lang) {
+      const t = translations[lang] || translations.en;
+      els.placeholder.querySelector('p').textContent = t.placeholder;
+      els.playPause.textContent = state.isPlaying ? t.pause : t.play;
+      // Add more translations as needed
+    }
+
+    // ==================== VIDEO HANDLING ====================
+    function loadVideoFromURL(url) {
+      if (!url) return showStatus('⚠️ Введите корректную ссылку', 'error');
+      
+      // Basic validation for common video hosts
+      const isDirect = /\.(mp4|webm|ogg|mov)($|\?)/i.test(url);
+      const isYouTube = /youtube\.com|youtu\.be/.test(url);
+      const isVimeo = /vimeo\.com/.test(url);
+      
+      if (isYouTube || isVimeo) {
+        showStatus('⚠️ Прямые ссылки YouTube/Vimeo не поддерживаются. Используйте прямую ссылку на .mp4 файл.', 'warning', 5000);
+        return;
+      }
+      
+      if (!isDirect) {
+        showStatus('⚠️ Используйте прямую ссылку на видеофайл (.mp4, .webm)', 'warning', 5000);
+      }
+      
+      els.video.src = url;
+      setupVideoElement();
+      showStatus('✅ Видео загружено по ссылке', 'success');
+    }
+
+    function loadVideoFromFile(file) {
+      if (!file) return;
+      if (!file.type.startsWith('video/')) {
+        return showStatus('❌ Выберите видеофайл', 'error');
+      }
+      if (file.size > 2 * 1024 * 1024 * 1024) { // 2GB limit warning
+        showStatus('⚠️ Файл больше 2 ГБ может работать медленно', 'warning', 5000);
+      }
+      
+      const url = URL.createObjectURL(file);
+      els.video.src = url;
+      setupVideoElement();
+      showStatus(`✅ Загружено: ${file.name}`, 'success');
+    }
+
+    function setupVideoElement() {
+      els.container.classList.add('has-video');
+      els.placeholder.style.display = 'none';
+      els.video.style.display = 'block';
+      els.video.load();
+      els.downloadBtn.disabled = false;
+      
+      // Event listeners
+      els.video.onloadedmetadata = () => {
+        els.duration.textContent = formatTime(els.video.duration);
+      };
+      
+      els.video.ontimeupdate = () => {
+        els.currentTime.textContent = formatTime(els.video.currentTime);
+        const percent = (els.video.currentTime / els.video.duration) * 100;
+        els.progressFill.style.width = `${percent || 0}%`;
+        
+        // Update subtitles
+        if (state.subtitlesToggle.checked && state.subtitles.length > 0) {
+          updateSubtitlesDisplay(els.video.currentTime);
+        }
+      };
+      
+      els.video.onended = () => {
+        state.isPlaying = false;
+        els.playPause.textContent = translations[state.currentLang]?.play || '▶️';
+      };
+      
+      els.video.onerror = (e) => {
+        showStatus('❌ Ошибка загрузки видео. Проверьте ссылку или формат файла.', 'error', 6000);
+        console.error('Video error:', e);
+      };
+    }
+
+    // ==================== CONTROLS ====================
+    els.playPause.addEventListener('click', () => {
+      if (!els.video.src) return showStatus('⚠️ Сначала загрузите видео', 'info');
+      
+      if (state.isPlaying) {
+        els.video.pause();
+        els.playPause.textContent = translations[state.currentLang]?.play || '▶️';
+      } else {
+        els.video.play().catch(e => {
+          showStatus('❌ Не удалось воспроизвести: ' + e.message, 'error', 4000);
+        });
+        els.playPause.textContent = translations[state.currentLang]?.pause || '⏸️';
+      }
+      state.isPlaying = !state.isPlaying;
+    });
+
+    els.rewind.addEventListener('click', () => {
+      els.video.currentTime = Math.max(0, els.video.currentTime - 10);
+    });
+
+    els.forward.addEventListener('click', () => {
+      els.video.currentTime = Math.min(els.video.duration || 0, els.video.currentTime + 10);
+    });
+
+    els.mute.addEventListener('click', () => {
+      els.video.muted = !els.video.muted;
+      els.mute.textContent = els.video.muted 
+        ? (translations[state.currentLang]?.mute || '🔇') 
+        : (translations[state.currentLang]?.unmute || '🔊');
+    });
+
+    els.volume.addEventListener('input', (e) => {
+      els.video.volume = e.target.value;
+      els.video.muted = e.target.value == 0;
+      els.mute.textContent = els.video.muted ? '🔇' : '🔊';
+    });
+
+    els.progress.addEventListener('click', (e) => {
+      if (!els.video.duration) return;
+      const rect = els.progress.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      els.video.currentTime = pos * els.video.duration;
+    });
+
+    // ==================== SUBTITLES ====================
+    function parseSubtitles(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        // Simple VTT parser (basic implementation)
+        if (content.includes('WEBVTT')) {
+          const lines = content.split('\n');
+          state.subtitles = [];
+          let current = null;
+          
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line || line === 'WEBVTT' || line.match(/^\d+$/)) continue;
+            
+            if (line.includes('-->')) {
+              const [start, end] = line.split('-->').map(t => parseVTTTime(t.trim()));
+              current = { start, end, text: '' };
+            } else if (current && line) {
+              current.text += (current.text ? ' ' : '') + line;
+            } else if (current && !line) {
+              if (current.text) state.subtitles.push(current);
+              current = null;
+            }
+          }
+          if (current?.text) state.subtitles.push(current);
+          
+          showStatus(`✅ Загружено ${state.subtitles.length} субтитров`, 'success');
+        } else {
+          showStatus('⚠️ Поддерживаются только файлы .vtt (WEBVTT)', 'warning', 4000);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function parseVTTTime(timeStr) {
+      // Format: HH:MM:SS.mmm or MM:SS.mmm
+      const parts = timeStr.split(':');
+      if (parts.length < 2) return 0;
+      
+      let hours = 0, minutes, seconds;
+      if (parts.length === 3) {
+        [hours, minutes, seconds] = parts;
+      } else {
+        [minutes, seconds] = parts;
+      }
+      
+      const [secs, ms] = seconds.split('.');
+      return parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(secs) + (ms ? parseInt(ms) / 1000 : 0);
+    }
+
+    function updateSubtitlesDisplay(currentTime) {
+      const active = state.subtitles.find(s => 
+        currentTime >= s.start && currentTime <= s.end
+      );
+      els.subtitleDisplay.textContent = active?.text || '';
+      els.subtitleDisplay.style.display = active ? 'block' : 'none';
+    }
+
+    // ==================== TRANSCRIPTION (Web Speech API) ====================
+    function initTranscription() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        showStatus('❌ Транскрипция не поддерживается в этом браузере', 'error', 5000);
+        els.transcribeToggle.checked = false;
+        return null;
+      }
+      
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = state.currentLang === 'zh' ? 'zh-CN' : 
+                        state.currentLang === 'ja' ? 'ja-JP' : 
+                        state.currentLang;
+      
+      recognition.onstart = () => {
+        state.isTranscribing = true;
+        els.transcribeStatus.innerHTML = '<span class="transcribing"><span class="spinner"></span> Идёт транскрипция...</span>';
+        els.transcribeStatus.className = 'status info show';
+      };
+      
+      recognition.onresult = (event) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + '\n';
+          }
+        }
+        if (finalTranscript) {
+          els.transcriptionOutput.textContent += finalTranscript;
+          els.transcriptionOutput.scrollTop = els.transcriptionOutput.scrollHeight;
+        }
+      };
+      
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        showStatus(`⚠️ Ошибка транскрипции: ${event.error}`, 'warning', 4000);
+        stopTranscription();
+      };
+      
+      recognition.onend = () => {
+        if (state.isTranscribing && els.video && !els.video.paused) {
+          // Auto-restart if video is playing
+          try { recognition.start(); } catch(e) {}
+        } else {
+          stopTranscription();
+        }
+      };
+      
+      return recognition;
+    }
+
+    function startTranscription() {
+      if (!els.video.src) return showStatus('⚠️ Загрузите видео для транскрипции', 'info');
+      
+      state.recognition = initTranscription();
+      if (!state.recognition) return;
+      
+      try {
+        state.recognition.start();
+        els.transcriptionOutput.style.display = 'block';
+        els.transcriptionOutput.textContent = '';
+        showStatus('🎙️ Транскрипция запущена', 'success', 2000);
+      } catch (e) {
+        showStatus('❌ Не удалось запустить транскрипцию', 'error');
+      }
+    }
+
+    function stopTranscription() {
+      state.isTranscribing = false;
+      if (state.recognition) {
+        state.recognition.stop();
+      }
+      els.transcribeStatus.textContent = '💡 Транскрипция остановлена';
+      els.transcribeStatus.className = 'status info show';
+      setTimeout(() => {
+        if (!state.isTranscribing) {
+          els.transcribeStatus.classList.remove('show');
+        }
+      }, 3000);
+    }
+
+    els.transcribeToggle.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        startTranscription();
+      } else {
+        stopTranscription();
+      }
+    });
+
+    // ==================== EVENT LISTENERS ====================
+    // Video upload
+    els.videoFile.addEventListener('change', (e) => {
+      loadVideoFromFile(e.target.files[0]);
+    });
+
+    els.loadUrlBtn.addEventListener('click', () => {
+      loadVideoFromURL(els.videoUrl.value.trim());
+    });
+
+    els.videoUrl.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loadVideoFromURL(els.videoUrl.value.trim());
+    });
+
+    // Background upload
+    els.bgFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        state.backgroundUrl = URL.createObjectURL(file);
+        els.container.style.backgroundImage = `url(${state.backgroundUrl})`;
+        els.container.style.backgroundSize = 'cover';
+        els.container.style.backgroundPosition = 'center';
+        showStatus('✅ Фон установлен', 'success');
+      }
+    });
+
+    els.loadBgUrlBtn.addEventListener('click', () => {
+      const url = els.bgUrl.value.trim();
+      if (url) {
+        state.backgroundUrl = url;
+        els.container.style.backgroundImage = `url(${url})`;
+        els.container.style.backgroundSize = 'cover';
+        els.container.style.backgroundPosition = 'center';
+        showStatus('✅ Фон загружен по ссылке', 'success');
+      }
+    });
+
+    // Language change
+    els.langSelect.addEventListener('change', (e) => {
+      state.currentLang = e.target.value;
+      updateUIForLanguage(state.currentLang);
+      
+      // Update speech recognition language if active
+      if (state.recognition && state.isTranscribing) {
+        stopTranscription();
+        startTranscription();
+      }
+      
+      showStatus(`🌐 Язык изменён: ${e.target.options[e.target.selectedIndex].text}`, 'success', 2000);
+    });
+
+    // Subtitles upload
+    els.subtitleFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) parseSubtitles(file);
+    });
+
+    // Subtitles toggle
+    els.subtitlesToggle.addEventListener('change', (e) => {
+      els.subtitleDisplay.style.display = e.target.checked ? 'block' : 'none';
+      if (e.target.checked && state.subtitles.length === 0) {
+        showStatus('💡 Загрузите файл .vtt для отображения титров', 'info', 4000);
+      }
+    });
+
+    // Download project (mock)
+    els.downloadBtn.addEventListener('click', () => {
+      const project = {
+        video: els.video.src,
+        background: state.backgroundUrl,
+        language: state.currentLang,
+        subtitles: state.subtitlesToggle.checked,
+        timestamp: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(project, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `video-project-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showStatus('💾 Проект сохранён!', 'success');
+    });
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set initial language
+      updateUIForLanguage(state.currentLang);
+      
+      // Initialize volume
+      els.video.volume = els.volume.value;
+      
+      // Show browser compatibility note for transcription
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        els.transcribeToggle.disabled = true;
+        els.transcribeToggle.title = 'Не поддерживается в этом браузере';
+        els.transcribeStatus.textContent = '❌ Транскрипция доступна только в Chrome, Edge, Safari (новейшие версии)';
+        els.transcribeStatus.className = 'status error show';
+      }
+      
+      // Handle iframe embedding: adjust height
+      if (window.self !== window.top) {
+        document.body.style.padding = '8px';
+        // Optional: send height to parent for Genially
+        const updateHeight = () => {
+          const height = document.documentElement.offsetHeight;
+          window.parent.postMessage({ type: 'resize', height }, '*');
+        };
+        updateHeight();
+        new ResizeObserver(updateHeight).observe(document.body);
+      }
+    });
+
+    // Handle messages from parent (for Genially iframe)
+    window.addEventListener('message', (event) => {
+      if (event.data?.type === 'play') {
+        if (!state.isPlaying && els.video.src) {
+          els.video.play();
+          state.isPlaying = true;
+          els.playPause.textContent = translations[state.currentLang]?.pause || '⏸️';
+        }
+      } else if (event.data?.type === 'pause') {
+        if (state.isPlaying) {
+          els.video.pause();
+          state.isPlaying = false;
+          els.playPause.textContent = translations[state.currentLang]?.play || '▶️';
+        }
+      }
+    });
+  </script>
 </body>
 </html>
