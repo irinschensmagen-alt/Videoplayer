@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Универсальный Видеоплеер</title>
     <style>
-        :root {
-            --primary: #4A90E2;
-            --bg-panel: rgba(255, 255, 255, 0.9);
-        }
+        :root { --primary: #4A90E2; --bg-panel: rgba(255, 255, 255, 0.95); }
         body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100%; }
         
         #player-container {
@@ -16,34 +13,40 @@
             background-color: #f0f0f0; background-size: cover; background-position: center; position: relative;
         }
 
-        /* Логотип */
         .header-logo {
             position: absolute; top: 15px; left: 15px; z-index: 10;
             background: rgba(255,255,255,0.8); padding: 5px 15px; border-radius: 8px; font-weight: bold;
         }
 
-        /* Панель настроек */
         .settings-panel {
             position: absolute; top: 15px; right: 15px; background: var(--bg-panel); padding: 15px;
-            border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 10;
-            max-width: 300px; max-height: 80vh; overflow-y: auto; transition: 0.3s;
+            border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 20;
+            width: 320px; max-height: 80vh; overflow-y: auto; transition: 0.3s;
         }
-        .settings-panel h3 { margin-top: 0; font-size: 16px; text-align: center; }
+        .settings-panel h3 { margin-top: 0; font-size: 16px; text-align: center; margin-bottom: 10px; }
         .input-group { margin-bottom: 10px; }
         .input-group label { display: block; font-size: 12px; margin-bottom: 4px; font-weight: bold; }
-        .input-group input, .input-group select { width: 100%; padding: 6px; box-sizing: border-box; font-size: 12px; }
+        .input-group input, .input-group select { width: 100%; padding: 6px; box-sizing: border-box; font-size: 12px; border: 1px solid #ccc; border-radius: 4px; }
         
-        /* Видеоплеер */
+        .embed-box { background: #eef; padding: 10px; border-radius: 5px; margin-top: 10px; }
+        .embed-box input { background: #fff; cursor: copy; font-family: monospace; }
+        
         .video-wrapper {
             position: relative; width: 80%; max-width: 900px; background: #000; border-radius: 10px; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column;
         }
         video { width: 100%; display: block; }
         
-        /* Пользовательские контролы */
+        /* Живые субтитры поверх видео */
+        #live-cc {
+            position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7); color: yellow; padding: 5px 15px; border-radius: 5px;
+            font-size: 18px; text-align: center; max-width: 80%; display: none; pointer-events: none; z-index: 5;
+        }
+
         .custom-controls {
-            position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7);
-            display: flex; flex-wrap: wrap; align-items: center; padding: 10px; box-sizing: border-box; gap: 10px;
+            width: 100%; background: rgba(0,0,0,0.8); display: flex; flex-wrap: wrap; align-items: center; 
+            padding: 10px; box-sizing: border-box; gap: 10px; z-index: 10;
         }
         .control-btn { background: none; border: none; color: white; cursor: pointer; font-size: 16px; }
         .control-btn:hover { color: var(--primary); }
@@ -53,15 +56,16 @@
         .volume-container { display: flex; align-items: center; gap: 5px; }
         .volume-slider { width: 60px; }
         
-        /* Транскрипция и субтитры */
+        /* Транскрипция */
         #transcription-box {
-            display: none; width: 80%; max-width: 900px; background: rgba(0,0,0,0.8); color: #fff;
-            padding: 15px; margin-top: 10px; border-radius: 8px; font-size: 14px; min-height: 50px; text-align: center;
+            display: none; width: 80%; max-width: 900px; background: rgba(255,255,255,0.95); color: #333;
+            padding: 15px; margin-top: 10px; border-radius: 8px; font-size: 14px; height: 100px; overflow-y: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-family: monospace;
         }
+        .mic-warning { font-size: 11px; color: red; margin-bottom: 5px; }
 
-        /* Экран блокировки (Test Mode) */
         #lock-screen {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: calc(100% - 40px);
             background: rgba(0,0,0,0.9); color: red; font-size: 40px; font-weight: bold;
             align-items: center; justify-content: center; z-index: 100; flex-direction: column;
         }
@@ -73,71 +77,76 @@
     <div class="header-logo">Логотип Моей Группы</div>
 
     <div class="settings-panel" id="settingsPanel">
-        <h3>Настройки медиа</h3>
+        <h3 data-i18n="settingsTitle">Настройки медиа</h3>
         
         <div class="input-group">
-            <label>1. Видео с ПК</label>
+            <label data-i18n="vidPC">1. Видео с ПК</label>
             <input type="file" id="video-upload" accept="video/*">
         </div>
         <div class="input-group">
-            <label>2. Видео по ссылке (URL)</label>
-            <input type="text" id="video-url" placeholder="https://.../video.mp4">
+            <label data-i18n="vidURL">2. Видео по ссылке</label>
+            <input type="text" id="video-url" placeholder="https://...">
         </div>
         
         <hr>
         
         <div class="input-group">
-            <label>3. Фон с ПК</label>
+            <label data-i18n="bgPC">3. Фон с ПК</label>
             <input type="file" id="bg-upload" accept="image/*">
         </div>
         <div class="input-group">
-            <label>4. Фон по ссылке (URL)</label>
-            <input type="text" id="bg-url" placeholder="https://.../image.jpg">
+            <label data-i18n="bgURL">4. Фон по ссылке</label>
+            <input type="text" id="bg-url" placeholder="https://...">
         </div>
         
         <hr>
         
         <div class="input-group">
-            <label>5. Язык интерфейса / субтитров</label>
+            <label data-i18n="langLabel">5. Язык распознавания и интерфейса</label>
             <select id="language-select">
-                <option value="ru">Русский</option>
-                <option value="en">English</option>
-                <option value="de">Deutsch</option>
-                <option value="fr">Français</option>
-                <option value="es">Español</option>
-                <option value="it">Italiano</option>
-                <option value="pt">Português</option>
-                <option value="zh">中文 (Chinese)</option>
-                <option value="ja">日本語 (Japanese)</option>
-                <option value="ar">العربية (Arabic)</option>
-                <option value="hi">हिन्दी (Hindi)</option>
-                <option value="fa">فارسی (Farsi)</option>
-                <option value="prs">دری (Dari)</option>
+                <option value="ru-RU">Русский</option>
+                <option value="en-US">English</option>
+                <option value="de-DE">Deutsch</option>
+                <option value="fr-FR">Français</option>
+                <option value="es-ES">Español</option>
+                <option value="it-IT">Italiano</option>
+                <option value="pt-PT">Português</option>
+                <option value="zh-CN">中文 (Chinese)</option>
+                <option value="ja-JP">日本語 (Japanese)</option>
+                <option value="ar-SA">العربية (Arabic)</option>
+                <option value="hi-IN">हिन्दी (Hindi)</option>
+                <option value="fa-IR">فارسی (Farsi)</option>
+                <option value="prs-AF">دری (Dari)</option>
             </select>
         </div>
 
         <div class="input-group">
-            <label>Режим работы (согласно вашим правилам)</label>
+            <label data-i18n="modeLabel">Режим работы</label>
             <select id="mode-select">
-                <option value="normal">Обычный</option>
-                <option value="study">Study Mode (Медленно 0.8x, лимит перемотки)</option>
-                <option value="master">Master Mode (Loop включен)</option>
-                <option value="test">Test Mode (Без перемотки, лимит 2 мин)</option>
+                <option value="normal" data-i18n="modeNormal">Обычный</option>
+                <option value="study" data-i18n="modeStudy">Study Mode (0.8x, лимит)</option>
+                <option value="master" data-i18n="modeMaster">Master Mode (Loop)</option>
+                <option value="test" data-i18n="modeTest">Test Mode (Без перемотки)</option>
             </select>
         </div>
-        <button onclick="document.getElementById('settingsPanel').style.display='none'" style="width:100%; padding:5px; margin-top:5px;">Скрыть панель</button>
+        
+        <div class="embed-box">
+            <label data-i18n="embedLabel" style="font-size: 11px; font-weight:bold; color: #333;">Код для встраивания (Genially / Сайты):</label>
+            <input type="text" id="embed-code" readonly onclick="this.select(); document.execCommand('copy'); alert('Код скопирован!');">
+        </div>
+
+        <button onclick="document.getElementById('settingsPanel').style.display='none'" style="width:100%; padding:5px; margin-top: 10px;" data-i18n="hidePanel">Скрыть панель</button>
     </div>
 
     <div class="video-wrapper">
-        <video id="main-video" crossorigin="anonymous">
-            </video>
+        <video id="main-video" crossorigin="anonymous"></video>
         
-        <div id="lock-screen">Time is up</div>
+        <div id="live-cc"></div> <div id="lock-screen" data-i18n="timeUp">Время вышло! / Time is up!</div>
 
         <div class="custom-controls">
             <button class="control-btn" id="play-pause">▶</button>
-            <button class="control-btn" id="rewind">⏪ 10s</button>
-            <button class="control-btn" id="forward">10s ⏩</button>
+            <button class="control-btn" id="rewind">⏪</button>
+            <button class="control-btn" id="forward">⏩</button>
             
             <div class="progress-container" id="progress-container">
                 <div class="progress-bar" id="progress-bar"></div>
@@ -151,174 +160,182 @@
             </div>
 
             <button class="control-btn" id="slow-mo-btn" style="display:none; font-size:12px;">0.8x</button>
-            
-            <button class="control-btn" id="cc-btn" title="Субтитры">CC</button>
-            <button class="control-btn" id="transcribe-btn" title="Транскрибация">📝</button>
+            <button class="control-btn" id="cc-btn" title="Авто-Субтитры">CC</button>
+            <button class="control-btn" id="transcribe-btn" title="Авто-Транскрипция">📝</button>
             <button class="control-btn" onclick="document.getElementById('settingsPanel').style.display='block'" title="Настройки">⚙️</button>
         </div>
     </div>
 
     <div id="transcription-box">
-        <em>Транскрибация (распознавание речи браузером)... Говорите в микрофон или ожидайте загрузки текста.</em>
-        <div id="transcription-text" style="margin-top: 10px; color: #4A90E2;"></div>
+        <div class="mic-warning" data-i18n="micWarning">Внимание: используется браузерное распознавание. Сделайте звук громче, чтобы микрофон услышал видео. Требуется разрешение на микрофон.</div>
+        <div id="transcription-content">...</div>
     </div>
 </div>
 
 <script>
-    const video = document.getElementById('main-video');
-    const container = document.getElementById('player-container');
-    const playPauseBtn = document.getElementById('play-pause');
-    const progressBar = document.getElementById('progress-bar');
-    const progressContainer = document.getElementById('progress-container');
-    const timeDisplay = document.getElementById('time-display');
-    const volumeSlider = document.getElementById('volume-slider');
-    const muteBtn = document.getElementById('mute-btn');
-    const modeSelect = document.getElementById('mode-select');
-    const lockScreen = document.getElementById('lock-screen');
-    const slowMoBtn = document.getElementById('slow-mo-btn');
+    // --- ПЕРЕВОДЫ ИНТЕРФЕЙСА (i18n) ---
+    const i18n = {
+        'ru-RU': { settingsTitle: "Настройки медиа", vidPC: "1. Видео с ПК", vidURL: "2. Видео по ссылке", bgPC: "3. Фон с ПК", bgURL: "4. Фон по ссылке", langLabel: "5. Язык распознавания и интерфейса", modeLabel: "Режим работы", modeNormal: "Обычный", modeStudy: "Study Mode (0.8x, лимит)", modeMaster: "Master Mode (Loop)", modeTest: "Test Mode (Без перемотки)", hidePanel: "Скрыть панель", timeUp: "Время вышло", embedLabel: "Нажмите, чтобы скопировать код вставки:", micWarning: "Внимание: включите звук колонок, чтобы микрофон распознал речь (только Chrome/Edge/Safari)." },
+        'en-US': { settingsTitle: "Media Settings", vidPC: "1. Video from PC", vidURL: "2. Video URL", bgPC: "3. Background from PC", bgURL: "4. Background URL", langLabel: "5. Language", modeLabel: "Working Mode", modeNormal: "Normal", modeStudy: "Study Mode (0.8x, limit)", modeMaster: "Master Mode (Loop)", modeTest: "Test Mode (No skip)", hidePanel: "Hide Panel", timeUp: "Time is up", embedLabel: "Click to copy embed code (iframe):", micWarning: "Note: Turn up speakers so your mic can hear the video for live transcription." },
+        // (Для краткости кода переводы применены к основным языкам, остальные переключат логику распознавания речи)
+    };
+
+    const langSelect = document.getElementById('language-select');
     
-    // Переменные для отслеживания логики режимов
-    let previousTime = 0;
-    let attemptCount = 0; // Для Study mode
-
-    // 1 & 2. Загрузка Видео
-    document.getElementById('video-upload').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) video.src = URL.createObjectURL(file);
-    });
-    document.getElementById('video-url').addEventListener('change', (e) => {
-        if (e.target.value) video.src = e.target.value;
-    });
-
-    // 3 & 4. Загрузка Фона
-    document.getElementById('bg-upload').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) container.style.backgroundImage = `url(${URL.createObjectURL(file)})`;
-    });
-    document.getElementById('bg-url').addEventListener('change', (e) => {
-        if (e.target.value) container.style.backgroundImage = `url(${e.target.value})`;
+    // Смена языка интерфейса
+    langSelect.addEventListener('change', (e) => {
+        const lang = e.target.value;
+        const dict = i18n[lang] || i18n['en-US']; // Fallback на англ, если интерфейс не переведен полностью
+        if(dict) {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    if(el.tagName === 'OPTION') el.text = dict[key];
+                    else el.innerText = dict[key];
+                }
+            });
+        }
+        // Обновляем язык живого распознавания, если оно запущено
+        if(recognition) recognition.lang = lang;
     });
 
-    // Воспроизведение / Пауза
-    playPauseBtn.addEventListener('click', () => {
-        if (video.paused) { video.play(); playPauseBtn.textContent = '⏸'; } 
-        else { video.pause(); playPauseBtn.textContent = '▶'; }
+    // --- ЛОГИКА ПЛЕЕРА ---
+    const video = document.getElementById('main-video');
+    
+    // Загрузка медиа
+    document.getElementById('video-upload').addEventListener('change', e => { if(e.target.files[0]) video.src = URL.createObjectURL(e.target.files[0]); });
+    document.getElementById('video-url').addEventListener('change', e => { if(e.target.value) video.src = e.target.value; });
+    document.getElementById('bg-upload').addEventListener('change', e => { if(e.target.files[0]) document.getElementById('player-container').style.backgroundImage = `url(${URL.createObjectURL(e.target.files[0])})`; });
+    document.getElementById('bg-url').addEventListener('change', e => { if(e.target.value) document.getElementById('player-container').style.backgroundImage = `url(${e.target.value})`; });
+
+    // --- ЖИВАЯ ТРАНСКРИПЦИЯ И СУБТИТРЫ (Web Speech API) ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    let isRecognizing = false;
+    const liveCcBox = document.getElementById('live-cc');
+    const transBox = document.getElementById('transcription-box');
+    const transContent = document.getElementById('transcription-content');
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript + ' ';
+                else interimTranscript += event.results[i][0].transcript;
+            }
+
+            // Обновляем желтые субтитры на видео
+            if (liveCcBox.style.display === 'block') {
+                liveCcBox.innerText = interimTranscript || finalTranscript;
+            }
+
+            // Обновляем окно транскрипции
+            if (finalTranscript) {
+                const span = document.createElement('span');
+                span.innerText = finalTranscript;
+                transContent.appendChild(span);
+                transBox.scrollTop = transBox.scrollHeight; // Автоскролл вниз
+            }
+        };
+
+        recognition.onend = () => { if (isRecognizing && !video.paused) recognition.start(); };
+    }
+
+    // Включение/выключение Субтитров
+    document.getElementById('cc-btn').addEventListener('click', () => {
+        if (!SpeechRecognition) return alert("Ваш браузер не поддерживает живые субтитры.");
+        if (liveCcBox.style.display === 'block') {
+            liveCcBox.style.display = 'none';
+        } else {
+            liveCcBox.style.display = 'block';
+            startRecognition();
+        }
     });
 
-    // Обновление времени и прогресс-бара + ЛОГИКА РЕЖИМОВ
+    // Включение/выключение Транскрипции
+    document.getElementById('transcribe-btn').addEventListener('click', () => {
+        if (!SpeechRecognition) return alert("Ваш браузер не поддерживает живую транскрипцию.");
+        if (transBox.style.display === 'block') {
+            transBox.style.display = 'none';
+        } else {
+            transBox.style.display = 'block';
+            startRecognition();
+        }
+    });
+
+    function startRecognition() {
+        if (!isRecognizing) {
+            recognition.lang = langSelect.value;
+            try { recognition.start(); isRecognizing = true; } catch(e) {}
+        }
+    }
+
+    // Синхронизация распознавания с паузой видео
+    video.addEventListener('play', () => { if(liveCcBox.style.display === 'block' || transBox.style.display === 'block') startRecognition(); });
+    video.addEventListener('pause', () => { if(isRecognizing) { recognition.stop(); isRecognizing = false; } });
+
+    // --- ГЕНЕРАЦИЯ КОДА ДЛЯ GENIALLY (IFRAME) ---
+    function updateEmbedCode() {
+        // Берет текущий URL (например, вашу ссылку на GitHub Pages)
+        const currentUrl = window.location.href.split('?')[0]; 
+        const iframeCode = `<iframe src="${currentUrl}" width="100%" height="600" frameborder="0" allow="autoplay; fullscreen; microphone" allowfullscreen></iframe>`;
+        document.getElementById('embed-code').value = iframeCode;
+    }
+    // Вызываем сразу при загрузке
+    updateEmbedCode();
+
+    // --- ОСТАЛЬНАЯ ЛОГИКА И РЕЖИМЫ ---
+    let previousTime = 0; let attemptCount = 0;
+
     video.addEventListener('timeupdate', () => {
-        if (!video.duration) return;
-        
-        const mode = modeSelect.value;
+        const mode = document.getElementById('mode-select').value;
         const current = video.currentTime;
 
-        // TEST MODE ЛОГИКА: Таймер 2 минуты (120 сек)
-        if (mode === 'test' && current >= 120) {
-            video.pause();
-            lockScreen.style.display = 'flex';
-        }
+        if (mode === 'test' && current >= 120) { video.pause(); document.getElementById('lock-screen').style.display = 'flex'; }
+        if (mode === 'test' && current - previousTime > 1) video.currentTime = previousTime;
+        else previousTime = current;
 
-        // STUDY MODE ЛОГИКА: Блокировка перемотки на 3 попытке (здесь упрощенно отслеживаем попытки клика по прогрессбару)
-        
-        // Предотвращение перемотки (Test Mode)
-        if (mode === 'test' && current - previousTime > 1) {
-            video.currentTime = previousTime; // Возвращаем назад
-        } else {
-            previousTime = current;
+        if(video.duration) {
+            document.getElementById('progress-bar').style.width = `${(current / video.duration) * 100}%`;
+            document.getElementById('time-display').textContent = `${formatTime(current)} / ${formatTime(video.duration)}`;
         }
-
-        // Обновление UI
-        const percent = (video.currentTime / video.duration) * 100;
-        progressBar.style.width = `${percent}%`;
-        timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
     });
 
-    // Навигация по прогресс-бару (Прокрутка)
-    progressContainer.addEventListener('click', (e) => {
-        const mode = modeSelect.value;
+    document.getElementById('progress-container').addEventListener('click', (e) => {
+        const mode = document.getElementById('mode-select').value;
+        if (mode === 'test') return;
+        if (mode === 'study') { attemptCount++; if (attemptCount >= 3) return alert("Перемотка заблокирована (Study Mode: 3 попытка)"); }
         
-        if (mode === 'test') return; // В Test Mode запрещена перемотка
-        
-        if (mode === 'study') {
-            attemptCount++;
-            if (attemptCount >= 3) {
-                alert("Перемотка заблокирована (Study Mode: 3 попытка)");
-                return;
-            }
-        }
-
-        const rect = progressContainer.getBoundingClientRect();
-        const pos = (e.clientX - rect.left) / rect.width;
-        video.currentTime = pos * video.duration;
+        const rect = e.target.getBoundingClientRect();
+        video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
     });
 
-    // Кнопки 10 сек вперед/назад
+    document.getElementById('play-pause').addEventListener('click', () => video.paused ? video.play() : video.pause());
     document.getElementById('rewind').addEventListener('click', () => video.currentTime -= 10);
-    document.getElementById('forward').addEventListener('click', () => {
-        if (modeSelect.value === 'test') return; // Блок в Test
-        video.currentTime += 10;
-    });
-
-    // Громкость
-    volumeSlider.addEventListener('input', (e) => {
-        video.volume = e.target.value;
-        muteBtn.textContent = video.volume === 0 ? '🔇' : '🔊';
-    });
-    muteBtn.addEventListener('click', () => {
-        video.muted = !video.muted;
-        muteBtn.textContent = video.muted ? '🔇' : '🔊';
-    });
-
-    // Переключение режимов (Study, Master, Test)
-    modeSelect.addEventListener('change', (e) => {
-        const mode = e.target.value;
-        video.loop = (mode === 'master'); // Master Mode: Loop
-        slowMoBtn.style.display = (mode === 'study') ? 'inline-block' : 'none'; // Study Mode: Slow Mo button
-        lockScreen.style.display = 'none'; // Сброс лока
-        attemptCount = 0; // Сброс попыток для Study
-        video.playbackRate = 1.0; // Сброс скорости
-    });
-
-    // Study Mode: Кнопка замедления (Slow Motion) без изменения высоты звука
-    slowMoBtn.addEventListener('click', () => {
-        video.preservesPitch = true; // Сохраняем питч
-        video.playbackRate = video.playbackRate === 1.0 ? 0.8 : 1.0;
-        slowMoBtn.style.color = video.playbackRate === 0.8 ? 'var(--primary)' : 'white';
-    });
-
-    // Транскрибация (используем Web Speech API браузера как заглушку для демо)
-    const transcribeBtn = document.getElementById('transcribe-btn');
-    const transBox = document.getElementById('transcription-box');
-    const transText = document.getElementById('transcription-text');
+    document.getElementById('forward').addEventListener('click', () => { if(document.getElementById('mode-select').value !== 'test') video.currentTime += 10; });
+    document.getElementById('volume-slider').addEventListener('input', (e) => video.volume = e.target.value);
     
-    transcribeBtn.addEventListener('click', () => {
-        transBox.style.display = transBox.style.display === 'none' || transBox.style.display === '' ? 'block' : 'none';
-        
-        if(transBox.style.display === 'block' && 'webkitSpeechRecognition' in window) {
-            const recognition = new webkitSpeechRecognition();
-            recognition.lang = document.getElementById('language-select').value;
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.onresult = function(event) {
-                let finalTranscript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
-                }
-                transText.innerText += finalTranscript + ' ';
-            };
-            recognition.start();
-        } else if (transBox.style.display === 'block') {
-            transText.innerText = "Авто-транскрибация звука видео в реальном времени требует серверного API, но вы можете загрузить файл субтитров .vtt.";
-        }
+    document.getElementById('mode-select').addEventListener('change', (e) => {
+        const mode = e.target.value;
+        video.loop = (mode === 'master');
+        document.getElementById('slow-mo-btn').style.display = (mode === 'study') ? 'inline-block' : 'none';
+        document.getElementById('lock-screen').style.display = 'none'; attemptCount = 0; video.playbackRate = 1.0;
     });
 
-    // Утилита форматирования времени
-    function formatTime(seconds) {
-        const m = Math.floor(seconds / 60);
-        const s = Math.floor(seconds % 60);
+    document.getElementById('slow-mo-btn').addEventListener('click', () => {
+        video.preservesPitch = true; video.playbackRate = video.playbackRate === 1.0 ? 0.8 : 1.0;
+    });
+
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60); const s = Math.floor(sec % 60);
         return `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
     }
 </script>
-
 </body>
 </html>
