@@ -281,6 +281,16 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
 .sdot{width:6px;height:6px;border-radius:50%;background:var(--rose2);
   animation:blink 2s ease-in-out infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+/* Capture button active state */
+#btnCaptureTc.capturing{
+  background:linear-gradient(135deg,#c62828,#e53935)!important;
+  animation:capPulse .6s ease-in-out infinite alternate;
+}
+@keyframes capPulse{from{box-shadow:0 0 4px #c62828;}to{box-shadow:0 0 16px #e53935,0 0 30px rgba(198,40,40,.4);}}
+
+/* Debug panel */
+#subDebug{transition:all .3s;}
+
 .toast{position:fixed;bottom:14px;right:14px;
   background:linear-gradient(135deg,#fff0f4,#fff8f0);
   border:1px solid var(--border2);border-radius:8px;padding:8px 13px;
@@ -546,6 +556,17 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
           background:rgba(194,24,91,.2);outline:none;cursor:pointer;flex-shrink:0;">
       </div>
       <button class="btn" id="btnApplySubs" style="margin-top:6px;">✅ Применить</button>
+      <button class="btn btn-ol btn-sm" id="btnSubsDemo" style="margin-top:3px;">🧪 Тест субтитров</button>
+      <div id="subDebug" style="display:none;font-size:8px;font-family:monospace;color:var(--pur);
+        background:rgba(123,31,162,.06);border:1px solid var(--border);border-radius:4px;
+        padding:3px 6px;margin-top:4px;line-height:1.6;">
+        ⏱ Время видео: <span id="subDbgTime">0:00</span> &nbsp;|&nbsp;
+        💬 Активная фраза: <span id="subDbgPhrase">—</span>
+      </div>
+      <div class="trow" style="margin-top:4px;">
+        <label class="tsw"><input type="checkbox" id="subDebugTog"><span class="tsl"></span></label>
+        <span class="tlbl">🔍 Отладка субтитров</span>
+      </div>
     </div>
 
     <!-- TRANSCRIPTION -->
@@ -594,9 +615,24 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
         <button class="btn btn-sm" id="btnCpyTrans">📋 Копировать</button>
       </div>
       <hr class="dv">
-      <div class="slbl" id="t_mantrans">Ручной ввод</div>
-      <textarea class="txta" id="manTrans" rows="2" placeholder="Введите вручную…"></textarea>
-      <button class="btn btn-ol btn-sm" id="btnSubsFromTrans" style="margin-top:3px;">→ В титры</button>
+      <div class="slbl" id="t_mantrans">📍 Ручной захват (без микрофона)</div>
+      <div class="hint">Нажмите 📍 во время видео — время зафиксируется. Введите текст и нажмите ✚</div>
+      <!-- Capture row -->
+      <div style="display:flex;gap:3px;align-items:stretch;margin-bottom:4px;">
+        <button class="btn" id="btnCaptureTc" style="flex-shrink:0;width:auto;padding:5px 8px;font-size:14px;margin-top:0;" title="Зафиксировать текущее время видео">📍</button>
+        <input type="text" class="url-in" id="captureTcDisplay" value="00:00" readonly
+          style="width:46px;text-align:center;margin-bottom:0;flex-shrink:0;
+          font-weight:bold;color:var(--rose);background:#fff8f0;">
+        <input type="text" class="url-in" id="captureText" placeholder="Текст фразы…"
+          style="flex:1;margin-bottom:0;">
+        <button class="btn" id="btnAddCapture" style="flex-shrink:0;width:auto;padding:5px 8px;font-size:13px;margin-top:0;" title="Добавить строку">✚</button>
+      </div>
+      <!-- Also keep plain textarea for paste/edit -->
+      <textarea class="txta" id="manTrans" rows="2" placeholder="Или вставьте текст вручную…"></textarea>
+      <div class="row2" style="margin-top:3px;">
+        <button class="btn btn-ol btn-sm" id="btnSubsFromTrans">→ В субтитры</button>
+        <button class="btn btn-sm" id="btnCapturesToSubs">⚡ Захваты → субтитры</button>
+      </div>
     </div>
 
   </div><!-- /col-right -->
@@ -738,6 +774,7 @@ function autoDetectAspect(v){
 /* ═══ CROSS-BROWSER VIDEO LOADING ═══ */
 var curUrl='';
 var subsArr=[];
+var capturesArr=[]; /* {tc:'MM:SS', t:seconds, txt:'phrase'} for manual capture */
 
 document.getElementById('vidFile').addEventListener('change',function(){
   var f=this.files&&this.files[0];if(!f)return;
@@ -819,6 +856,19 @@ function updProg(){
   document.getElementById('pbfill').style.width=((vEl.currentTime/vEl.duration)*100)+'%';
   document.getElementById('tdsp').textContent=fmt(vEl.currentTime)+' / '+fmt(vEl.duration);
   updSubOv(vEl.currentTime);
+  /* Update subtitle debug panel if active */
+  if(document.getElementById('subDebugTog').checked){
+    var dbgT=document.getElementById('subDbgTime');
+    var dbgP=document.getElementById('subDbgPhrase');
+    if(dbgT)dbgT.textContent=fmt(vEl.currentTime);
+    if(dbgP){
+      var ct=vEl.currentTime,cur='',ps=-1;
+      for(var di=0;di<subsArr.length;di++){if(ct>=subsArr[di].t){cur=subsArr[di].tx;ps=subsArr[di].t;}}
+      if(!cur) dbgP.textContent='— (нет фразы)';
+      else if(ct-ps>5) dbgP.textContent='⏰ '+cur+' (истекла)';
+      else dbgP.textContent='✅ ['+fmt(ps)+'] '+cur.substring(0,30)+(cur.length>30?'…':'');
+    }
+  }
 }
 function fmt(s){var m=Math.floor(s/60),sc=Math.floor(s%60);return m+':'+(sc<10?'0':'')+sc;}
 function fmtTc(s){if(!s||isNaN(s))s=0;var m=Math.floor(s/60),sc=Math.floor(s%60);return(m<10?'0':'')+m+':'+(sc<10?'0':'')+sc;}
@@ -844,6 +894,37 @@ document.getElementById('subTog').addEventListener('change',function(){
   document.getElementById(id).addEventListener(ev,updateSubStyle);
 });
 document.getElementById('subSize').addEventListener('input',updateSubStyle);
+
+/* ── Subtitle debug toggle ── */
+document.getElementById('subDebugTog').addEventListener('change',function(){
+  var dbg=document.getElementById('subDebug');
+  dbg.style.display=this.checked?'block':'none';
+  if(this.checked){
+    var dbgT=document.getElementById('subDbgTime');
+    if(dbgT)dbgT.textContent=fmt(vEl.currentTime);
+    var dbgP=document.getElementById('subDbgPhrase');
+    if(dbgP)dbgP.textContent=subsArr.length?'Загружено '+subsArr.length+' фраз':'— нет субтитров';
+  }
+});
+
+/* ── Demo subtitles: fills from currentTime so always works ── */
+document.getElementById('btnSubsDemo').addEventListener('click',function(){
+  var t=Math.floor(vEl.currentTime);
+  var demos=[
+    [t,   '▶ Это первая фраза субтитров'],
+    [t+4, 'Субтитры работают! Язык: '+subLang.toUpperCase()],
+    [t+8, 'Формат: ММ:СС Текст фразы'],
+    [t+12,'Отредактируйте и нажмите Применить'],
+  ];
+  var txt=demos.map(function(d){
+    var m=Math.floor(d[0]/60),s=d[0]%60;
+    return m+':'+(s<10?'0':'')+s+' '+d[1];
+  }).join('\n');
+  document.getElementById('subTxt').value=txt;
+  /* Auto-apply */
+  parseSubs();
+  showToast('🧪 Тест загружен — нажмите ▶ или проверьте сразу!');
+});
 document.getElementById('btnApplySubs').addEventListener('click',parseSubs);
 
 function parseSubs(){
@@ -1010,6 +1091,50 @@ document.getElementById('btnSubsFromTrans').addEventListener('click',function(){
   else{var t=document.getElementById('manTrans').value.trim();if(!t){showToast('⚠️ Нет текста');return;}var sents=t.split(/[.!?]+/).map(function(s){return s.trim();}).filter(Boolean);sents.forEach(function(s,i){var mn=Math.floor((i*5)/60),sc=(i*5)%60;res+=mn+':'+(sc<10?'0':'')+sc+' '+s+'\n';});}
   document.getElementById('subTxt').value=res.trim();
   showToast('→ Конвертировано в титры!');
+});
+
+/* ══ MANUAL TIMECODE CAPTURE ══ */
+/* 📍 button — lock current video time */
+document.getElementById('btnCaptureTc').addEventListener('click',function(){
+  var tc=fmtTc(vEl.currentTime);
+  document.getElementById('captureTcDisplay').value=tc;
+  document.getElementById('captureText').focus();
+  /* Visual pulse */
+  this.classList.add('capturing');
+  var btn=this;
+  setTimeout(function(){btn.classList.remove('capturing');},800);
+  showToast('📍 Таймкод '+tc+' зафиксирован');
+});
+/* Enter key in captureText = add */
+document.getElementById('captureText').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){e.preventDefault();document.getElementById('btnAddCapture').click();}
+});
+/* ✚ button — add line to capturesArr */
+document.getElementById('btnAddCapture').addEventListener('click',function(){
+  var tc=document.getElementById('captureTcDisplay').value||fmtTc(vEl.currentTime);
+  var txt=document.getElementById('captureText').value.trim();
+  if(!txt){showToast('⚠️ Введите текст фразы');return;}
+  var parts=tc.split(':');
+  var t=parseInt(parts[0],10)*60+(parseInt(parts[1],10)||0);
+  capturesArr.push({tc:tc,t:t,txt:txt});
+  /* Show in transBox */
+  transLines.push({tc:tc,txt:txt});
+  renderTransBox();
+  /* Clear text, advance tc by ~5s */
+  document.getElementById('captureText').value='';
+  var newT=t+5;
+  document.getElementById('captureTcDisplay').value=fmtTc(newT);
+  showToast('✚ ['+tc+'] добавлено');
+  document.getElementById('captureText').focus();
+});
+/* ⚡ Захваты → субтитры */
+document.getElementById('btnCapturesToSubs').addEventListener('click',function(){
+  if(!capturesArr.length&&!transLines.length){showToast('⚠️ Нет захватов');return;}
+  var src=transLines.length?transLines:capturesArr;
+  var res=src.map(function(l){return l.tc+' '+l.txt;}).join('\n');
+  document.getElementById('subTxt').value=res;
+  parseSubs();
+  showToast('⚡ '+src.length+' фраз перенесено в субтитры!');
 });
 
 /* ═══ EXPORT TABS ═══ */
