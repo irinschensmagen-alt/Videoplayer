@@ -163,9 +163,7 @@ select:focus{outline:none;border-color:var(--rose2);}
   position:absolute;
   bottom:0;left:0;right:0;
   width:100%;
-  /* gradient bg — never covers center of video */
   color:#fff;
-  display:flex;
   align-items:center;
   justify-content:center;
   flex-wrap:wrap;
@@ -869,9 +867,15 @@ function updProg(){
     if(dbgP){
       var ct=vEl.currentTime,cur='',ps=-1;
       for(var di=0;di<subsArr.length;di++){if(ct>=subsArr[di].t){cur=subsArr[di].tx;ps=subsArr[di].t;}}
-      if(!cur) dbgP.textContent='— (нет фразы)';
-      else if(ct-ps>5) dbgP.textContent='⏰ '+cur+' (истекла)';
-      else dbgP.textContent='✅ ['+fmt(ps)+'] '+cur.substring(0,30)+(cur.length>30?'…':'');
+      if(!cur) dbgP.textContent='— (нет фразы на этом времени)';
+      else{
+        /* same expire logic as updSubOv */
+        var _di=-1;for(var _x=0;_x<subsArr.length;_x++){if(ct>=subsArr[_x].t)_di=_x;}
+        var _ns=(_di+1<subsArr.length)?subsArr[_di+1].t:ps+6;
+        var _exp=Math.max(ps+1,Math.min(ps+5,_ns-0.05));
+        if(ct>_exp) dbgP.textContent='⏰ ['+fmt(ps)+'] '+cur.substring(0,25)+' (истекла, exp='+_exp.toFixed(1)+'s)';
+        else dbgP.textContent='✅ ['+fmt(ps)+'] '+cur.substring(0,30)+(cur.length>30?'…':'')+'  →exp:'+_exp.toFixed(1)+'s';
+      }
     }
   }
 }
@@ -1023,7 +1027,9 @@ function updSubOv(ct){
      If next phrase exists use its start time as the cutoff instead of 5s */
   var phraseStart=subsArr[curIdx].t;
   var nextStart=(curIdx+1 < subsArr.length) ? subsArr[curIdx+1].t : phraseStart+6;
-  var expire=Math.min(phraseStart+5, nextStart-0.1);
+  /* expire = when to hide: up to 5s, but yield to next phrase.
+     Max ensures we never expire BEFORE the phrase even starts. */
+  var expire=Math.max(phraseStart+1, Math.min(phraseStart+5, nextStart-0.05));
   if(ct > expire){
     ov.style.display='none';
     _subCurTxt='';
@@ -1056,7 +1062,11 @@ var _liveSubText='';
 var _transRestartTimer=null;
 
 function _pushLiveSub(txt, isFinal){
-  if(!document.getElementById('liveSubTog').checked) return;
+  if(!document.getElementById('liveSubTog').checked){
+    /* Live subs disabled — make sure we don't block manual subs */
+    _subPreview=false;
+    return;
+  }
   /* Ensure subtitle overlay is on */
   if(!document.getElementById('subTog').checked)
     document.getElementById('subTog').checked=true;
@@ -1347,6 +1357,11 @@ function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.c
 
 applyI18n();
 renderTransBox();
+/* Ensure subtitle overlay starts hidden */
+(function(){
+  var ov=document.getElementById('subOv');
+  if(ov) ov.style.display='none';
+})();
 
 /* ── Browser detection for Web Speech API ── */
 (function(){
@@ -1372,6 +1387,11 @@ renderTransBox();
 document.getElementById('liveSubTog').addEventListener('change',function(){
   var info=document.getElementById('liveSubInfo');
   info.style.display=this.checked?'block':'none';
+  if(!this.checked){
+    /* Release subtitle control back to manual subs */
+    _subPreview=false;
+    clearTimeout(_liveSubTimer);
+  }
   if(this.checked){
     /* Auto-start transcription when live subs turned on */
     var tog=document.getElementById('transTog');
