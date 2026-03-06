@@ -890,421 +890,310 @@ document.getElementById('btnClearBg').addEventListener('click',function(){docume
 function applyBg(url){var o=document.getElementById('bgOv');o.style.backgroundImage='url("'+url+'")';o.style.backgroundSize='cover';o.style.backgroundPosition='center';o.style.opacity=document.getElementById('bgOp').value;showToast('🌸 Фон применён!');}
 
 /* ═══ SMART SUBTITLES with language badge ═══ */
-/* ── Subtitle state ── */
-var _subCurTxt='';      /* phrase currently displayed */
-var _subPreview=false;  /* true = showing preview, skip timeupdate */
-var _liveSubTimer=null; /* timer for live-speech auto-clear */
+/* ═══════════════════════════════════════════════
+   SUBTITLE ENGINE — clean, simple, reliable
+   ═══════════════════════════════════════════════ */
+var subsArr = [];
+var subLang = 'ru';
 
-document.getElementById('subTog').addEventListener('change',function(){
-  var ov=document.getElementById('subOv');
-  if(!this.checked){ov.style.display='none';_subCurTxt='';}
-  else{_subCurTxt='';updSubOv(vEl.currentTime);}
-});
-['subFont','subColor','subSize'].forEach(function(id){
-  var ev=id==='subColor'?'input':'change';
-  document.getElementById(id).addEventListener(ev,updateSubStyle);
-});
-document.getElementById('subSize').addEventListener('input',updateSubStyle);
+function updSubOv(ct) {
+  var ov  = document.getElementById('subOv');
+  var tog = document.getElementById('subTog');
+  if (!tog || !tog.checked) { ov.style.display='none'; return; }
+  if (!subsArr.length)       { ov.style.display='none'; return; }
 
-/* ── Subtitle debug toggle ── */
-document.getElementById('subDebugTog').addEventListener('change',function(){
-  var dbg=document.getElementById('subDebug');
-  dbg.style.display=this.checked?'block':'none';
-  if(this.checked){
-    var dbgT=document.getElementById('subDbgTime');
-    if(dbgT)dbgT.textContent=fmt(vEl.currentTime);
-    var dbgP=document.getElementById('subDbgPhrase');
-    if(dbgP)dbgP.textContent=subsArr.length?'Загружено '+subsArr.length+' фраз':'— нет субтитров';
+  /* Find active phrase */
+  var cur = null, curIdx = -1;
+  for (var i = 0; i < subsArr.length; i++) {
+    if (ct >= subsArr[i].t) { cur = subsArr[i]; curIdx = i; }
   }
-});
+  if (!cur) { ov.style.display='none'; return; }
 
-/* ── Demo subtitles: fills from currentTime so always works ── */
-document.getElementById('btnSubsDemo').addEventListener('click',function(){
-  var t=Math.floor(vEl.currentTime);
-  var demos=[
-    [t,   '▶ Это первая фраза субтитров'],
-    [t+4, 'Субтитры работают! Язык: '+subLang.toUpperCase()],
-    [t+8, 'Формат: ММ:СС Текст фразы'],
-    [t+12,'Отредактируйте и нажмите Применить'],
-  ];
-  var txt=demos.map(function(d){
-    var m=Math.floor(d[0]/60),s=d[0]%60;
-    return m+':'+(s<10?'0':'')+s+' '+d[1];
-  }).join('\n');
-  document.getElementById('subTxt').value=txt;
-  /* Auto-apply */
-  parseSubs();
-  showToast('🧪 Тест загружен — нажмите ▶ или проверьте сразу!');
-});
-document.getElementById('btnApplySubs').addEventListener('click',parseSubs);
+  /* Expire at next phrase start, or +5s for last phrase */
+  var expireAt = (curIdx+1 < subsArr.length) ? subsArr[curIdx+1].t : cur.t + 5;
+  if (ct >= expireAt) { ov.style.display='none'; return; }
 
-function parseSubs(){
-  var raw=document.getElementById('subTxt').value;
-  subsArr=[];
-  /* Get selected subtitle language */
-  var sel=document.getElementById('subLangSel');
-  var selVal=sel.value;
-  if(selVal==='other'){
-    var custom=document.getElementById('subLangCustom').value.trim();
-    subLang=custom||'other';
-  }else{subLang=selVal;}
-  /* Update badge and name */
-  updateSubLangBadge();
-  var sln=document.getElementById('subLangName');
-  if(sln)sln.textContent=LANG_NAMES[subLang]||subLang;
+  _showSubText(cur.tx, subLang, 'normal');
+}
 
-  /* Normalize line endings and parse */
-  var lines=raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
-  for(var i=0;i<lines.length;i++){
-    var line=lines[i].trim();if(!line)continue;
-    /* Accept M:S, M:SS, MM:SS */
-    var m=line.match(/^(\d{1,2}):(\d{1,2})\s+(.+)$/);
-    if(m){subsArr.push({t:parseInt(m[1],10)*60+parseInt(m[2],10),tx:m[3].trim()});}
+function _showSubText(txt, lang, style) {
+  var ov    = document.getElementById('subOv');
+  var badge = document.getElementById('subBadge');
+  var txtEl = document.getElementById('subText');
+  if (!ov || !txtEl) return;
+  var code = (lang||'').toUpperCase().substring(0,3);
+  if (badge) { badge.textContent=code; badge.style.display=code?'inline':'none'; }
+  txtEl.textContent = txt;
+  txtEl.style.fontStyle = style || 'normal';
+  ov.style.display = 'flex';
+}
+
+function _hideSubOv() {
+  var ov = document.getElementById('subOv');
+  if (ov) ov.style.display='none';
+}
+
+function parseSubs() {
+  var raw = document.getElementById('subTxt').value;
+  subsArr = [];
+
+  var sel = document.getElementById('subLangSel');
+  subLang = (sel.value === 'other')
+    ? (document.getElementById('subLangCustom').value.trim() || 'other')
+    : sel.value;
+
+  var sln = document.getElementById('subLangName');
+  if (sln) sln.textContent = LANG_NAMES[subLang] || subLang;
+
+  raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').forEach(function(line) {
+    line = line.trim(); if (!line) return;
+    var mm = line.match(/^(\d{1,2}):(\d{1,2})\s+(.+)$/);
+    if (mm) subsArr.push({ t: +mm[1]*60 + +mm[2], tx: mm[3].trim() });
+  });
+
+  document.getElementById('subCount').textContent = subsArr.length;
+
+  if (!subsArr.length) {
+    showToast('⚠️ Строк не найдено. Формат:  0:05 Текст фразы');
+    _hideSubOv(); return;
   }
-  document.getElementById('subCount').textContent=subsArr.length;
+
+  document.getElementById('subTog').checked = true;
   updateSubStyle();
-  /* Enable toggle */
-  document.getElementById('subTog').checked=true;
-
-  /* Preview first phrase */
-  var ov=document.getElementById('subOv');
-  if(subsArr.length>0){
-    showToast('💬 '+subsArr.length+' фраз · '+(LANG_NAMES[subLang]||subLang));
-    /* Reset state and show first subtitle as persistent preview */
-    _subCurTxt='__preview__'; /* sentinel so updSubOv skips until video plays */
-    _subPreview=false; /* allow updSubOv to work normally — it handles t=0 gracefully now */
-    var badge=document.getElementById('subBadge');
-    var txtEl2=document.getElementById('subText');
-    var code=subLang.toUpperCase().substring(0,3);
-    if(badge){badge.textContent=code;badge.style.display=code?'inline':'none';}
-    if(txtEl2){txtEl2.textContent='▶  '+subsArr[0].tx; txtEl2.style.fontStyle='normal';}
-    ov.style.display='flex';
-    /* Keep preview visible: updSubOv only hides if cur='' AND _subCurTxt is not '__preview__' */
-  }else{
-    showToast('⚠️ Строк не найдено. Формат: 0:05 Текст');
-    ov.style.display='none'; _subCurTxt='';
-  }
-  setStatus('💬 Титры ('+( LANG_NAMES[subLang]||subLang)+'): '+subsArr.length+' фраз');
+  _showSubText('▶  ' + subsArr[0].tx, subLang, 'normal');
+  showToast('💬 ' + subsArr.length + ' фраз · ' + (LANG_NAMES[subLang]||subLang));
+  setStatus('💬 ' + (LANG_NAMES[subLang]||subLang) + ': ' + subsArr.length + ' фраз');
 }
 
-function updateSubStyle(){
-  var ov=document.getElementById('subOv');
-  var ff=document.getElementById('subFont').value;
-  var col=document.getElementById('subColor').value;
-  var sz=document.getElementById('subSize').value+'px';
-  /* Apply to the text span for font/size, to ov for color */
-  var txt=document.getElementById('subText');
-  if(txt){txt.style.fontFamily=ff;txt.style.fontSize=sz;txt.style.color=col;}
-  /* Also update ov so CSS inherits correctly */
-  ov.style.fontFamily=ff;ov.style.color=col;ov.style.fontSize=sz;
+function updateSubStyle() {
+  var ov    = document.getElementById('subOv');
+  var txtEl = document.getElementById('subText');
+  var ff  = document.getElementById('subFont').value;
+  var col = document.getElementById('subColor').value;
+  var sz  = document.getElementById('subSize').value + 'px';
+  if (ov)    { ov.style.fontFamily=ff; ov.style.color=col; ov.style.fontSize=sz; }
+  if (txtEl) { txtEl.style.fontFamily=ff; txtEl.style.color=col; txtEl.style.fontSize=sz; }
 }
 
-function updSubOv(ct){
-  /* Don't fight live speech subtitles */
-  if(_subPreview) return;
-
-  var ov=document.getElementById('subOv');
-  var tog=document.getElementById('subTog');
-  if(!tog.checked){ov.style.display='none';return;}
-  if(!subsArr.length)return;
-
-  /* Find active phrase index */
-  var cur='', curIdx=-1;
-  for(var i=0;i<subsArr.length;i++){
-    if(ct>=subsArr[i].t){cur=subsArr[i].tx; curIdx=i;}
-  }
-
-  if(!cur){
-    /* Keep preview visible until video actually plays */
-    if(_subCurTxt==='__preview__') return;
-    ov.style.display='none';
-    _subCurTxt='';
-    return;
-  }
-
-  /* Check if phrase has expired:
-     Expire = 5s passed AND next phrase hasn't started yet (avoid gaps).
-     If next phrase exists use its start time as the cutoff instead of 5s */
-  var phraseStart=subsArr[curIdx].t;
-  var nextStart=(curIdx+1 < subsArr.length) ? subsArr[curIdx+1].t : phraseStart+6;
-  /* expire = when to hide: up to 5s, but yield to next phrase.
-     Max ensures we never expire BEFORE the phrase even starts. */
-  var expire=Math.max(phraseStart+1, Math.min(phraseStart+5, nextStart-0.05));
-  if(ct > expire){
-    ov.style.display='none';
-    _subCurTxt='';
-    return;
-  }
-
-  /* Update badge */
-  var badge=document.getElementById('subBadge');
-  var code=subLang.toUpperCase().substring(0,3);
-  if(badge){badge.textContent=code; badge.style.display=code?'inline':'none';}
-
-  /* Update text (also replaces __preview__ sentinel) */
-  if(cur!==_subCurTxt){
-    _subCurTxt=cur;
-    var txtEl=document.getElementById('subText');
-    if(txtEl){txtEl.textContent=cur; txtEl.style.fontStyle='normal';}
-  }
-  ov.style.display='flex';
+/* ── Subtitle controls ── */
+document.getElementById('subTog').addEventListener('change', function() {
+  if (this.checked) updSubOv(vEl.currentTime); else _hideSubOv();
+});
+['subFont','subColor','subSize'].forEach(function(id) {
+  var ev = (id==='subColor'||id==='subSize') ? 'input' : 'change';
+  document.getElementById(id).addEventListener(ev, updateSubStyle);
+});
+document.getElementById('btnApplySubs').addEventListener('click', parseSubs);
+document.getElementById('subLangSel').addEventListener('change', function() {
+  subLang = this.value;
+  document.getElementById('subLangCustom').style.display = (this.value==='other') ? 'block' : 'none';
+  var sln = document.getElementById('subLangName');
+  if (sln) sln.textContent = LANG_NAMES[subLang] || subLang;
+});
+document.getElementById('subLangCustom').addEventListener('input', function() {
+  subLang = this.value || 'other';
+});
+document.getElementById('subDebugTog').addEventListener('change', function() {
+  document.getElementById('subDebug').style.display = this.checked ? 'block' : 'none';
+});
+document.getElementById('btnSubsDemo').addEventListener('click', function() {
+  var t = Math.floor(vEl.currentTime);
+  document.getElementById('subTxt').value = [
+    [t,   '▶ Первая фраза субтитров'],
+    [t+5, 'Субтитры работают! · '+(LANG_NAMES[subLang]||subLang)],
+    [t+10,'Формат: М:СС Текст фразы'],
+    [t+15,'Редактируйте и жмите Применить']
+  ].map(function(d){
+    var mm=Math.floor(d[0]/60),ss=d[0]%60;
+    return mm+':'+(ss<10?'0':'')+ss+' '+d[1];
+  }).join('\n');
+  parseSubs();
+});
+function updateSubLangBadge(){
+  var b=document.getElementById('subBadge');
+  if(b){var c2=subLang.toUpperCase().substring(0,3);b.textContent=c2;b.style.display=c2?'inline':'none';}
 }
 
-/* ═══ TRANSCRIPTION WITH TIMECODES ═══ */
-var recog=null,transActive=false,transLines=[],transInterim='';
+/* ═══════════════════════════════════════════════
+   TRANSCRIPTION ENGINE — clean, stable
+   ═══════════════════════════════════════════════ */
+var recog = null;
+var transActive = false;
+var transLines = [];
+var transInterim = '';
+var capturesArr = [];
+var _transRestartTimer = null;
+var _liveSubActive = false;
+var _liveSubTimer  = null;
 
-
-
-document.getElementById('transTog').addEventListener('change',function(){if(this.checked)startTrans();else stopTrans();});
-
-/* ── live subtitle state ── */
-var _liveSubText='';
-var _transRestartTimer=null;
-
-function _pushLiveSub(txt, isFinal){
-  if(!document.getElementById('liveSubTog').checked){
-    /* Live subs disabled — make sure we don't block manual subs */
-    _subPreview=false;
-    return;
+document.getElementById('transTog').addEventListener('change', function() {
+  if (this.checked) startTrans(); else stopTrans();
+});
+document.getElementById('liveSubTog').addEventListener('change', function() {
+  _liveSubActive = this.checked;
+  document.getElementById('liveSubInfo').style.display = this.checked ? 'block' : 'none';
+  if (this.checked) {
+    document.getElementById('subTog').checked = true;
+    if (!transActive) { document.getElementById('transTog').checked=true; startTrans(); }
+  } else {
+    _hideSubOv();
   }
-  /* Ensure subtitle overlay is on */
-  if(!document.getElementById('subTog').checked)
-    document.getElementById('subTog').checked=true;
-  var ov=document.getElementById('subOv');
-  var badge=document.getElementById('subBadge');
-  var txtEl=document.getElementById('subText');
-  var lang=document.getElementById('transLangSel').value.split('-')[0].toUpperCase();
-  if(badge){badge.textContent=lang; badge.style.display='inline';}
-  if(txtEl){txtEl.textContent=txt; txtEl.style.fontStyle=isFinal?'normal':'italic';}
-  ov.style.display='flex';
-  _subCurTxt=txt;
-  _subPreview=true; /* block updSubOv from overwriting live speech */
-  if(isFinal){
-    clearTimeout(_liveSubTimer);
-    _liveSubTimer=setTimeout(function(){
-      if(_subCurTxt===txt){
-        ov.style.display='none';
-        _subCurTxt='';
-        _subPreview=false; /* hand back control to timed subs */
-      }
-    },4000);
-  }
-}
+});
+document.getElementById('transLangSel').addEventListener('change', function() {
+  if (transActive) { stopTrans(); setTimeout(function(){ document.getElementById('transTog').checked=true; startTrans(); }, 400); }
+});
+document.getElementById('transFont').addEventListener('change', renderTransBox);
+document.getElementById('transSize').addEventListener('input', function() {
+  document.getElementById('transSizeVal').textContent = this.value+'px';
+  renderTransBox();
+});
+document.getElementById('btnClrTrans').addEventListener('click', function() {
+  transLines=[]; transInterim=''; renderTransBox();
+});
+document.getElementById('btnCpyTrans').addEventListener('click', function() {
+  var txt = transLines.map(function(l){ return '['+l.tc+'] '+l.txt; }).join('\n');
+  if (!txt) { showToast('⚠️ Нет текста'); return; }
+  navigator.clipboard.writeText(txt).then(function(){ showToast('📋 Скопировано!'); });
+});
 
-function startTrans(){
-  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){
-    setTstat('err','⚠️ Браузер не поддерживает Web Speech API');
-    showToast('⚠️ Нужен Chrome, Edge или Safari');
+function startTrans() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    setTstat('err','⚠️ Нужен Chrome, Edge или Safari');
     document.getElementById('transTog').checked=false;
+    if(_liveSubActive){ document.getElementById('liveSubTog').checked=false; _liveSubActive=false; }
     return;
   }
-  transLines=[];transInterim='';
-  document.getElementById('transBox').innerHTML='';
   clearTimeout(_transRestartTimer);
+  transLines=[]; transInterim='';
 
-  try{
-    recog=new SR();
-    recog.lang=document.getElementById('transLangSel').value;
-    recog.continuous=true;
-    recog.interimResults=true;
-    recog.maxAlternatives=1;
+  function _attach(r) {
+    r.lang = document.getElementById('transLangSel').value;
+    r.continuous=true; r.interimResults=true; r.maxAlternatives=1;
 
-    recog.onstart=function(){
-      transActive=true;
-      setTstat('on','🎙 '+recog.lang);
-      setStatus('🎙 Транскрипция: '+recog.lang);
-    };
+    r.onstart = function(){ transActive=true; setTstat('on','🎙 '+r.lang); setStatus('🎙 '+r.lang); };
 
-    recog.onresult=function(e){
+    r.onresult = function(e) {
       transInterim='';
-      for(var i=e.resultIndex;i<e.results.length;i++){
-        var phrase=e.results[i][0].transcript.trim();
-        if(!phrase) continue;
-        if(e.results[i].isFinal){
-          transLines.push({tc:fmtTc(vEl.currentTime),txt:phrase});
+      for (var i=e.resultIndex; i<e.results.length; i++) {
+        var p=e.results[i][0].transcript.trim(); if(!p) continue;
+        if (e.results[i].isFinal) {
+          transLines.push({tc:fmtTc(vEl.currentTime), txt:p});
           transInterim='';
-          _pushLiveSub(phrase, true);
+          if (_liveSubActive) {
+            _showSubText(p, r.lang.split('-')[0], 'normal');
+            clearTimeout(_liveSubTimer);
+            _liveSubTimer=setTimeout(_hideSubOv, 4000);
+          }
         } else {
-          transInterim+=phrase;
-          _pushLiveSub(transInterim, false);
+          transInterim+=p;
+          if (_liveSubActive) _showSubText(transInterim, r.lang.split('-')[0], 'italic');
         }
       }
       renderTransBox();
     };
 
-    recog.onerror=function(e){
-      /* no-speech and aborted are not real errors — ignore */
-      if(e.error==='no-speech'||e.error==='aborted') return;
-      /* network error — retry after 1.5s */
-      if(e.error==='network'){
-        setTstat('on','↻ сеть, повтор…');
-        _transRestartTimer=setTimeout(function(){
-          if(transActive) _restartRecog();
-        },1500);
+    r.onerror = function(e) {
+      if (e.error==='no-speech'||e.error==='aborted') return;
+      if (e.error==='network'||e.error==='audio-capture') {
+        setTstat('on','↻ повтор…');
+        _transRestartTimer=setTimeout(function(){ if(transActive)_restart(); },1500);
         return;
       }
-      /* audio-capture — microphone busy, wait and retry */
-      if(e.error==='audio-capture'){
-        setTstat('on','⏳ микрофон занят…');
-        _transRestartTimer=setTimeout(function(){
-          if(transActive) _restartRecog();
-        },2000);
-        return;
-      }
-      /* Permission denied — stop */
-      if(e.error==='not-allowed'||e.error==='service-not-allowed'){
-        transActive=false;
-        document.getElementById('transTog').checked=false;
-        setTstat('err','🔒 Микрофон: разрешите доступ в браузере');
-        return;
+      if (e.error==='not-allowed'||e.error==='service-not-allowed') {
+        transActive=false; document.getElementById('transTog').checked=false;
+        setTstat('err','🔒 Разрешите доступ к микрофону'); return;
       }
       setTstat('err','⚠️ '+e.error);
     };
 
-    recog.onend=function(){
-      if(transActive
-        && document.getElementById('transContTog').checked
-        && document.getElementById('transTog').checked){
-        /* Small delay avoids tight restart loop */
-        _transRestartTimer=setTimeout(_restartRecog, 300);
+    r.onend = function() {
+      if (transActive&&document.getElementById('transContTog').checked&&document.getElementById('transTog').checked) {
+        _transRestartTimer=setTimeout(_restart,300);
       } else {
-        transActive=false;
-        setTstat('','');
-        document.getElementById('transTog').checked=false;
-        setStatus('⏹ Остановлено');
+        transActive=false; setTstat('','');
+        document.getElementById('transTog').checked=false; setStatus('⏹ Остановлено');
       }
     };
+  }
 
-    recog.start();
-  }catch(ex){
-    setTstat('err','⚠️ '+ex.message);
-    document.getElementById('transTog').checked=false;
+  function _restart() {
+    if (!transActive) return;
+    try {
+      var SR2=window.SpeechRecognition||window.webkitSpeechRecognition;
+      recog=new SR2(); _attach(recog); recog.start();
+    } catch(ex) { _transRestartTimer=setTimeout(function(){if(transActive)_restart();},1000); }
+  }
+
+  try {
+    recog=new SR(); _attach(recog); recog.start();
+  } catch(ex) {
+    setTstat('err','⚠️ '+ex.message); document.getElementById('transTog').checked=false;
   }
 }
 
-function _restartRecog(){
-  if(!transActive) return;
-  try{
-    recog=new (window.SpeechRecognition||window.webkitSpeechRecognition)();
-    recog.lang=document.getElementById('transLangSel').value;
-    recog.continuous=true; recog.interimResults=true; recog.maxAlternatives=1;
-    /* Re-attach all handlers by calling the same setup */
-    var savedOnResult=arguments.callee; /* pass through */
-    recog.onstart=function(){setTstat('on','🎙 '+recog.lang);};
-    recog.onresult=function(e){
-      transInterim='';
-      for(var i=e.resultIndex;i<e.results.length;i++){
-        var phrase=e.results[i][0].transcript.trim();if(!phrase)continue;
-        if(e.results[i].isFinal){transLines.push({tc:fmtTc(vEl.currentTime),txt:phrase});transInterim='';_pushLiveSub(phrase,true);}
-        else{transInterim+=phrase;_pushLiveSub(transInterim,false);}
-      }
-      renderTransBox();
-    };
-    recog.onerror=function(e){
-      if(e.error==='no-speech'||e.error==='aborted')return;
-      if(e.error==='network'||e.error==='audio-capture'){_transRestartTimer=setTimeout(function(){if(transActive)_restartRecog();},2000);return;}
-      if(e.error==='not-allowed'||e.error==='service-not-allowed'){transActive=false;document.getElementById('transTog').checked=false;setTstat('err','🔒 Микрофон: разрешите доступ');return;}
-    };
-    recog.onend=function(){
-      if(transActive&&document.getElementById('transContTog').checked&&document.getElementById('transTog').checked){_transRestartTimer=setTimeout(_restartRecog,300);}
-      else{transActive=false;setTstat('','');document.getElementById('transTog').checked=false;}
-    };
-    recog.start();
-  }catch(ex){
-    _transRestartTimer=setTimeout(function(){if(transActive)_restartRecog();},1000);
-  }
-}
-function stopTrans(){
+function stopTrans() {
   transActive=false;
-  clearTimeout(_transRestartTimer);
-  clearTimeout(_liveSubTimer);
-  _subPreview=false;
-  if(recog){try{recog.abort();}catch(ex){}recog=null;}
-  setTstat('','');setStatus('⏹ Остановлено');showToast('⏹ Остановлено');
+  clearTimeout(_transRestartTimer); clearTimeout(_liveSubTimer);
+  if (recog) { try{recog.abort();}catch(ex){} recog=null; }
+  setTstat('',''); setStatus('⏹ Остановлено'); showToast('⏹ Остановлено');
 }
-function setTstat(type,msg){var s=document.getElementById('tstat');s.className='tstat'+(type?' '+type:'');s.textContent=msg;}
+function setTstat(type,msg){ var s=document.getElementById('tstat'); s.className='tstat'+(type?' '+type:''); s.textContent=msg; }
 
-function renderTransBox(){
+function renderTransBox() {
   var box=document.getElementById('transBox');
-  /* Apply font and size from controls */
-  var ff=document.getElementById('transFont').value;
-  var sz=document.getElementById('transSize').value+'px';
-  box.style.fontFamily=ff; box.style.fontSize=sz;
+  box.style.fontFamily=document.getElementById('transFont').value;
+  box.style.fontSize=document.getElementById('transSize').value+'px';
   var html='';
-  transLines.forEach(function(l){html+='<span style="color:#b5006b;font-weight:bold;">['+l.tc+']</span> <span style="color:#3a1020;">'+escHtml(l.txt)+'</span><br>';});
-  if(transInterim){html+='<span style="color:#b5006b;opacity:.45;">[…]</span> <span style="color:#888;font-style:italic;">'+escHtml(transInterim)+'</span>';}
-  if(!html){
-    var _ph={ru:'Здесь появится транскрипция с таймкодами…',de:'Transkription erscheint hier mit Zeitcodes…',en:'Transcription with timecodes will appear here…',es:'La transcripción con marcas de tiempo aparecerá aquí…',fr:'La transcription avec codes temporels apparaîtra ici…',it:'La trascrizione con codici temporali apparirà qui…',zh:'带时间码的转录将出现在此处…',ja:'タイムコード付きの文字起こしがここに表示されます…'};
-    html='<span style="color:#aaa;font-style:italic;">'+(_ph[curLang]||_ph.ru)+'</span>';
-  }
-  box.innerHTML=html;box.scrollTop=box.scrollHeight;
+  transLines.forEach(function(l){
+    html+='<span style="color:#b5006b;font-weight:bold;">['+l.tc+']</span> <span style="color:#3a1020;">'+escHtml(l.txt)+'</span><br>';
+  });
+  if(transInterim) html+='<span style="color:#b5006b;opacity:.5;">[…]</span> <span style="color:#888;font-style:italic;">'+escHtml(transInterim)+'</span>';
+  if(!html){var ph={ru:'Транскрипция с таймкодами появится здесь…',de:'Transkription erscheint hier…',en:'Transcription will appear here…',es:'La transcripción aparecerá aquí…',fr:'La transcription apparaîtra ici…',it:'La trascrizione apparirà qui…',zh:'转录将出现在此处…',ja:'文字起こしがここに表示されます…'};html='<span style="color:#aaa;font-style:italic;">'+(ph[curLang]||ph.ru)+'</span>';}
+  box.innerHTML=html; box.scrollTop=box.scrollHeight;
 }
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-document.getElementById('btnClrTrans').addEventListener('click',function(){transLines=[];transInterim='';renderTransBox();});
-document.getElementById('transFont').addEventListener('change',renderTransBox);
-document.getElementById('transSize').addEventListener('input',function(){
-  document.getElementById('transSizeVal').textContent=this.value+'px';
-  renderTransBox();
-});
-document.getElementById('btnCpyTrans').addEventListener('click',function(){
-  var lines=transLines.map(function(l){return '['+l.tc+'] '+l.txt;});
-  var man=document.getElementById('manTrans').value.trim();if(man)lines.push(man);
-  var txt=lines.join('\n').trim();if(!txt){showToast('⚠️ Нет текста');return;}
-  navigator.clipboard.writeText(txt).then(function(){showToast('📋 Скопировано '+lines.length+' строк!');});
-});
-document.getElementById('btnSubsFromTrans').addEventListener('click',function(){
+/* Manual transcription → subtitles */
+document.getElementById('btnSubsFromTrans').addEventListener('click', function() {
   var res='';
-  if(transLines.length>0){res=transLines.map(function(l){return l.tc+' '+l.txt;}).join('\n');}
-  else{var t=document.getElementById('manTrans').value.trim();if(!t){showToast('⚠️ Нет текста');return;}var sents=t.split(/[.!?]+/).map(function(s){return s.trim();}).filter(Boolean);sents.forEach(function(s,i){var mn=Math.floor((i*5)/60),sc=(i*5)%60;res+=mn+':'+(sc<10?'0':'')+sc+' '+s+'\n';});}
-  document.getElementById('subTxt').value=res.trim();
-  showToast('→ Конвертировано в титры!');
+  if (transLines.length) { res=transLines.map(function(l){return l.tc+' '+l.txt;}).join('\n'); }
+  else {
+    var t=document.getElementById('manTrans').value.trim(); if(!t){showToast('⚠️ Нет текста');return;}
+    t.split(/[.!?]+/).map(function(s){return s.trim();}).filter(Boolean).forEach(function(s,i){
+      var mm=Math.floor(i*5/60),ss=(i*5)%60; res+=mm+':'+(ss<10?'0':'')+ss+' '+s+'\n';
+    });
+  }
+  document.getElementById('subTxt').value=res.trim(); showToast('→ Конвертировано!');
 });
 
-/* ══ MANUAL TIMECODE CAPTURE ══ */
-/* 📍 button — lock current video time */
-document.getElementById('btnCaptureTc').addEventListener('click',function(){
+/* Manual timecode capture */
+document.getElementById('btnCaptureTc').addEventListener('click', function() {
   var tc=fmtTc(vEl.currentTime);
   document.getElementById('captureTcDisplay').value=tc;
   document.getElementById('captureText').focus();
-  /* Visual pulse */
-  this.classList.add('capturing');
-  var btn=this;
-  setTimeout(function(){btn.classList.remove('capturing');},800);
-  showToast('📍 Таймкод '+tc+' зафиксирован');
+  var btn=this; btn.style.background='linear-gradient(135deg,#c62828,#e53935)';
+  setTimeout(function(){btn.style.background='';},700);
+  showToast('📍 '+tc+' зафиксирован');
 });
-/* Enter key in captureText = add */
-document.getElementById('captureText').addEventListener('keydown',function(e){
+document.getElementById('captureText').addEventListener('keydown', function(e) {
   if(e.key==='Enter'){e.preventDefault();document.getElementById('btnAddCapture').click();}
 });
-/* ✚ button — add line to capturesArr */
-document.getElementById('btnAddCapture').addEventListener('click',function(){
+document.getElementById('btnAddCapture').addEventListener('click', function() {
   var tc=document.getElementById('captureTcDisplay').value||fmtTc(vEl.currentTime);
-  var txt=document.getElementById('captureText').value.trim();
-  if(!txt){showToast('⚠️ Введите текст фразы');return;}
-  var parts=tc.split(':');
-  var t=parseInt(parts[0],10)*60+(parseInt(parts[1],10)||0);
-  capturesArr.push({tc:tc,t:t,txt:txt});
-  /* Show in transBox */
-  transLines.push({tc:tc,txt:txt});
-  renderTransBox();
-  /* Clear text, advance tc by ~5s */
-  document.getElementById('captureText').value='';
-  var newT=t+5;
-  document.getElementById('captureTcDisplay').value=fmtTc(newT);
-  showToast('✚ ['+tc+'] добавлено');
-  document.getElementById('captureText').focus();
+  var txt=document.getElementById('captureText').value.trim(); if(!txt){showToast('⚠️ Введите текст');return;}
+  var parts=tc.split(':'), t=+parts[0]*60+(+parts[1]||0);
+  capturesArr.push({tc:tc,t:t,txt:txt}); transLines.push({tc:tc,txt:txt});
+  renderTransBox(); document.getElementById('captureText').value='';
+  document.getElementById('captureTcDisplay').value=fmtTc(t+5);
+  showToast('✚ ['+tc+'] добавлено'); document.getElementById('captureText').focus();
 });
-/* ⚡ Захваты → субтитры */
-document.getElementById('btnCapturesToSubs').addEventListener('click',function(){
-  if(!capturesArr.length&&!transLines.length){showToast('⚠️ Нет захватов');return;}
-  var src=transLines.length?transLines:capturesArr;
-  var res=src.map(function(l){return l.tc+' '+l.txt;}).join('\n');
-  document.getElementById('subTxt').value=res;
-  parseSubs();
-  showToast('⚡ '+src.length+' фраз перенесено в субтитры!');
+document.getElementById('btnCapturesToSubs').addEventListener('click', function() {
+  var src=transLines.length?transLines:capturesArr; if(!src.length){showToast('⚠️ Нет захватов');return;}
+  document.getElementById('subTxt').value=src.map(function(l){return l.tc+' '+l.txt;}).join('\n');
+  parseSubs(); showToast('⚡ '+src.length+' фраз → субтитры!');
 });
+
 
 /* ═══ EXPORT TABS ═══ */
 ['GH','GN','IF'].forEach(function(tab){
@@ -1388,9 +1277,8 @@ document.getElementById('liveSubTog').addEventListener('change',function(){
   var info=document.getElementById('liveSubInfo');
   info.style.display=this.checked?'block':'none';
   if(!this.checked){
-    /* Release subtitle control back to manual subs */
-    _subPreview=false;
     clearTimeout(_liveSubTimer);
+    _liveSubActive=false;
   }
   if(this.checked){
     /* Auto-start transcription when live subs turned on */
