@@ -304,8 +304,7 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
 .tstat{font-size:9px;padding:3px 6px;border-radius:4px;margin-bottom:4px;text-align:center;display:none;}
 .tstat.on{display:block;background:rgba(50,150,50,.08);border:1px solid rgba(50,180,50,.3);color:#1a6a1a;}
 .tstat.err{display:block;background:rgba(200,50,50,.08);border:1px solid rgba(200,50,50,.3);color:#8b1a1a;}
-.warn-box{background:#fff8f0;border:1px solid #ffb74d;border-radius:4px;
-  padding:4px 7px;font-size:8px;color:#7a4000;margin-bottom:5px;line-height:1.4;}
+
 .sub-info{font-size:8px;color:var(--txt3);font-style:italic;margin-top:2px;}
 
 /* ── RESPONSIVE ── */
@@ -573,9 +572,7 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
     <div class="panel">
       <div class="ptitle">📝 <span id="t_trans">Транскрипция</span></div>
       <div class="tstat" id="tstat"></div>
-      <div class="warn-box" id="transWarn">
-        <span id="t_transWarn">⚠️ Только Chrome/Edge · Требуется HTTPS или localhost</span>
-      </div>
+      
       <div class="trow">
         <label class="tsw"><input type="checkbox" id="transTog"><span class="tsl"></span></label>
         <span class="tlbl" id="t_autotrans">Авто (Web Speech API)</span>
@@ -665,14 +662,14 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
 
 /* ═══ i18n ═══ */
 var TR={
-  ru:{vs:'Источник видео',uppc:'📁 С компьютера',dropv:'Нажмите или перетащите',vurl:'🔗 По ссылке',asp:'Соотношение сторон',autoAsp:'Авто по видео',bg:'Фон плеера',bgpc:'📁 Изображение',dropb:'Нажмите или перетащите',bgurl:'🔗 По ссылке',bgOp:'Прозрач.:',plr:'Видеоплеер',nov:'Загрузите видео или вставьте ссылку',spd:'Скорость',subs:'Титры',ensubs:'Включить титры',subtxt:'0:05 Текст · мин:сек пробел текст',subLangLbl:'🌐 Язык субтитров',subLangHint:'Выберите язык субтитров (независимо от языка интерфейса)',subFormatLbl:'Формат строк:',trans:'Транскрипция',autotrans:'Авто (Web Speech API)',transcont:'Непрерывно',transres:'Результат',mantrans:'Ручной ввод',exp:'Экспорт кода',hdrSub:'Видеоредактор · Детский сад · Школа · ВУЗ · Семья · Игра',transWarn:'⚠️ Только Chrome/Edge · Требуется HTTPS или localhost (c file:// не работает) · Разрешите микрофон'},
-  de:{vs:'Videoquelle',uppc:'📁 Vom Computer',dropv:'Video hierher ziehen',vurl:'🔗 Per URL',asp:'Seitenverhältnis',autoAsp:'Auto nach Video',bg:'Hintergrund',bgpc:'📁 Hochladen',dropb:'Bild ziehen',bgurl:'🔗 URL',bgOp:'Opazität:',plr:'Videoplayer',nov:'Video laden oder URL eingeben',spd:'Geschwindigkeit',subs:'Untertitel',ensubs:'Aktivieren',subtxt:'0:05 Text · min:sek text',subLangLbl:'🌐 Untertitelsprache',subLangHint:'Sprache der Untertitel wählen (unabhängig von der Oberflächensprache)',subFormatLbl:'Format:',trans:'Transkription',autotrans:'Auto (Web Speech)',transcont:'Kontinuierlich',transres:'Ergebnis',mantrans:'Manuelle Eingabe',exp:'Code Export',hdrSub:'Videoeditor · Kindergarten · Schule · Uni · Familie',transWarn:'⚠️ Nur Chrome/Edge · HTTPS oder localhost erforderlich (file:// funktioniert nicht) · Mikrofon erlauben'},
-  en:{vs:'Video Source',uppc:'📁 From PC',dropv:'Click or drop video',vurl:'🔗 By URL',asp:'Aspect Ratio',autoAsp:'Auto from video',bg:'Player Background',bgpc:'📁 Upload',dropb:'Click or drop image',bgurl:'🔗 URL',bgOp:'Opacity:',plr:'Video Player',nov:'Upload video or enter URL',spd:'Speed',subs:'Subtitles',ensubs:'Enable Subtitles',subtxt:'0:05 Phrase · min:sec text',subLangLbl:'🌐 Subtitle Language',subLangHint:'Choose subtitle language (independent of UI language)',subFormatLbl:'Format:',trans:'Transcription',autotrans:'Auto (Web Speech)',transcont:'Continuous',transres:'Result',mantrans:'Manual input',exp:'Code Export',hdrSub:'Video Editor · Kindergarten · School · University · Family',transWarn:'⚠️ Chrome/Edge only · HTTPS or localhost required (file:// not supported) · Allow microphone'},
-  es:{vs:'Fuente de video',uppc:'📁 Del PC',dropv:'Arrastra el video',vurl:'🔗 Por URL',asp:'Relación de aspecto',autoAsp:'Auto del video',bg:'Fondo',bgpc:'📁 Subir',dropb:'Arrastre imagen',bgurl:'🔗 URL',bgOp:'Opacidad:',plr:'Reproductor',nov:'Sube video o URL',spd:'Velocidad',subs:'Subtítulos',ensubs:'Activar',subtxt:'0:05 Frase · min:seg texto',subLangLbl:'🌐 Idioma de subtítulos',subLangHint:'Elige el idioma de los subtítulos (independiente del idioma de la interfaz)',subFormatLbl:'Formato:',trans:'Transcripción',autotrans:'Auto (Web Speech)',transcont:'Continuo',transres:'Resultado',mantrans:'Entrada manual',exp:'Exportar código',hdrSub:'Editor de video · Jardín · Escuela · Universidad · Familia',transWarn:'⚠️ Solo Chrome/Edge · Se requiere HTTPS o localhost (file:// no funciona) · Permitir micrófono'},
-  fr:{vs:'Source vidéo',uppc:'📁 Du PC',dropv:'Déposer la vidéo',vurl:'🔗 Par URL',asp:"Format d'image",autoAsp:'Auto depuis vidéo',bg:'Arrière-plan',bgpc:'📁 Télécharger',dropb:'Déposer image',bgurl:'🔗 URL',bgOp:'Opacité:',plr:'Lecteur',nov:'Chargez vidéo ou URL',spd:'Vitesse',subs:'Sous-titres',ensubs:'Activer',subtxt:'0:05 Phrase · min:sec texte',subLangLbl:'🌐 Langue des sous-titres',subLangHint:'Choisir la langue des sous-titres (indépendamment de la langue de l\'interface)',subFormatLbl:'Format:',trans:'Transcription',autotrans:'Auto (Web Speech)',transcont:'Continu',transres:'Résultat',mantrans:'Saisie manuelle',exp:'Export code',hdrSub:'Éditeur vidéo · Maternelle · École · Université · Famille',transWarn:'⚠️ Chrome/Edge uniquement · HTTPS ou localhost requis (file:// non supporté) · Autoriser le micro'},
-  it:{vs:'Sorgente video',uppc:'📁 Dal PC',dropv:'Trascina il video',vurl:'🔗 Per URL',asp:'Proporzioni',autoAsp:'Auto dal video',bg:'Sfondo',bgpc:'📁 Carica',dropb:'Trascina immagine',bgurl:'🔗 URL',bgOp:'Opacità:',plr:'Lettore',nov:'Carica video o URL',spd:'Velocità',subs:'Sottotitoli',ensubs:'Attiva',subtxt:'0:05 Frase · min:sec testo',subLangLbl:'🌐 Lingua sottotitoli',subLangHint:'Scegli la lingua dei sottotitoli (indipendente dalla lingua dell\'interfaccia)',subFormatLbl:'Formato:',trans:'Trascrizione',autotrans:'Auto (Web Speech)',transcont:'Continuo',transres:'Risultato',mantrans:'Immissione manuale',exp:'Esporta codice',hdrSub:'Editor video · Asilo · Scuola · Università · Famiglia',transWarn:'⚠️ Solo Chrome/Edge · HTTPS o localhost richiesto (file:// non supportato) · Consentire microfono'},
-  zh:{vs:'视频来源',uppc:'📁 从电脑',dropv:'点击或拖放视频',vurl:'🔗 通过链接',asp:'宽高比',autoAsp:'自动适应',bg:'背景',bgpc:'📁 上传',dropb:'拖放图片',bgurl:'🔗 链接',bgOp:'透明度:',plr:'视频播放器',nov:'上传视频或输入链接',spd:'速度',subs:'字幕',ensubs:'启用字幕',subtxt:'0:05 短语 · 分:秒 文本',subLangLbl:'🌐 字幕语言',subLangHint:'选择字幕语言（与界面语言无关）',subFormatLbl:'格式：',trans:'转录',autotrans:'自动转录',transcont:'连续',transres:'结果',mantrans:'手动输入',exp:'代码导出',hdrSub:'视频编辑器 · 幼儿园 · 学校 · 大学 · 家庭',transWarn:'⚠️ 仅支持Chrome/Edge · 需要HTTPS或localhost（file://不支持）· 请允许麦克风'},
-  ja:{vs:'ビデオソース',uppc:'📁 PCから',dropv:'クリックまたはドロップ',vurl:'🔗 URLで',asp:'アスペクト比',autoAsp:'自動検出',bg:'背景',bgpc:'📁 アップロード',dropb:'画像をドロップ',bgurl:'🔗 URL',bgOp:'透明度:',plr:'プレーヤー',nov:'動画をアップロードまたはURL入力',spd:'速度',subs:'字幕',ensubs:'字幕を有効化',subtxt:'0:05 フレーズ · 分:秒 テキスト',subLangLbl:'🌐 字幕言語',subLangHint:'字幕の言語を選択（UI言語とは独立）',subFormatLbl:'書式：',trans:'文字起こし',autotrans:'自動文字起こし',transcont:'継続',transres:'結果',mantrans:'手動入力',exp:'コードエクスポート',hdrSub:'動画エディター · 幼稚園 · 学校 · 大学 · 家族',transWarn:'⚠️ Chrome/Edgeのみ · HTTPSまたはlocalhostが必要（file://は非対応）· マイクを許可'}
+  ru:{vs:'Источник видео',uppc:'📁 С компьютера',dropv:'Нажмите или перетащите',vurl:'🔗 По ссылке',asp:'Соотношение сторон',autoAsp:'Авто по видео',bg:'Фон плеера',bgpc:'📁 Изображение',dropb:'Нажмите или перетащите',bgurl:'🔗 По ссылке',bgOp:'Прозрач.:',plr:'Видеоплеер',nov:'Загрузите видео или вставьте ссылку',spd:'Скорость',subs:'Титры',ensubs:'Включить титры',subtxt:'0:05 Текст · мин:сек пробел текст',subLangLbl:'🌐 Язык субтитров',subLangHint:'Выберите язык субтитров (независимо от языка интерфейса)',subFormatLbl:'Формат строк:',trans:'Транскрипция',autotrans:'Авто (Web Speech API)',transcont:'Непрерывно',transres:'Результат',mantrans:'Ручной ввод',exp:'Экспорт кода',hdrSub:'Видеоредактор · Детский сад · Школа · ВУЗ · Семья · Игра'},
+  de:{vs:'Videoquelle',uppc:'📁 Vom Computer',dropv:'Video hierher ziehen',vurl:'🔗 Per URL',asp:'Seitenverhältnis',autoAsp:'Auto nach Video',bg:'Hintergrund',bgpc:'📁 Hochladen',dropb:'Bild ziehen',bgurl:'🔗 URL',bgOp:'Opazität:',plr:'Videoplayer',nov:'Video laden oder URL eingeben',spd:'Geschwindigkeit',subs:'Untertitel',ensubs:'Aktivieren',subtxt:'0:05 Text · min:sek text',subLangLbl:'🌐 Untertitelsprache',subLangHint:'Sprache der Untertitel wählen (unabhängig von der Oberflächensprache)',subFormatLbl:'Format:',trans:'Transkription',autotrans:'Auto (Web Speech)',transcont:'Kontinuierlich',transres:'Ergebnis',mantrans:'Manuelle Eingabe',exp:'Code Export',hdrSub:'Videoeditor · Kindergarten · Schule · Uni · Familie'},
+  en:{vs:'Video Source',uppc:'📁 From PC',dropv:'Click or drop video',vurl:'🔗 By URL',asp:'Aspect Ratio',autoAsp:'Auto from video',bg:'Player Background',bgpc:'📁 Upload',dropb:'Click or drop image',bgurl:'🔗 URL',bgOp:'Opacity:',plr:'Video Player',nov:'Upload video or enter URL',spd:'Speed',subs:'Subtitles',ensubs:'Enable Subtitles',subtxt:'0:05 Phrase · min:sec text',subLangLbl:'🌐 Subtitle Language',subLangHint:'Choose subtitle language (independent of UI language)',subFormatLbl:'Format:',trans:'Transcription',autotrans:'Auto (Web Speech)',transcont:'Continuous',transres:'Result',mantrans:'Manual input',exp:'Code Export',hdrSub:'Video Editor · Kindergarten · School · University · Family'},
+  es:{vs:'Fuente de video',uppc:'📁 Del PC',dropv:'Arrastra el video',vurl:'🔗 Por URL',asp:'Relación de aspecto',autoAsp:'Auto del video',bg:'Fondo',bgpc:'📁 Subir',dropb:'Arrastre imagen',bgurl:'🔗 URL',bgOp:'Opacidad:',plr:'Reproductor',nov:'Sube video o URL',spd:'Velocidad',subs:'Subtítulos',ensubs:'Activar',subtxt:'0:05 Frase · min:seg texto',subLangLbl:'🌐 Idioma de subtítulos',subLangHint:'Elige el idioma de los subtítulos (independiente del idioma de la interfaz)',subFormatLbl:'Formato:',trans:'Transcripción',autotrans:'Auto (Web Speech)',transcont:'Continuo',transres:'Resultado',mantrans:'Entrada manual',exp:'Exportar código',hdrSub:'Editor de video · Jardín · Escuela · Universidad · Familia'},
+  fr:{vs:'Source vidéo',uppc:'📁 Du PC',dropv:'Déposer la vidéo',vurl:'🔗 Par URL',asp:"Format d'image",autoAsp:'Auto depuis vidéo',bg:'Arrière-plan',bgpc:'📁 Télécharger',dropb:'Déposer image',bgurl:'🔗 URL',bgOp:'Opacité:',plr:'Lecteur',nov:'Chargez vidéo ou URL',spd:'Vitesse',subs:'Sous-titres',ensubs:'Activer',subtxt:'0:05 Phrase · min:sec texte',subLangLbl:'🌐 Langue des sous-titres',subLangHint:'Choisir la langue des sous-titres (indépendamment de la langue de l\'interface)',subFormatLbl:'Format:',trans:'Transcription',autotrans:'Auto (Web Speech)',transcont:'Continu',transres:'Résultat',mantrans:'Saisie manuelle',exp:'Export code',hdrSub:'Éditeur vidéo · Maternelle · École · Université · Famille'},
+  it:{vs:'Sorgente video',uppc:'📁 Dal PC',dropv:'Trascina il video',vurl:'🔗 Per URL',asp:'Proporzioni',autoAsp:'Auto dal video',bg:'Sfondo',bgpc:'📁 Carica',dropb:'Trascina immagine',bgurl:'🔗 URL',bgOp:'Opacità:',plr:'Lettore',nov:'Carica video o URL',spd:'Velocità',subs:'Sottotitoli',ensubs:'Attiva',subtxt:'0:05 Frase · min:sec testo',subLangLbl:'🌐 Lingua sottotitoli',subLangHint:'Scegli la lingua dei sottotitoli (indipendente dalla lingua dell\'interfaccia)',subFormatLbl:'Formato:',trans:'Trascrizione',autotrans:'Auto (Web Speech)',transcont:'Continuo',transres:'Risultato',mantrans:'Immissione manuale',exp:'Esporta codice',hdrSub:'Editor video · Asilo · Scuola · Università · Famiglia'},
+  zh:{vs:'视频来源',uppc:'📁 从电脑',dropv:'点击或拖放视频',vurl:'🔗 通过链接',asp:'宽高比',autoAsp:'自动适应',bg:'背景',bgpc:'📁 上传',dropb:'拖放图片',bgurl:'🔗 链接',bgOp:'透明度:',plr:'视频播放器',nov:'上传视频或输入链接',spd:'速度',subs:'字幕',ensubs:'启用字幕',subtxt:'0:05 短语 · 分:秒 文本',subLangLbl:'🌐 字幕语言',subLangHint:'选择字幕语言（与界面语言无关）',subFormatLbl:'格式：',trans:'转录',autotrans:'自动转录',transcont:'连续',transres:'结果',mantrans:'手动输入',exp:'代码导出',hdrSub:'视频编辑器 · 幼儿园 · 学校 · 大学 · 家庭'},
+  ja:{vs:'ビデオソース',uppc:'📁 PCから',dropv:'クリックまたはドロップ',vurl:'🔗 URLで',asp:'アスペクト比',autoAsp:'自動検出',bg:'背景',bgpc:'📁 アップロード',dropb:'画像をドロップ',bgurl:'🔗 URL',bgOp:'透明度:',plr:'プレーヤー',nov:'動画をアップロードまたはURL入力',spd:'速度',subs:'字幕',ensubs:'字幕を有効化',subtxt:'0:05 フレーズ · 分:秒 テキスト',subLangLbl:'🌐 字幕言語',subLangHint:'字幕の言語を選択（UI言語とは独立）',subFormatLbl:'書式：',trans:'文字起こし',autotrans:'自動文字起こし',transcont:'継続',transres:'結果',mantrans:'手動入力',exp:'コードエクスポート',hdrSub:'動画エディター · 幼稚園 · 学校 · 大学 · 家族'}
 };
 var LANG_NAMES={ru:'Русский',de:'Deutsch',en:'English',es:'Español',fr:'Français',it:'Italiano',zh:'中文',ja:'日本語'};
 var LANG_CODES={ru:'ru-RU',de:'de-DE',en:'en-US',es:'es-ES',fr:'fr-FR',it:'it-IT',zh:'zh-CN',ja:'ja-JP'};
@@ -698,7 +695,6 @@ function applyI18n(){
     t_trans:'trans',t_autotrans:'autotrans',t_transcont:'transcont',
     t_transres:'transres',t_mantrans:'mantrans',t_exp:'exp',hdrSub:'hdrSub'};
   Object.keys(map).forEach(function(id){var el=document.getElementById(id),v=t[map[id]];if(el&&v)el.textContent=v;});
-  var wb=document.getElementById('t_transWarn');if(wb&&t.transWarn)wb.textContent=t.transWarn;
 }
 document.getElementById('langToggle').addEventListener('click',function(e){e.stopPropagation();document.getElementById('langDrop').classList.toggle('open');});
 document.addEventListener('click',function(){document.getElementById('langDrop').classList.remove('open');});
@@ -706,12 +702,7 @@ document.addEventListener('click',function(){document.getElementById('langDrop')
   var b=document.getElementById('lb_'+l);if(b)b.addEventListener('click',function(e){e.stopPropagation();setLang(l);});
 });
 
-/* file:// warning */
-if(window.location.protocol==='file:'){
-  var _wb=document.getElementById('t_transWarn');
-  var _fmsg={ru:'🚫 file:// не поддерживается. Откройте через HTTPS, localhost или GitHub Pages.',de:'🚫 file:// nicht unterstützt. Bitte HTTPS oder localhost verwenden.',en:'🚫 file:// not supported. Open via HTTPS, localhost or GitHub Pages.',es:'🚫 file:// no soportado. Abrir con HTTPS o localhost.',fr:'🚫 file:// non supporté. Ouvrir via HTTPS ou localhost.',it:'🚫 file:// non supportato. Aprire con HTTPS o localhost.',zh:'🚫 file://不支持。请通过HTTPS或localhost打开。',ja:'🚫 file://は非対応。HTTPSかlocalhostで開いてください。'};
-  if(_wb)_wb.textContent=_fmsg[curLang]||_fmsg.ru;
-}
+/* file:// warning removed */
 
 /* ═══ SUBTITLE LANGUAGE SELECTOR ═══ */
 var subLang='ru'; /* independent of UI language */
@@ -1027,7 +1018,7 @@ function updSubOv(ct){
 /* ═══ TRANSCRIPTION WITH TIMECODES ═══ */
 var recog=null,transActive=false,transLines=[],transInterim='';
 
-if(window.location.protocol==='file:'){var _wb2=document.getElementById('t_transWarn');if(_wb2){var _fm={ru:'🚫 file:// не поддерживается — откройте через HTTPS или localhost.',de:'🚫 file:// nicht unterstützt — bitte HTTPS verwenden.',en:'🚫 file:// not supported — open via HTTPS or localhost.',es:'🚫 file:// no soportado — usar HTTPS.',fr:'🚫 file:// non supporté — utiliser HTTPS.',it:'🚫 file:// non supportato — usare HTTPS.',zh:'🚫 file://不支持，请使用HTTPS。',ja:'🚫 file://非対応、HTTPSを使用してください。'};_wb2.textContent=_fm[curLang]||_fm.ru;}}
+
 
 document.getElementById('transTog').addEventListener('change',function(){if(this.checked)startTrans();else stopTrans();});
 
@@ -1194,8 +1185,7 @@ renderTransBox();
   if(!SR){
     var tog=document.getElementById('transTog');
     if(tog){tog.disabled=true;tog.parentElement.style.opacity='0.4';}
-    setTstat('err','⚠️ Браузер не поддерживает Web Speech API (нужен Chrome/Edge + HTTPS)');
-  }
+     }
 })();
 
 </script>
