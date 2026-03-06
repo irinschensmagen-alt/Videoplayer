@@ -514,6 +514,18 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
         <span class="tlbl" id="t_ensubs">Включить титры</span>
       </div>
 
+      <!-- LIVE subtitles from speech -->
+      <div class="trow" style="background:rgba(194,24,91,.05);border-radius:6px;padding:5px 7px;margin-bottom:5px;">
+        <label class="tsw"><input type="checkbox" id="liveSubTog"><span class="tsl"></span></label>
+        <span class="tlbl" style="color:var(--rose);font-weight:bold;">🎙 Авто-субтитры из речи</span>
+      </div>
+      <div id="liveSubInfo" style="display:none;font-size:8px;color:var(--txt3);background:rgba(194,24,91,.05);
+        border-radius:4px;padding:4px 7px;margin-bottom:5px;line-height:1.5;">
+        🟢 Речь → субтитры в реальном времени.<br>
+        Язык субтитров = язык распознавания ниже.<br>
+        <span id="liveSubBrowser" style="color:var(--rose);"></span>
+      </div>
+
       <!-- Subtitle language: separate from UI language -->
       <div class="slbl" id="t_subLangLbl">🌐 Язык субтитров</div>
       <div class="hint" id="t_subLangHint">Выберите язык субтитров (независимо от языка интерфейса)</div>
@@ -581,6 +593,8 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
         <label class="tsw"><input type="checkbox" id="transContTog" checked><span class="tsl"></span></label>
         <span class="tlbl" id="t_transcont">Непрерывно</span>
       </div>
+      <div id="srBrowserInfo" style="font-size:8px;line-height:1.5;border-radius:4px;
+        padding:4px 7px;margin-bottom:5px;"></div>
       <select id="transLangSel" style="margin-bottom:5px;">
         <option value="ru-RU">🇷🇺 Русский</option>
         <option value="de-DE">🇩🇪 Deutsch</option>
@@ -1022,29 +1036,167 @@ var recog=null,transActive=false,transLines=[],transInterim='';
 
 document.getElementById('transTog').addEventListener('change',function(){if(this.checked)startTrans();else stopTrans();});
 
+/* ── live subtitle state ── */
+var _liveSubText='';
+var _transRestartTimer=null;
+
+function _pushLiveSub(txt, isFinal){
+  if(!document.getElementById('liveSubTog').checked) return;
+  if(!document.getElementById('subTog').checked){
+    document.getElementById('subTog').checked=true;
+  }
+  var ov=document.getElementById('subOv');
+  var badge=document.getElementById('subBadge');
+  var txtEl=document.getElementById('subText');
+  /* Use transcription language as subtitle language */
+  var lang=document.getElementById('transLangSel').value.split('-')[0].toUpperCase();
+  if(badge){badge.textContent=lang;badge.style.display='inline';}
+  if(txtEl){txtEl.textContent=txt; txtEl.style.fontStyle=isFinal?'normal':'italic';}
+  if(isFinal){
+    _liveSubText=txt; _subCurTxt=txt;
+    ov.style.display='flex';
+    /* Auto-clear after 4 seconds if no new phrase */
+    clearTimeout(_liveSubText._t);
+    _liveSubText._t=setTimeout(function(){
+      if(txtEl && txtEl.textContent===txt){
+        ov.style.display='none'; _subCurTxt='';
+      }
+    },4000);
+  } else {
+    ov.style.display='flex'; /* show interim immediately */
+  }
+}
+
 function startTrans(){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){setTstat('err','⚠️ Только Chrome/Edge');showToast('⚠️ Web Speech API: только Chrome/Edge');document.getElementById('transTog').checked=false;return;}
-  transLines=[];transInterim='';document.getElementById('transBox').innerHTML='';
+  if(!SR){
+    setTstat('err','⚠️ Браузер не поддерживает Web Speech API');
+    showToast('⚠️ Нужен Chrome, Edge или Safari');
+    document.getElementById('transTog').checked=false;
+    return;
+  }
+  transLines=[];transInterim='';
+  document.getElementById('transBox').innerHTML='';
+  clearTimeout(_transRestartTimer);
+
   try{
-    recog=new SR();recog.lang=document.getElementById('transLangSel').value;
-    recog.continuous=true;recog.interimResults=true;recog.maxAlternatives=1;
-    recog.onstart=function(){transActive=true;setTstat('on','🎙 '+recog.lang);setStatus('🎙 Транскрипция...');};
+    recog=new SR();
+    recog.lang=document.getElementById('transLangSel').value;
+    recog.continuous=true;
+    recog.interimResults=true;
+    recog.maxAlternatives=1;
+
+    recog.onstart=function(){
+      transActive=true;
+      setTstat('on','🎙 '+recog.lang);
+      setStatus('🎙 Транскрипция: '+recog.lang);
+    };
+
+    recog.onresult=function(e){
+      transInterim='';
+      for(var i=e.resultIndex;i<e.results.length;i++){
+        var phrase=e.results[i][0].transcript.trim();
+        if(!phrase) continue;
+        if(e.results[i].isFinal){
+          transLines.push({tc:fmtTc(vEl.currentTime),txt:phrase});
+          transInterim='';
+          _pushLiveSub(phrase, true);
+        } else {
+          transInterim+=phrase;
+          _pushLiveSub(transInterim, false);
+        }
+      }
+      renderTransBox();
+    };
+
+    recog.onerror=function(e){
+      /* no-speech and aborted are not real errors — ignore */
+      if(e.error==='no-speech'||e.error==='aborted') return;
+      /* network error — retry after 1.5s */
+      if(e.error==='network'){
+        setTstat('on','↻ сеть, повтор…');
+        _transRestartTimer=setTimeout(function(){
+          if(transActive) _restartRecog();
+        },1500);
+        return;
+      }
+      /* audio-capture — microphone busy, wait and retry */
+      if(e.error==='audio-capture'){
+        setTstat('on','⏳ микрофон занят…');
+        _transRestartTimer=setTimeout(function(){
+          if(transActive) _restartRecog();
+        },2000);
+        return;
+      }
+      /* Permission denied — stop */
+      if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+        transActive=false;
+        document.getElementById('transTog').checked=false;
+        setTstat('err','🔒 Микрофон: разрешите доступ в браузере');
+        return;
+      }
+      setTstat('err','⚠️ '+e.error);
+    };
+
+    recog.onend=function(){
+      if(transActive
+        && document.getElementById('transContTog').checked
+        && document.getElementById('transTog').checked){
+        /* Small delay avoids tight restart loop */
+        _transRestartTimer=setTimeout(_restartRecog, 300);
+      } else {
+        transActive=false;
+        setTstat('','');
+        document.getElementById('transTog').checked=false;
+        setStatus('⏹ Остановлено');
+      }
+    };
+
+    recog.start();
+  }catch(ex){
+    setTstat('err','⚠️ '+ex.message);
+    document.getElementById('transTog').checked=false;
+  }
+}
+
+function _restartRecog(){
+  if(!transActive) return;
+  try{
+    recog=new (window.SpeechRecognition||window.webkitSpeechRecognition)();
+    recog.lang=document.getElementById('transLangSel').value;
+    recog.continuous=true; recog.interimResults=true; recog.maxAlternatives=1;
+    /* Re-attach all handlers by calling the same setup */
+    var savedOnResult=arguments.callee; /* pass through */
+    recog.onstart=function(){setTstat('on','🎙 '+recog.lang);};
     recog.onresult=function(e){
       transInterim='';
       for(var i=e.resultIndex;i<e.results.length;i++){
         var phrase=e.results[i][0].transcript.trim();if(!phrase)continue;
-        if(e.results[i].isFinal){transLines.push({tc:fmtTc(vEl.currentTime),txt:phrase});transInterim='';}
-        else transInterim+=phrase;
+        if(e.results[i].isFinal){transLines.push({tc:fmtTc(vEl.currentTime),txt:phrase});transInterim='';_pushLiveSub(phrase,true);}
+        else{transInterim+=phrase;_pushLiveSub(transInterim,false);}
       }
       renderTransBox();
     };
-    recog.onerror=function(e){if(e.error==='aborted'||e.error==='no-speech')return;setTstat('err','⚠️ '+e.error);showToast('⚠️ '+e.error);if(e.error==='not-allowed'||e.error==='service-not-allowed'){transActive=false;document.getElementById('transTog').checked=false;setTstat('err','⚠️ Микрофон запрещён');}};
-    recog.onend=function(){if(transActive&&document.getElementById('transContTog').checked&&document.getElementById('transTog').checked){try{recog.start();}catch(ex){}}else{transActive=false;setTstat('','');document.getElementById('transTog').checked=false;setStatus('⏹ Остановлено');}};
+    recog.onerror=function(e){
+      if(e.error==='no-speech'||e.error==='aborted')return;
+      if(e.error==='network'||e.error==='audio-capture'){_transRestartTimer=setTimeout(function(){if(transActive)_restartRecog();},2000);return;}
+      if(e.error==='not-allowed'||e.error==='service-not-allowed'){transActive=false;document.getElementById('transTog').checked=false;setTstat('err','🔒 Микрофон: разрешите доступ');return;}
+    };
+    recog.onend=function(){
+      if(transActive&&document.getElementById('transContTog').checked&&document.getElementById('transTog').checked){_transRestartTimer=setTimeout(_restartRecog,300);}
+      else{transActive=false;setTstat('','');document.getElementById('transTog').checked=false;}
+    };
     recog.start();
-  }catch(ex){setTstat('err','⚠️ '+ex.message);document.getElementById('transTog').checked=false;}
+  }catch(ex){
+    _transRestartTimer=setTimeout(function(){if(transActive)_restartRecog();},1000);
+  }
 }
-function stopTrans(){transActive=false;if(recog){try{recog.abort();}catch(ex){}recog=null;}setTstat('','');setStatus('⏹ Остановлено');showToast('⏹ Остановлено');}
+function stopTrans(){
+  transActive=false;
+  clearTimeout(_transRestartTimer);
+  if(recog){try{recog.abort();}catch(ex){}recog=null;}
+  setTstat('','');setStatus('⏹ Остановлено');showToast('⏹ Остановлено');
+}
 function setTstat(type,msg){var s=document.getElementById('tstat');s.className='tstat'+(type?' '+type:'');s.textContent=msg;}
 
 function renderTransBox(){
@@ -1179,14 +1331,52 @@ function showToast(m){var t=document.getElementById('toast');t.textContent=m;t.c
 
 applyI18n();
 renderTransBox();
-/* Disable transcription toggle if Web Speech API unavailable */
+
+/* ── Browser detection for Web Speech API ── */
 (function(){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){
+  var info=document.getElementById('srBrowserInfo');
+  var liveInfo=document.getElementById('liveSubBrowser');
+  if(SR){
+    var msg='✅ Ваш браузер поддерживает распознавание речи.';
+    if(info){info.style.background='rgba(50,150,50,.08)';info.style.border='1px solid rgba(50,180,50,.3)';info.style.color='#1a5a1a';info.textContent=msg;}
+    if(liveInfo)liveInfo.textContent='✅ Распознавание поддерживается';
+  }else{
+    var noMsg='ℹ️ Распознавание речи недоступно в этом браузере. Используйте Chrome, Edge или Safari 14.1+. Ручной захват работает везде.';
+    if(info){info.style.background='rgba(120,80,0,.07)';info.style.border='1px solid rgba(180,130,0,.3)';info.style.color='#5a3a00';info.textContent=noMsg;}
+    if(liveInfo)liveInfo.textContent='ℹ️ Смените браузер для авто-субтитров';
     var tog=document.getElementById('transTog');
-    if(tog){tog.disabled=true;tog.parentElement.style.opacity='0.4';}
-     }
+    if(tog){tog.disabled=true;tog.parentElement.style.opacity='0.45';}
+    var ltog=document.getElementById('liveSubTog');
+    if(ltog){ltog.disabled=true;ltog.parentElement.style.opacity='0.45';}
+  }
 })();
+
+/* ── Live subtitle toggle ── */
+document.getElementById('liveSubTog').addEventListener('change',function(){
+  var info=document.getElementById('liveSubInfo');
+  info.style.display=this.checked?'block':'none';
+  if(this.checked){
+    /* Auto-start transcription when live subs turned on */
+    var tog=document.getElementById('transTog');
+    if(!tog.checked){tog.checked=true;startTrans();}
+    /* Sync sub lang display */
+    var langCode=document.getElementById('transLangSel').value.split('-')[0];
+    var sln=document.getElementById('subLangName');
+    if(sln)sln.textContent='🎙 '+langCode.toUpperCase()+' (авто)';
+  }
+});
+
+/* When transcription language changes, update live sub badge */
+document.getElementById('transLangSel').addEventListener('change',function(){
+  if(document.getElementById('liveSubTog').checked){
+    var langCode=this.value.split('-')[0];
+    var sln=document.getElementById('subLangName');
+    if(sln)sln.textContent='🎙 '+langCode.toUpperCase()+' (авто)';
+    /* Restart recognition with new language */
+    if(transActive){stopTrans();setTimeout(function(){document.getElementById('transTog').checked=true;startTrans();},400);}
+  }
+});
 
 </script>
 </body>
