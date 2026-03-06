@@ -886,8 +886,10 @@ document.getElementById('btnClearBg').addEventListener('click',function(){docume
 function applyBg(url){var o=document.getElementById('bgOv');o.style.backgroundImage='url("'+url+'")';o.style.backgroundSize='cover';o.style.backgroundPosition='center';o.style.opacity=document.getElementById('bgOp').value;showToast('🌸 Фон применён!');}
 
 /* ═══ SMART SUBTITLES with language badge ═══ */
-/* subtitle state — no timers, pure time-based */
-var _subCurTxt=''; /* text currently in the overlay */
+/* ── Subtitle state ── */
+var _subCurTxt='';      /* phrase currently displayed */
+var _subPreview=false;  /* true = showing preview, skip timeupdate */
+var _liveSubTimer=null; /* timer for live-speech auto-clear */
 
 document.getElementById('subTog').addEventListener('change',function(){
   var ov=document.getElementById('subOv');
@@ -965,14 +967,15 @@ function parseSubs(){
   if(subsArr.length>0){
     showToast('💬 '+subsArr.length+' фраз · '+(LANG_NAMES[subLang]||subLang));
     /* Reset state and show first subtitle as persistent preview */
-    _subCurTxt='';
+    _subCurTxt='__preview__'; /* sentinel so updSubOv skips until video plays */
+    _subPreview=false; /* allow updSubOv to work normally — it handles t=0 gracefully now */
     var badge=document.getElementById('subBadge');
-    var txt=document.getElementById('subText');
+    var txtEl2=document.getElementById('subText');
     var code=subLang.toUpperCase().substring(0,3);
     if(badge){badge.textContent=code;badge.style.display=code?'inline':'none';}
-    if(txt)txt.textContent='▶  '+subsArr[0].tx;
+    if(txtEl2){txtEl2.textContent='▶  '+subsArr[0].tx; txtEl2.style.fontStyle='normal';}
     ov.style.display='flex';
-    /* Preview stays until video plays — updSubOv will take over on timeupdate */
+    /* Keep preview visible: updSubOv only hides if cur='' AND _subCurTxt is not '__preview__' */
   }else{
     showToast('⚠️ Строк не найдено. Формат: 0:05 Текст');
     ov.style.display='none'; _subCurTxt='';
@@ -992,39 +995,51 @@ function updateSubStyle(){
   ov.style.fontFamily=ff;ov.style.color=col;ov.style.fontSize=sz;
 }
 
-/* ── SUBTITLES: pure DOM, no innerHTML, timer-free ──
-   Logic: find active phrase, check 5s window, show/hide.
-   Uses child spans #subBadge and #subText.
-*/
 function updSubOv(ct){
+  /* Don't fight live speech subtitles */
+  if(_subPreview) return;
+
   var ov=document.getElementById('subOv');
   var tog=document.getElementById('subTog');
   if(!tog.checked){ov.style.display='none';return;}
   if(!subsArr.length)return;
 
-  /* Find active phrase */
-  var cur='', phraseStart=-1;
+  /* Find active phrase index */
+  var cur='', curIdx=-1;
   for(var i=0;i<subsArr.length;i++){
-    if(ct>=subsArr[i].t){cur=subsArr[i].tx; phraseStart=subsArr[i].t;}
+    if(ct>=subsArr[i].t){cur=subsArr[i].tx; curIdx=i;}
   }
 
-  /* Hide if no match OR phrase expired (>5s since start) */
-  if(!cur || (ct-phraseStart>5)){
+  if(!cur){
+    /* Keep preview visible until video actually plays */
+    if(_subCurTxt==='__preview__') return;
     ov.style.display='none';
     _subCurTxt='';
     return;
   }
 
-  /* Always update badge */
+  /* Check if phrase has expired:
+     Expire = 5s passed AND next phrase hasn't started yet (avoid gaps).
+     If next phrase exists use its start time as the cutoff instead of 5s */
+  var phraseStart=subsArr[curIdx].t;
+  var nextStart=(curIdx+1 < subsArr.length) ? subsArr[curIdx+1].t : phraseStart+6;
+  var expire=Math.min(phraseStart+5, nextStart-0.1);
+  if(ct > expire){
+    ov.style.display='none';
+    _subCurTxt='';
+    return;
+  }
+
+  /* Update badge */
   var badge=document.getElementById('subBadge');
   var code=subLang.toUpperCase().substring(0,3);
   if(badge){badge.textContent=code; badge.style.display=code?'inline':'none';}
 
-  /* Only update text if phrase changed */
+  /* Update text (also replaces __preview__ sentinel) */
   if(cur!==_subCurTxt){
     _subCurTxt=cur;
-    var txt=document.getElementById('subText');
-    if(txt)txt.textContent=cur;
+    var txtEl=document.getElementById('subText');
+    if(txtEl){txtEl.textContent=cur; txtEl.style.fontStyle='normal';}
   }
   ov.style.display='flex';
 }
@@ -1042,28 +1057,27 @@ var _transRestartTimer=null;
 
 function _pushLiveSub(txt, isFinal){
   if(!document.getElementById('liveSubTog').checked) return;
-  if(!document.getElementById('subTog').checked){
+  /* Ensure subtitle overlay is on */
+  if(!document.getElementById('subTog').checked)
     document.getElementById('subTog').checked=true;
-  }
   var ov=document.getElementById('subOv');
   var badge=document.getElementById('subBadge');
   var txtEl=document.getElementById('subText');
-  /* Use transcription language as subtitle language */
   var lang=document.getElementById('transLangSel').value.split('-')[0].toUpperCase();
-  if(badge){badge.textContent=lang;badge.style.display='inline';}
+  if(badge){badge.textContent=lang; badge.style.display='inline';}
   if(txtEl){txtEl.textContent=txt; txtEl.style.fontStyle=isFinal?'normal':'italic';}
+  ov.style.display='flex';
+  _subCurTxt=txt;
+  _subPreview=true; /* block updSubOv from overwriting live speech */
   if(isFinal){
-    _liveSubText=txt; _subCurTxt=txt;
-    ov.style.display='flex';
-    /* Auto-clear after 4 seconds if no new phrase */
-    clearTimeout(_liveSubText._t);
-    _liveSubText._t=setTimeout(function(){
-      if(txtEl && txtEl.textContent===txt){
-        ov.style.display='none'; _subCurTxt='';
+    clearTimeout(_liveSubTimer);
+    _liveSubTimer=setTimeout(function(){
+      if(_subCurTxt===txt){
+        ov.style.display='none';
+        _subCurTxt='';
+        _subPreview=false; /* hand back control to timed subs */
       }
     },4000);
-  } else {
-    ov.style.display='flex'; /* show interim immediately */
   }
 }
 
@@ -1194,6 +1208,8 @@ function _restartRecog(){
 function stopTrans(){
   transActive=false;
   clearTimeout(_transRestartTimer);
+  clearTimeout(_liveSubTimer);
+  _subPreview=false;
   if(recog){try{recog.abort();}catch(ex){}recog=null;}
   setTstat('','');setStatus('⏹ Остановлено');showToast('⏹ Остановлено');
 }
