@@ -327,7 +327,7 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
   <h1 class="hdr-title">ИгроМир в Сундучке</h1>
   <div class="orn">✿ ❤ ✿</div>
   <div class="march8">🌹 С 8 Марта! · Happy Women's Day! · Alles Liebe zum 8. März!</div>
-  <p class="hdr-sub" id="hdrSub">Видеоредактор · Детский сад · Школа · ВУЗ · Семья · Игра</p>
+  <p class="hdr-sub" id="hdrSub" id="t_desc">Видеоредактор · Детский сад · Школа · ВУЗ · Семья · Игра</p>
   <div class="hdr-tools">
     <div class="icon-btn" id="langToggle" title="Язык">🌐
       <div class="lang-drop" id="langDrop">
@@ -378,7 +378,7 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
         <button class="asp-btn" id="asp_43">4:3</button>
         <button class="asp-btn" id="asp_32">3:2</button>
         <button class="asp-btn" id="asp_23">2:3</button>
-        <button class="asp-btn" id="asp_cust">Своё</button>
+        <button class="asp-btn" id="asp_cust"><span id="t_aspCust">Своё</span></button>
       </div>
       <div class="custom-asp" id="customAsp">
         <input type="number" id="aspW" value="16" min="1" max="99">
@@ -520,8 +520,8 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
       </div>
       <div id="liveSubInfo" style="display:none;font-size:8px;color:var(--txt3);background:rgba(194,24,91,.05);
         border-radius:4px;padding:4px 7px;margin-bottom:5px;line-height:1.5;">
-        🟢 Речь → субтитры в реальном времени.<br>
-        Язык субтитров = язык распознавания ниже.<br>
+        <span id="t_livesubinfo1">🟢 Речь → субтитры в реальном времени.</span><br>
+        <span id="t_livesubinfo2">Язык субтитров = язык распознавания ниже.</span><br>
         <span id="liveSubBrowser" style="color:var(--rose);"></span>
       </div>
 
@@ -537,7 +537,7 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
         <option value="it">🇮🇹 Italiano</option>
         <option value="zh">🇨🇳 中文</option>
         <option value="ja">🇯🇵 日本語</option>
-        <option value="other">✏️ Другой</option>
+        <option value="other" id="opt_other">✏️ Другой</option>
       </select>
       <input type="text" class="url-in" id="subLangCustom" placeholder="Введите язык…"
         style="display:none;margin-bottom:5px;">
@@ -548,7 +548,7 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
         placeholder="0:00 Добро пожаловать!&#10;0:05 С праздником!&#10;0:12 Следующая фраза..."></textarea>
 
       <div class="sub-info">
-        Язык: <span id="subLangName">Русский</span> · Фраз: <span id="subCount">0</span>
+        <span id="t_langLabel">Язык</span>: <span id="subLangName">Русский</span id="t_phrLabel"> · Фраз: <span id="subCount">0</span>
       </div>
 
       <div style="display:flex;gap:4px;margin-top:5px;align-items:center;">
@@ -566,16 +566,16 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
           background:rgba(194,24,91,.2);outline:none;cursor:pointer;flex-shrink:0;">
       </div>
       <button class="btn" id="btnApplySubs" style="margin-top:6px;">✅ Применить</button>
-      <button class="btn btn-ol btn-sm" id="btnSubsDemo" style="margin-top:3px;">🧪 Тест субтитров</button>
+      <button class="btn btn-ol btn-sm" id="btnSubsDemo" style="margin-top:3px;" id="t_testSubs">🧪 Тест субтитров</button>
       <div id="subDebug" style="display:none;font-size:8px;font-family:monospace;color:var(--pur);
         background:rgba(123,31,162,.06);border:1px solid var(--border);border-radius:4px;
         padding:3px 6px;margin-top:4px;line-height:1.6;">
-        ⏱ Время видео: <span id="subDbgTime">0:00</span> &nbsp;|&nbsp;
-        💬 Активная фраза: <span id="subDbgPhrase">—</span>
+        ⏱ <span id="t_dbgTime">Время видео</span>: <span id="subDbgTime">0:00</span> &nbsp;|&nbsp;
+        💬 <span id="t_dbgPhrase">Активная фраза</span>: <span id="subDbgPhrase">—</span>
       </div>
       <div class="trow" style="margin-top:4px;">
         <label class="tsw"><input type="checkbox" id="subDebugTog"><span class="tsl"></span></label>
-        <span class="tlbl">🔍 Отладка субтитров</span>
+        <span class="tlbl" id="t_debugSubs">🔍 Отладка субтитров</span>
       </div>
     </div>
 
@@ -626,8 +626,8 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
         <button class="btn btn-sm" id="btnCpyTrans">📋 Копировать</button>
       </div>
       <hr class="dv">
-      <div class="slbl" id="t_mantrans">📍 Ручной захват (без микрофона)</div>
-      <div class="hint">Нажмите 📍 во время видео — время зафиксируется. Введите текст и нажмите ✚</div>
+      <div class="slbl" id="t_mantrans" id="t_captureLabel">📍 Ручной захват (без микрофона)</div>
+      <div class="hint" id="t_captureHint">Нажмите 📍 во время видео — время зафиксируется. Введите текст и нажмите ✚</div>
       <!-- Capture row -->
       <div style="display:flex;gap:3px;align-items:stretch;margin-bottom:4px;">
         <button class="btn" id="btnCaptureTc" style="flex-shrink:0;width:auto;padding:5px 8px;font-size:14px;margin-top:0;" title="Зафиксировать текущее время видео">📍</button>
@@ -641,8 +641,8 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
       <!-- Also keep plain textarea for paste/edit -->
       <textarea class="txta" id="manTrans" rows="2" placeholder="Или вставьте текст вручную…"></textarea>
       <div class="row2" style="margin-top:3px;">
-        <button class="btn btn-ol btn-sm" id="btnSubsFromTrans">→ В субтитры</button>
-        <button class="btn btn-sm" id="btnCapturesToSubs">⚡ Захваты → субтитры</button>
+        <button class="btn btn-ol btn-sm" id="btnSubsFromTrans" id="btnSubsFromTrans">→ В субтитры</button>
+        <button class="btn btn-sm" id="btnCapturesToSubs" id="t_capturesToSubs">⚡ Захваты → субтитры</button>
       </div>
     </div>
 
@@ -676,16 +676,419 @@ hr.dv{border:none;border-top:1px solid var(--border);margin:6px 0;}
 
 /* ═══ i18n ═══ */
 var TR={
-  ru:{vs:'Источник видео',uppc:'📁 С компьютера',dropv:'Нажмите или перетащите',vurl:'🔗 По ссылке',asp:'Соотношение сторон',autoAsp:'Авто по видео',bg:'Фон плеера',bgpc:'📁 Изображение',dropb:'Нажмите или перетащите',bgurl:'🔗 По ссылке',bgOp:'Прозрач.:',plr:'Видеоплеер',nov:'Загрузите видео или вставьте ссылку',spd:'Скорость',subs:'Титры',ensubs:'Включить титры',subtxt:'0:05 Текст · мин:сек пробел текст',subLangLbl:'🌐 Язык субтитров',subLangHint:'Выберите язык субтитров (независимо от языка интерфейса)',subFormatLbl:'Формат строк:',trans:'Транскрипция',autotrans:'Авто (Web Speech API)',transcont:'Непрерывно',transres:'Результат',mantrans:'Ручной ввод',exp:'Экспорт кода',hdrSub:'Видеоредактор · Детский сад · Школа · ВУЗ · Семья · Игра'},
-  de:{vs:'Videoquelle',uppc:'📁 Vom Computer',dropv:'Video hierher ziehen',vurl:'🔗 Per URL',asp:'Seitenverhältnis',autoAsp:'Auto nach Video',bg:'Hintergrund',bgpc:'📁 Hochladen',dropb:'Bild ziehen',bgurl:'🔗 URL',bgOp:'Opazität:',plr:'Videoplayer',nov:'Video laden oder URL eingeben',spd:'Geschwindigkeit',subs:'Untertitel',ensubs:'Aktivieren',subtxt:'0:05 Text · min:sek text',subLangLbl:'🌐 Untertitelsprache',subLangHint:'Sprache der Untertitel wählen (unabhängig von der Oberflächensprache)',subFormatLbl:'Format:',trans:'Transkription',autotrans:'Auto (Web Speech)',transcont:'Kontinuierlich',transres:'Ergebnis',mantrans:'Manuelle Eingabe',exp:'Code Export',hdrSub:'Videoeditor · Kindergarten · Schule · Uni · Familie'},
-  en:{vs:'Video Source',uppc:'📁 From PC',dropv:'Click or drop video',vurl:'🔗 By URL',asp:'Aspect Ratio',autoAsp:'Auto from video',bg:'Player Background',bgpc:'📁 Upload',dropb:'Click or drop image',bgurl:'🔗 URL',bgOp:'Opacity:',plr:'Video Player',nov:'Upload video or enter URL',spd:'Speed',subs:'Subtitles',ensubs:'Enable Subtitles',subtxt:'0:05 Phrase · min:sec text',subLangLbl:'🌐 Subtitle Language',subLangHint:'Choose subtitle language (independent of UI language)',subFormatLbl:'Format:',trans:'Transcription',autotrans:'Auto (Web Speech)',transcont:'Continuous',transres:'Result',mantrans:'Manual input',exp:'Code Export',hdrSub:'Video Editor · Kindergarten · School · University · Family'},
-  es:{vs:'Fuente de video',uppc:'📁 Del PC',dropv:'Arrastra el video',vurl:'🔗 Por URL',asp:'Relación de aspecto',autoAsp:'Auto del video',bg:'Fondo',bgpc:'📁 Subir',dropb:'Arrastre imagen',bgurl:'🔗 URL',bgOp:'Opacidad:',plr:'Reproductor',nov:'Sube video o URL',spd:'Velocidad',subs:'Subtítulos',ensubs:'Activar',subtxt:'0:05 Frase · min:seg texto',subLangLbl:'🌐 Idioma de subtítulos',subLangHint:'Elige el idioma de los subtítulos (independiente del idioma de la interfaz)',subFormatLbl:'Formato:',trans:'Transcripción',autotrans:'Auto (Web Speech)',transcont:'Continuo',transres:'Resultado',mantrans:'Entrada manual',exp:'Exportar código',hdrSub:'Editor de video · Jardín · Escuela · Universidad · Familia'},
-  fr:{vs:'Source vidéo',uppc:'📁 Du PC',dropv:'Déposer la vidéo',vurl:'🔗 Par URL',asp:"Format d'image",autoAsp:'Auto depuis vidéo',bg:'Arrière-plan',bgpc:'📁 Télécharger',dropb:'Déposer image',bgurl:'🔗 URL',bgOp:'Opacité:',plr:'Lecteur',nov:'Chargez vidéo ou URL',spd:'Vitesse',subs:'Sous-titres',ensubs:'Activer',subtxt:'0:05 Phrase · min:sec texte',subLangLbl:'🌐 Langue des sous-titres',subLangHint:'Choisir la langue des sous-titres (indépendamment de la langue de l\'interface)',subFormatLbl:'Format:',trans:'Transcription',autotrans:'Auto (Web Speech)',transcont:'Continu',transres:'Résultat',mantrans:'Saisie manuelle',exp:'Export code',hdrSub:'Éditeur vidéo · Maternelle · École · Université · Famille'},
-  it:{vs:'Sorgente video',uppc:'📁 Dal PC',dropv:'Trascina il video',vurl:'🔗 Per URL',asp:'Proporzioni',autoAsp:'Auto dal video',bg:'Sfondo',bgpc:'📁 Carica',dropb:'Trascina immagine',bgurl:'🔗 URL',bgOp:'Opacità:',plr:'Lettore',nov:'Carica video o URL',spd:'Velocità',subs:'Sottotitoli',ensubs:'Attiva',subtxt:'0:05 Frase · min:sec testo',subLangLbl:'🌐 Lingua sottotitoli',subLangHint:'Scegli la lingua dei sottotitoli (indipendente dalla lingua dell\'interfaccia)',subFormatLbl:'Formato:',trans:'Trascrizione',autotrans:'Auto (Web Speech)',transcont:'Continuo',transres:'Risultato',mantrans:'Immissione manuale',exp:'Esporta codice',hdrSub:'Editor video · Asilo · Scuola · Università · Famiglia'},
-  zh:{vs:'视频来源',uppc:'📁 从电脑',dropv:'点击或拖放视频',vurl:'🔗 通过链接',asp:'宽高比',autoAsp:'自动适应',bg:'背景',bgpc:'📁 上传',dropb:'拖放图片',bgurl:'🔗 链接',bgOp:'透明度:',plr:'视频播放器',nov:'上传视频或输入链接',spd:'速度',subs:'字幕',ensubs:'启用字幕',subtxt:'0:05 短语 · 分:秒 文本',subLangLbl:'🌐 字幕语言',subLangHint:'选择字幕语言（与界面语言无关）',subFormatLbl:'格式：',trans:'转录',autotrans:'自动转录',transcont:'连续',transres:'结果',mantrans:'手动输入',exp:'代码导出',hdrSub:'视频编辑器 · 幼儿园 · 学校 · 大学 · 家庭'},
-  ja:{vs:'ビデオソース',uppc:'📁 PCから',dropv:'クリックまたはドロップ',vurl:'🔗 URLで',asp:'アスペクト比',autoAsp:'自動検出',bg:'背景',bgpc:'📁 アップロード',dropb:'画像をドロップ',bgurl:'🔗 URL',bgOp:'透明度:',plr:'プレーヤー',nov:'動画をアップロードまたはURL入力',spd:'速度',subs:'字幕',ensubs:'字幕を有効化',subtxt:'0:05 フレーズ · 分:秒 テキスト',subLangLbl:'🌐 字幕言語',subLangHint:'字幕の言語を選択（UI言語とは独立）',subFormatLbl:'書式：',trans:'文字起こし',autotrans:'自動文字起こし',transcont:'継続',transres:'結果',mantrans:'手動入力',exp:'コードエクスポート',hdrSub:'動画エディター · 幼稚園 · 学校 · 大学 · 家族'}
+  ru:{vs:'Источник видео',uppc:'📁 С компьютера',dropv:'Нажмите или перетащите',vurl:'🔗 По ссылке',
+    asp:'Соотношение сторон',autoAsp:'Авто по видео',aspCust:'Своё',loadvid:'▶ Загрузить',
+    bg:'Фон плеера',bgpc:'📁 С компьютера',dropb:'Нажмите или перетащите',bgurl:'🔗 По ссылке',
+    bgOp:'Прозрач.:',bgApply:'🌸 Применить',bgClear:'✕ Убрать фон',
+    plr:'Видеоплеер',nov:'Загрузите видео или вставьте ссылку',
+    novideo:'Ваш браузер не поддерживает HTML5 видео. Попробуйте Chrome, Firefox, Safari или Edge.',
+    spd:'Скорость',
+    exp:'Экспорт кода',ghDesc:'HTML для GitHub Pages с субтитрами',
+    gnDesc:'Добавить элемент → HTML-код в Genially',ifDesc:'Универсальный iFrame для LMS, Moodle, сайта',
+    subs:'Титры',ensubs:'Включить титры',
+    subtxt:'0:05 Текст · мин:сек пробел текст',
+    subLangLbl:'🌐 Язык субтитров',subLangHint:'Язык субтитров (независимо от языка интерфейса)',
+    subFormatLbl:'Формат:',
+    livesub:'🎙 Авто-субтитры из речи',
+    livesubinfo1:'🟢 Речь → субтитры в реальном времени.',
+    livesubinfo2:'Язык субтитров = язык распознавания ниже.',
+    trans:'Транскрипция',autotrans:'Авто (Web Speech API)',transcont:'Непрерывно',
+    transres:'Результаты',mantrans:'Или вставьте текст вручную…',
+    directOpt:'Прямое видео (mp4/webm/ogg)',
+    phr:'фраз',phrFmt:'Текст фразы',notFound:'Строк не найдено. Формат: 0:05 Текст',
+    toSubs:'→ Конвертировано!',noText:'Нет текста',noCaptures:'Нет захватов',
+    added:'добавлено',enterText:'Введите текст',tcFixed:'зафиксирован',
+    demoLine1:'▶ Первая фраза субтитров',demoLine2:'Субтитры работают!',
+    demoLine3:'Формат: М:СС Текст фразы',demoLine4:'Редактируйте и жмите Применить',
+    hdrSub:'Субтитры',
+    subApply:'✅ Применить',
+    testSubs:'🧪 Тест',
+    debugSubs:'🔍 Отладка',
+    dbgTime:'Время видео',
+    dbgPhrase:'Активная фраза',
+    phrLabel:'Фраз',
+    langLabel:'Язык',
+    optOther:'✏️ Другой',
+    captureLabel:'📍 Ручной захват',
+    captureHint:'Нажмите 📍 → введите текст → ✚',
+    capturesToSubs:'⚡ Захваты → субтитры',
+    subsFromTrans:'→ В субтитры',
+    generate:'⚙️ Сгенерировать',
+    copyBtn:'📋 Копировать',
+    subtitleDesc:'Видеоредактор · Детский сад · Школа · ВУЗ · Семья · Игра',
+    copied:'📋 Скопировано!',noCode:'⚠️ Сначала Сгенерировать'},
+
+  de:{vs:'Videoquelle',uppc:'📁 Vom Computer',dropv:'Hier ablegen oder klicken',vurl:'🔗 Per URL',
+    asp:'Seitenverhältnis',autoAsp:'Auto nach Video',aspCust:'Eigenes',loadvid:'▶ Laden',
+    bg:'Hintergrund',bgpc:'📁 Vom Computer',dropb:'Hier ablegen oder klicken',bgurl:'🔗 URL',
+    bgOp:'Opazität:',bgApply:'🌸 Anwenden',bgClear:'✕ Hintergrund entfernen',
+    plr:'Videoplayer',nov:'Video laden oder URL eingeben',
+    novideo:'Ihr Browser unterstützt kein HTML5-Video. Bitte Chrome, Firefox, Safari oder Edge verwenden.',
+    spd:'Geschwindigkeit',
+    exp:'Code exportieren',ghDesc:'HTML für GitHub Pages mit Untertiteln',
+    gnDesc:'Element hinzufügen → HTML-Code in Genially',ifDesc:'Universeller iFrame für LMS, Moodle, Website',
+    subs:'Untertitel',ensubs:'Aktivieren',
+    subtxt:'0:05 Text · min:sek leerzeichen text',
+    subLangLbl:'🌐 Untertitelsprache',subLangHint:'Untertitelsprache wählen (unabhängig von der Oberflächensprache)',
+    subFormatLbl:'Format:',
+    livesub:'🎙 Automatische Untertitel aus Sprache',
+    livesubinfo1:'🟢 Sprache → Untertitel in Echtzeit.',
+    livesubinfo2:'Untertitelsprache = Erkennungssprache unten.',
+    trans:'Transkription',autotrans:'Auto (Web Speech API)',transcont:'Kontinuierlich',
+    transres:'Ergebnisse',mantrans:'Oder Text manuell eingeben…',
+    directOpt:'Direktes Video (mp4/webm/ogg)',
+    phr:'Phrasen',phrFmt:'Phrasentext',notFound:'Keine Zeilen gefunden. Format: 0:05 Text',
+    toSubs:'→ Konvertiert!',noText:'Kein Text',noCaptures:'Keine Aufnahmen',
+    added:'hinzugefügt',enterText:'Text eingeben',tcFixed:'fixiert',
+    demoLine1:'▶ Erste Untertitelphrase',demoLine2:'Untertitel funktionieren!',
+    demoLine3:'Format: M:SS Phrasentext',demoLine4:'Bearbeiten und Anwenden drücken',
+    hdrSub:'Untertitel',
+    subApply:'✅ Anwenden',
+    testSubs:'🧪 Testen',
+    debugSubs:'🔍 Debug',
+    dbgTime:'Videozeit',
+    dbgPhrase:'Aktive Phrase',
+    phrLabel:'Phrasen',
+    langLabel:'Sprache',
+    optOther:'✏️ Andere',
+    captureLabel:'📍 Manuell',
+    captureHint:'📍 drücken → Text eingeben → ✚',
+    capturesToSubs:'⚡ Aufnahmen → Untertitel',
+    subsFromTrans:'→ Als Untertitel',
+    generate:'⚙️ Generieren',
+    copyBtn:'📋 Kopieren',
+    subtitleDesc:'Videoeditor · Kindergarten · Schule · Uni · Familie · Spiel',
+    copied:'📋 Kopiert!',noCode:'⚠️ Zuerst auf Generieren klicken'},
+
+  en:{vs:'Video source',uppc:'📁 From computer',dropv:'Click or drag here',vurl:'🔗 By URL',
+    asp:'Aspect ratio',autoAsp:'Auto from video',aspCust:'Custom',loadvid:'▶ Load',
+    bg:'Background',bgpc:'📁 From computer',dropb:'Click or drag here',bgurl:'🔗 URL',
+    bgOp:'Opacity:',bgApply:'🌸 Apply',bgClear:'✕ Remove background',
+    plr:'Video player',nov:'Load video or enter URL',
+    novideo:'Your browser does not support HTML5 video. Please try Chrome, Firefox, Safari or Edge.',
+    spd:'Speed',
+    exp:'Export code',ghDesc:'HTML for GitHub Pages with subtitles',
+    gnDesc:'Add element → HTML code in Genially',ifDesc:'Universal iFrame for LMS, Moodle, website',
+    subs:'Subtitles',ensubs:'Enable subtitles',
+    subtxt:'0:05 Text · min:sec space text',
+    subLangLbl:'🌐 Subtitle language',subLangHint:'Subtitle language (independent of UI language)',
+    subFormatLbl:'Format:',
+    livesub:'🎙 Auto-subtitles from speech',
+    livesubinfo1:'🟢 Speech → subtitles in real time.',
+    livesubinfo2:'Subtitle language = recognition language below.',
+    trans:'Transcription',autotrans:'Auto (Web Speech API)',transcont:'Continuous',
+    transres:'Results',mantrans:'Or paste text manually…',
+    directOpt:'Direct video (mp4/webm/ogg)',
+    phr:'phrases',phrFmt:'Phrase text',notFound:'No lines found. Format: 0:05 Text',
+    toSubs:'→ Converted!',noText:'No text',noCaptures:'No captures',
+    added:'added',enterText:'Enter text',tcFixed:'fixed',
+    demoLine1:'▶ First subtitle phrase',demoLine2:'Subtitles work!',
+    demoLine3:'Format: M:SS Phrase text',demoLine4:'Edit and press Apply',
+    hdrSub:'Subtitles',
+    subApply:'✅ Apply',
+    testSubs:'🧪 Test',
+    debugSubs:'🔍 Debug',
+    dbgTime:'Video time',
+    dbgPhrase:'Active phrase',
+    phrLabel:'Phrases',
+    langLabel:'Language',
+    optOther:'✏️ Other',
+    captureLabel:'📍 Manual capture',
+    captureHint:'Press 📍 → enter text → ✚',
+    capturesToSubs:'⚡ Captures → subtitles',
+    subsFromTrans:'→ To subtitles',
+    generate:'⚙️ Generate',
+    copyBtn:'📋 Copy',
+    subtitleDesc:'Video editor · Kindergarten · School · University · Family · Game',
+    copied:'📋 Copied!',noCode:'⚠️ Click Generate first'},
+
+  es:{vs:'Fuente de video',uppc:'📁 Desde el ordenador',dropv:'Haz clic o arrastra',vurl:'🔗 Por URL',
+    asp:'Relación de aspecto',autoAsp:'Auto desde video',aspCust:'Personalizado',loadvid:'▶ Cargar',
+    bg:'Fondo',bgpc:'📁 Desde el ordenador',dropb:'Haz clic o arrastra',bgurl:'🔗 URL',
+    bgOp:'Opacidad:',bgApply:'🌸 Aplicar',bgClear:'✕ Quitar fondo',
+    plr:'Reproductor',nov:'Carga video o ingresa URL',
+    novideo:'Tu navegador no admite video HTML5. Prueba Chrome, Firefox, Safari o Edge.',
+    spd:'Velocidad',
+    exp:'Exportar código',ghDesc:'HTML para GitHub Pages con subtítulos',
+    gnDesc:'Añadir elemento → código HTML en Genially',ifDesc:'iFrame universal para LMS, Moodle, sitio web',
+    subs:'Subtítulos',ensubs:'Activar',
+    subtxt:'0:05 Texto · min:seg espacio texto',
+    subLangLbl:'🌐 Idioma de subtítulos',subLangHint:'Idioma de subtítulos (independiente del idioma de la interfaz)',
+    subFormatLbl:'Formato:',
+    livesub:'🎙 Subtítulos automáticos de voz',
+    livesubinfo1:'🟢 Voz → subtítulos en tiempo real.',
+    livesubinfo2:'Idioma de subtítulos = idioma de reconocimiento abajo.',
+    trans:'Transcripción',autotrans:'Auto (Web Speech API)',transcont:'Continuo',
+    transres:'Resultados',mantrans:'O pega texto manualmente…',
+    directOpt:'Video directo (mp4/webm/ogg)',
+    phr:'frases',phrFmt:'Texto de frase',notFound:'No se encontraron líneas. Formato: 0:05 Texto',
+    toSubs:'→ ¡Convertido!',noText:'Sin texto',noCaptures:'Sin capturas',
+    added:'añadido',enterText:'Ingresar texto',tcFixed:'fijado',
+    demoLine1:'▶ Primera frase de subtítulos',demoLine2:'¡Los subtítulos funcionan!',
+    demoLine3:'Formato: M:SS Texto de frase',demoLine4:'Edita y pulsa Aplicar',
+    hdrSub:'Subtítulos',
+    subApply:'✅ Aplicar',
+    testSubs:'🧪 Probar',
+    debugSubs:'🔍 Debug',
+    dbgTime:'Tiempo',
+    dbgPhrase:'Frase activa',
+    phrLabel:'Frases',
+    langLabel:'Idioma',
+    optOther:'✏️ Otro',
+    captureLabel:'📍 Manual',
+    captureHint:'Pulsa 📍 → escribe texto → ✚',
+    capturesToSubs:'⚡ Capturas → subtítulos',
+    subsFromTrans:'→ A subtítulos',
+    generate:'⚙️ Generar',
+    copyBtn:'📋 Copiar',
+    subtitleDesc:'Editor de video · Jardín · Escuela · Universidad · Familia · Juego',
+    urlEmpty:'Ingresar URL',
+    noYtId:'No se pudo determinar el ID de YouTube',
+    loaded:'▶ Cargado!',
+    errAbort:'Carga interrumpida',
+    errNet:'Error de red',
+    errDecode:'Error de decodificación',
+    errFormat:'Formato no soportado',
+    ready:'✅ Listo',
+    stopped:'⏹ Detenido',
+    micOk:'✅ Micrófono disponible!',
+    micBlocked:'🔒 Micrófono bloqueado.',
+    micNotFound:'🎤 Micrófono no encontrado.',
+    micNoHttps:'🔒 Se requiere HTTPS.',
+    micBlocked2:'🔒 Abrir vía HTTPS.',
+    copied:'📋 Copiado!',
+    noCode:'⚠️ Primero generar'},
+
+  fr:{vs:'Source vidéo',uppc:'📁 Depuis l\'ordinateur',dropv:'Cliquer ou déposer',vurl:'🔗 Par URL',
+    asp:'Format d\'image',autoAsp:'Auto depuis vidéo',aspCust:'Personnalisé',loadvid:'▶ Charger',
+    bg:'Arrière-plan',bgpc:'📁 Depuis l\'ordinateur',dropb:'Cliquer ou déposer',bgurl:'🔗 URL',
+    bgOp:'Opacité:',bgApply:'🌸 Appliquer',bgClear:'✕ Supprimer l\'arrière-plan',
+    plr:'Lecteur vidéo',nov:'Charger une vidéo ou entrer une URL',
+    novideo:'Votre navigateur ne supporte pas la vidéo HTML5. Essayez Chrome, Firefox, Safari ou Edge.',
+    spd:'Vitesse',
+    exp:'Exporter le code',ghDesc:'HTML pour GitHub Pages avec sous-titres',
+    gnDesc:'Ajouter élément → code HTML dans Genially',ifDesc:'iFrame universel pour LMS, Moodle, site web',
+    subs:'Sous-titres',ensubs:'Activer',
+    subtxt:'0:05 Texte · min:sec espace texte',
+    subLangLbl:'🌐 Langue des sous-titres',subLangHint:'Langue des sous-titres (indépendante de la langue de l\'interface)',
+    subFormatLbl:'Format:',
+    livesub:'🎙 Sous-titres automatiques par reconnaissance vocale',
+    livesubinfo1:'🟢 Voix → sous-titres en temps réel.',
+    livesubinfo2:'Langue des sous-titres = langue de reconnaissance ci-dessous.',
+    trans:'Transcription',autotrans:'Auto (Web Speech API)',transcont:'Continu',
+    transres:'Résultats',mantrans:'Ou collez le texte manuellement…',
+    directOpt:'Vidéo directe (mp4/webm/ogg)',
+    phr:'phrases',phrFmt:'Texte de phrase',notFound:'Aucune ligne trouvée. Format: 0:05 Texte',
+    toSubs:'→ Converti!',noText:'Pas de texte',noCaptures:'Pas de captures',
+    added:'ajouté',enterText:'Entrer le texte',tcFixed:'fixé',
+    demoLine1:'▶ Première phrase de sous-titres',demoLine2:'Les sous-titres fonctionnent!',
+    demoLine3:'Format: M:SS Texte de phrase',demoLine4:'Modifiez et appuyez sur Appliquer',
+    hdrSub:'Sous-titres',
+    subApply:'✅ Appliquer',
+    testSubs:'🧪 Tester',
+    debugSubs:'🔍 Debug',
+    dbgTime:'Temps vidéo',
+    dbgPhrase:'Phrase active',
+    phrLabel:'Phrases',
+    langLabel:'Langue',
+    optOther:'✏️ Autre',
+    captureLabel:'📍 Manuel',
+    captureHint:'Appuyez 📍 → entrez texte → ✚',
+    capturesToSubs:'⚡ Captures → sous-titres',
+    subsFromTrans:'→ Sous-titres',
+    generate:'⚙️ Générer',
+    copyBtn:'📋 Copier',
+    subtitleDesc:'Éditeur vidéo · Maternelle · École · Université · Famille · Jeu',
+    urlEmpty:"Entrer l'URL",
+    noYtId:'ID YouTube introuvable',
+    loaded:'▶ Chargé!',
+    errAbort:'Chargement interrompu',
+    errNet:'Erreur réseau',
+    errDecode:'Erreur de décodage',
+    errFormat:'Format non supporté',
+    ready:'✅ Prêt',
+    stopped:'⏹ Arrêté',
+    micOk:'✅ Micro disponible!',
+    micBlocked:'🔒 Micro bloqué.',
+    micNotFound:'🎤 Micro introuvable.',
+    micNoHttps:'🔒 HTTPS requis.',
+    micBlocked2:'🔒 Ouvrir via HTTPS.',
+    copied:'📋 Copié!',
+    noCode:"⚠️ Générer d'abord"},
+
+  it:{vs:'Sorgente video',uppc:'📁 Dal computer',dropv:'Clicca o trascina',vurl:'🔗 Per URL',
+    asp:'Formato',autoAsp:'Auto dal video',aspCust:'Personalizzato',loadvid:'▶ Carica',
+    bg:'Sfondo',bgpc:'📁 Dal computer',dropb:'Clicca o trascina',bgurl:'🔗 URL',
+    bgOp:'Opacità:',bgApply:'🌸 Applica',bgClear:'✕ Rimuovi sfondo',
+    plr:'Lettore video',nov:'Carica video o inserisci URL',
+    novideo:'Il tuo browser non supporta il video HTML5. Prova Chrome, Firefox, Safari o Edge.',
+    spd:'Velocità',
+    exp:'Esporta codice',ghDesc:'HTML per GitHub Pages con sottotitoli',
+    gnDesc:'Aggiungi elemento → codice HTML in Genially',ifDesc:'iFrame universale per LMS, Moodle, sito web',
+    subs:'Sottotitoli',ensubs:'Attiva',
+    subtxt:'0:05 Testo · min:sec spazio testo',
+    subLangLbl:'🌐 Lingua dei sottotitoli',subLangHint:'Lingua dei sottotitoli (indipendente dalla lingua dell\'interfaccia)',
+    subFormatLbl:'Formato:',
+    livesub:'🎙 Sottotitoli automatici dal parlato',
+    livesubinfo1:'🟢 Voce → sottotitoli in tempo reale.',
+    livesubinfo2:'Lingua sottotitoli = lingua di riconoscimento sotto.',
+    trans:'Trascrizione',autotrans:'Auto (Web Speech API)',transcont:'Continuo',
+    transres:'Risultati',mantrans:'Oppure incolla il testo manualmente…',
+    directOpt:'Video diretto (mp4/webm/ogg)',
+    phr:'frasi',phrFmt:'Testo della frase',notFound:'Nessuna riga trovata. Formato: 0:05 Testo',
+    toSubs:'→ Convertito!',noText:'Nessun testo',noCaptures:'Nessuna acquisizione',
+    added:'aggiunto',enterText:'Inserisci testo',tcFixed:'fissato',
+    demoLine1:'▶ Prima frase di sottotitoli',demoLine2:'I sottotitoli funzionano!',
+    demoLine3:'Formato: M:SS Testo della frase',demoLine4:'Modifica e premi Applica',
+    hdrSub:'Sottotitoli',
+    subApply:'✅ Applica',
+    testSubs:'🧪 Testa',
+    debugSubs:'🔍 Debug',
+    dbgTime:'Tempo video',
+    dbgPhrase:'Frase attiva',
+    phrLabel:'Frasi',
+    langLabel:'Lingua',
+    optOther:'✏️ Altro',
+    captureLabel:'📍 Manuale',
+    captureHint:'Premi 📍 → inserisci testo → ✚',
+    capturesToSubs:'⚡ Acquisizioni → sottotitoli',
+    subsFromTrans:'→ Ai sottotitoli',
+    generate:'⚙️ Genera',
+    copyBtn:'📋 Copia',
+    subtitleDesc:'Editor video · Asilo · Scuola · Università · Famiglia · Gioco',
+    urlEmpty:'Inserisci URL',
+    noYtId:'ID YouTube non trovato',
+    loaded:'▶ Caricato!',
+    errAbort:'Caricamento interrotto',
+    errNet:'Errore di rete',
+    errDecode:'Errore di decodifica',
+    errFormat:'Formato non supportato',
+    ready:'✅ Pronto',
+    stopped:'⏹ Fermato',
+    micOk:'✅ Microfono disponibile!',
+    micBlocked:'🔒 Microfono bloccato.',
+    micNotFound:'🎤 Microfono non trovato.',
+    micNoHttps:'🔒 Richiesto HTTPS.',
+    micBlocked2:'🔒 Aprire tramite HTTPS.',
+    copied:'📋 Copiato!',
+    noCode:'⚠️ Prima genera'},
+
+  zh:{vs:'视频来源',uppc:'📁 从电脑',dropv:'点击或拖拽',vurl:'🔗 通过链接',
+    asp:'宽高比',autoAsp:'从视频自动',aspCust:'自定义',loadvid:'▶ 加载',
+    bg:'背景',bgpc:'📁 从电脑',dropb:'点击或拖拽',bgurl:'🔗 链接',
+    bgOp:'透明度:',bgApply:'🌸 应用',bgClear:'✕ 移除背景',
+    plr:'视频播放器',nov:'加载视频或输入链接',
+    novideo:'您的浏览器不支持HTML5视频。请尝试Chrome、Firefox、Safari或Edge。',
+    spd:'速度',
+    exp:'导出代码',ghDesc:'带字幕的GitHub Pages HTML',
+    gnDesc:'添加元素 → Genially中的HTML代码',ifDesc:'用于LMS、Moodle、网站的通用iFrame',
+    subs:'字幕',ensubs:'启用字幕',
+    subtxt:'0:05 文字 · 分:秒 空格 文字',
+    subLangLbl:'🌐 字幕语言',subLangHint:'字幕语言（独立于界面语言）',
+    subFormatLbl:'格式:',
+    livesub:'🎙 语音自动字幕',
+    livesubinfo1:'🟢 语音 → 实时字幕。',
+    livesubinfo2:'字幕语言 = 以下识别语言。',
+    trans:'转录',autotrans:'自动 (Web Speech API)',transcont:'连续',
+    transres:'结果',mantrans:'或手动粘贴文本…',
+    directOpt:'直接视频 (mp4/webm/ogg)',
+    phr:'短语',phrFmt:'短语文本',notFound:'未找到行。格式: 0:05 文本',
+    toSubs:'→ 已转换!',noText:'无文本',noCaptures:'无捕获',
+    added:'已添加',enterText:'输入文本',tcFixed:'已固定',
+    demoLine1:'▶ 第一条字幕',demoLine2:'字幕正常工作！',
+    demoLine3:'格式: 分:秒 短语文本',demoLine4:'编辑后点击应用',
+    hdrSub:'字幕',
+    subApply:'✅ 適用',
+    testSubs:'🧪 テスト',
+    debugSubs:'🔍 デバッグ',
+    dbgTime:'動画時間',
+    dbgPhrase:'現在フレーズ',
+    phrLabel:'フレーズ',
+    langLabel:'言語',
+    optOther:'✏️ その他',
+    captureLabel:'📍 手動',
+    captureHint:'📍を押す → テキスト入力 → ✚',
+    capturesToSubs:'⚡ キャプチャ→字幕',
+    subsFromTrans:'→ 字幕へ',
+    generate:'⚙️ 生成',
+    copyBtn:'📋 コピー',
+    subtitleDesc:'ビデオエディター · 幼稚園 · 学校 · 大学 · 家族 · ゲーム',
+    subApply:'✅ 应用',
+    testSubs:'🧪 测试',
+    debugSubs:'🔍 调试',
+    dbgTime:'视频时间',
+    dbgPhrase:'当前短语',
+    phrLabel:'短语',
+    langLabel:'语言',
+    optOther:'✏️ 其他',
+    captureLabel:'📍 手动捕获',
+    captureHint:'按📍 → 输入文本 → ✚',
+    capturesToSubs:'⚡ 捕获→字幕',
+    subsFromTrans:'→ 转为字幕',
+    generate:'⚙️ 生成',
+    copyBtn:'📋 复制',
+    subtitleDesc:'视频编辑器 · 幼儿园 · 学校 · 大学 · 家庭 · 游戏',
+    urlEmpty:'输入链接',
+    noYtId:'无法确定YouTube ID',
+    loaded:'▶ 已加载!',
+    errAbort:'加载中止',
+    errNet:'网络错误',
+    errDecode:'解码错误',
+    errFormat:'格式不受支持',
+    ready:'✅ 准备播放',
+    stopped:'⏹ 已停止',
+    micOk:'✅ 麦克风可用!',
+    micBlocked:'🔒 麦克风被阻止.',
+    micNotFound:'🎤 未找到麦克风.',
+    micNoHttps:'🔒 需要HTTPS.',
+    micBlocked2:'🔒 通过HTTPS打开.',
+    copied:'📋 已复制!',
+    noCode:'⚠️ 先点击生成'},
+
+  ja:{vs:'ビデオソース',uppc:'📁 コンピューターから',dropv:'クリックまたはドラッグ',vurl:'🔗 URLで',
+    asp:'アスペクト比',autoAsp:'ビデオから自動',aspCust:'カスタム',loadvid:'▶ 読み込む',
+    bg:'背景',bgpc:'📁 コンピューターから',dropb:'クリックまたはドラッグ',bgurl:'🔗 URL',
+    bgOp:'不透明度:',bgApply:'🌸 適用',bgClear:'✕ 背景を削除',
+    plr:'ビデオプレーヤー',nov:'ビデオを読み込むかURLを入力',
+    novideo:'お使いのブラウザはHTML5ビデオをサポートしていません。Chrome、Firefox、Safari、Edgeをお試しください。',
+    spd:'速度',
+    exp:'コードをエクスポート',ghDesc:'字幕付きGitHub Pages用HTML',
+    gnDesc:'要素を追加 → GeniallyにHTMLコード',ifDesc:'LMS・Moodle・ウェブサイト用ユニバーサルiFrame',
+    subs:'字幕',ensubs:'字幕を有効にする',
+    subtxt:'0:05 テキスト · 分:秒 スペース テキスト',
+    subLangLbl:'🌐 字幕言語',subLangHint:'字幕言語（UI言語とは独立）',
+    subFormatLbl:'形式:',
+    livesub:'🎙 音声からの自動字幕',
+    livesubinfo1:'🟢 音声 → リアルタイム字幕。',
+    livesubinfo2:'字幕言語 = 以下の認識言語。',
+    trans:'文字起こし',autotrans:'自動 (Web Speech API)',transcont:'継続',
+    transres:'結果',mantrans:'またはテキストを手動で貼り付け…',
+    directOpt:'直接動画 (mp4/webm/ogg)',
+    phr:'フレーズ',phrFmt:'フレーズテキスト',notFound:'行が見つかりません。形式: 0:05 テキスト',
+    toSubs:'→ 変換しました!',noText:'テキストなし',noCaptures:'キャプチャなし',
+    added:'追加しました',enterText:'テキストを入力',tcFixed:'固定しました',
+    demoLine1:'▶ 最初の字幕フレーズ',demoLine2:'字幕が機能しています！',
+    demoLine3:'形式: 分:秒 フレーズテキスト',demoLine4:'編集して適用を押してください',
+    hdrSub:'字幕',
+    subApply:'✅ 应用',testSubs:'🧪 测试',debugSubs:'🔍 调试',dbgTime:'视频时间',dbgPhrase:'当前短语',phrLabel:'短语',langLabel:'语言',optOther:'✏️ 其他',captureLabel:'📍 手动捕获',captureHint:'按📍 → 输入文本 → ✚',capturesToSubs:'⚡ 捕获→字幕',subsFromTrans:'→ 转为字幕',generate:'⚙️ 生成',copyBtn:'📋 复制',subtitleDesc:'视频编辑器 · 幼儿园 · 学校 · 大学 · 家庭 · 游戏',
+    urlEmpty:'URLを入力',
+    noYtId:'YouTube IDを特定できません',
+    loaded:'▶ 完了!',
+    errAbort:'読込中断',
+    errNet:'ネットエラー',
+    errDecode:'デコードエラー',
+    errFormat:'非対応フォーマット',
+    ready:'✅ 準備完了',
+    stopped:'⏹ 停止',
+    micOk:'✅ マイク使用可能!',
+    micBlocked:'🔒 マイクがブロックされています.',
+    micNotFound:'🎤 マイク未検出.',
+    micNoHttps:'🔒 HTTPSが必要です.',
+    micBlocked2:'🔒 HTTPSで開いてください.',
+    copied:'📋 コピー済み!',
+    noCode:'⚠️ まず生成'}
 };
-var LANG_NAMES={ru:'Русский',de:'Deutsch',en:'English',es:'Español',fr:'Français',it:'Italiano',zh:'中文',ja:'日本語'};
+
 var LANG_CODES={ru:'ru-RU',de:'de-DE',en:'en-US',es:'es-ES',fr:'fr-FR',it:'it-IT',zh:'zh-CN',ja:'ja-JP'};
 var curLang='ru';
 
@@ -697,18 +1100,46 @@ function setLang(l){
   /* Sync transcription language with UI language */
   var tls=document.getElementById('transLangSel');
   if(tls){var code=LANG_CODES[l]||'ru-RU';for(var i=0;i<tls.options.length;i++){if(tls.options[i].value===code){tls.selectedIndex=i;break;}}}
+  var sls=document.getElementById('subLangSel');
+  if(sls){for(var j=0;j<sls.options.length;j++){if(sls.options[j].value===l){sls.selectedIndex=j;subLang=l;break;}}}
+  var sln=document.getElementById('subLangName');if(sln)sln.textContent=LANG_NAMES[l]||l;
   document.getElementById('langDrop').classList.remove('open');
   showToast('🌐 '+(LANG_NAMES[l]||l));
 }
 function applyI18n(){
   var t=TR[curLang]||TR.ru;
-  var map={t_vs:'vs',t_uppc:'uppc',t_dropv:'dropv',t_vurl:'vurl',t_asp:'asp',t_autoAsp:'autoAsp',
-    t_bg:'bg',t_bgpc:'bgpc',t_dropb:'dropb',t_bgurl:'bgurl',t_bgOp:'bgOp',t_plr:'plr',
-    t_nov:'nov',t_spd:'spd',t_subs:'subs',t_ensubs:'ensubs',t_subtxt:'subtxt',
+  var map={
+    t_vs:'vs',t_uppc:'uppc',t_dropv:'dropv',t_vurl:'vurl',t_asp:'asp',t_autoAsp:'autoAsp',
+    t_aspCust:'aspCust',t_loadvid:'loadvid',
+    t_bg:'bg',t_bgpc:'bgpc',t_dropb:'dropb',t_bgurl:'bgurl',t_bgOp:'bgOp',
+    t_bgApply:'bgApply',t_bgClear:'bgClear',
+    t_plr:'plr',t_novideo:'novideo',t_nov:'nov',t_spd:'spd',
+    t_exp:'exp',t_ghDesc:'ghDesc',t_gnDesc:'gnDesc',t_ifDesc:'ifDesc',
+    t_subs:'subs',t_ensubs:'ensubs',
     t_subLangLbl:'subLangLbl',t_subLangHint:'subLangHint',t_subFormatLbl:'subFormatLbl',
+    t_livesub:'livesub',t_livesubinfo1:'livesubinfo1',t_livesubinfo2:'livesubinfo2',
     t_trans:'trans',t_autotrans:'autotrans',t_transcont:'transcont',
-    t_transres:'transres',t_mantrans:'mantrans',t_exp:'exp',hdrSub:'hdrSub'};
-  Object.keys(map).forEach(function(id){var el=document.getElementById(id),v=t[map[id]];if(el&&v)el.textContent=v;});
+    t_transres:'transres',t_mantrans:'mantrans',hdrSub:'hdrSub',
+    t_testSubs:'testSubs',t_debugSubs:'debugSubs',
+    t_dbgTime:'dbgTime',t_dbgPhrase:'dbgPhrase',
+    t_phrLabel:'phrLabel',t_langLabel:'langLabel',
+    t_captureLabel:'captureLabel',t_captureHint:'captureHint',
+    t_capturesToSubs:'capturesToSubs',btnSubsFromTrans:'subsFromTrans',
+    t_desc:'subtitleDesc'};
+  Object.keys(map).forEach(function(id){
+    var el=document.getElementById(id),v=t[map[id]];
+    if(el&&v)el.textContent=v;
+  });
+  var od=document.getElementById('opt_direct');if(od&&t.directOpt)od.textContent=t.directOpt;
+  var oo=document.getElementById('opt_other');if(oo&&t.optOther)oo.textContent=t.optOther;
+  var se=document.getElementById('subTxt');if(se&&t.phrFmt)se.placeholder='0:05 '+t.phrFmt+'...';
+  var me=document.getElementById('manTrans');if(me&&t.mantrans)me.placeholder=t.mantrans;
+  var ce=document.getElementById('captureText');if(ce&&t.phrFmt)ce.placeholder=t.phrFmt+'...';
+  var ab=document.getElementById('btnApplySubs');if(ab&&t.subApply)ab.textContent=t.subApply;
+  ['GH','GN','IF'].forEach(function(s){
+    var g=document.getElementById('btnGen'+s);if(g&&t.generate)g.textContent=t.generate;
+    var p=document.getElementById('btnCpy'+s);if(p&&t.copyBtn)p.textContent=t.copyBtn;
+  });
 }
 document.getElementById('langToggle').addEventListener('click',function(e){e.stopPropagation();document.getElementById('langDrop').classList.toggle('open');});
 document.addEventListener('click',function(){document.getElementById('langDrop').classList.remove('open');});
@@ -720,7 +1151,7 @@ document.addEventListener('click',function(){document.getElementById('langDrop')
 
 /* ═══ SUBTITLE LANGUAGE SELECTOR ═══ */
 var subLang='ru'; /* independent of UI language */
-var SUB_LANG_NAMES={ru:'RU',de:'DE',en:'EN',es:'ES',fr:'FR',it:'IT',zh:'ZH',ja:'JA',other:'?'};
+var SUB_LANG_NAMES={ru:'Русский',de:'Deutsch',en:'English',es:'Español',fr:'Français',it:'Italiano',zh:'中文',ja:'日本語',other:'?'};
 
 document.getElementById('subLangSel').addEventListener('change',function(){
   subLang=this.value;
@@ -791,12 +1222,12 @@ document.getElementById('btnLoadVid').addEventListener('click',loadVidUrl);
 document.getElementById('vidUrl').addEventListener('keydown',function(e){if(e.key==='Enter')loadVidUrl();});
 
 function loadVidUrl(){
-  var raw=document.getElementById('vidUrl').value.trim();if(!raw){showToast('⚠️ Введите URL');return;}
+  var raw=document.getElementById('vidUrl').value.trim();if(!raw){showToast('⚠️ '+(TR[curLang]||TR.ru).urlEmpty);return;}
   var plat=document.getElementById('platSel').value;var embed=raw;
-  if(plat==='youtube'){var yid=ytId(raw);if(yid)embed='https://www.youtube.com/embed/'+yid+'?rel=0&modestbranding=1';else{showToast('⚠️ Не удалось определить YouTube ID');return;}}
+  if(plat==='youtube'){var yid=ytId(raw);if(yid)embed='https://www.youtube.com/embed/'+yid+'?rel=0&modestbranding=1';else{showToast('⚠️ '+(TR[curLang]||TR.ru).noYtId);return;}}
   else if(plat==='vimeo'){var vm=raw.match(/vimeo\.com\/(\d+)/);embed=vm?'https://player.vimeo.com/video/'+vm[1]:raw;}
   if(plat==='direct')showDirect(raw,''); else showIframe(embed);
-  curUrl=raw;setStatus('🔗 '+raw.substring(0,70));showToast('▶ Загружено!');
+  curUrl=raw;setStatus('🔗 '+raw.substring(0,70));showToast((TR[curLang]||TR.ru).loaded);
 }
 function ytId(u){var m=u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^?&\s]+)/);return m?m[1]:null;}
 
@@ -838,18 +1269,18 @@ vEl.addEventListener('pause',function(){document.getElementById('pbtn').textCont
 vEl.addEventListener('ended',function(){document.getElementById('pbtn').textContent='▶';});
 vEl.addEventListener('error',function(){
   if(vEl.error){
-    var msg={1:'Загрузка прервана',2:'Ошибка сети',3:'Ошибка декодирования (формат не поддерживается?)',4:'Формат не поддерживается браузером'};
-    showToast('⚠️ '+(msg[vEl.error.code]||vEl.error.message||'Ошибка видео'));
+    var _t=TR[curLang]||TR.ru;var msg={1:_t.errAbort,2:_t.errNet,3:_t.errDecode,4:_t.errFormat};
+    showToast('⚠️ '+(msg[vEl.error.code]||vEl.error.message||(TR[curLang]||TR.ru).errDecode));
   }
 });
 /* Safari needs canplay event to confirm playability */
-vEl.addEventListener('canplay',function(){setStatus('✅ Готово к воспроизведению');});
+vEl.addEventListener('canplay',function(){setStatus((TR[curLang]||TR.ru).ready);});
 vEl.addEventListener('seeked',function(){ updSubOv(vEl.currentTime); });
 vEl.addEventListener('pause', function(){ updSubOv(vEl.currentTime); });
 
 document.getElementById('pbtn').addEventListener('click',function(){
-  if(!vEl.src&&!vEl.currentSrc){showToast('⚠️ Сначала загрузите видео');return;}
-  vEl.paused?vEl.play().catch(function(e){showToast('⚠️ Автовоспроизведение заблокировано браузером. Нажмите ▶ ещё раз.');}):vEl.pause();
+  if(!vEl.src&&!vEl.currentSrc){showToast('⚠️ '+(TR[curLang]||TR.ru).nov);return;}
+  vEl.paused?vEl.play().catch(function(e){showToast('⚠️ '+(TR[curLang]||TR.ru).errAbort);}):vEl.pause();
 });
 document.getElementById('btnSkipBack').addEventListener('click',function(){vEl.currentTime=Math.max(0,vEl.currentTime-10);});
 document.getElementById('btnSkipFwd').addEventListener('click',function(){vEl.currentTime=Math.min(vEl.duration||0,vEl.currentTime+10);});
@@ -871,13 +1302,13 @@ function updProg(){
     if(dbgP){
       var ct=vEl.currentTime,cur='',ps=-1;
       for(var di=0;di<subsArr.length;di++){if(ct>=subsArr[di].t){cur=subsArr[di].tx;ps=subsArr[di].t;}}
-      if(!cur) dbgP.textContent='— (нет фразы на этом времени)';
+      if(!cur) dbgP.textContent='— ';
       else{
         /* same expire logic as updSubOv */
         var _di=-1;for(var _x=0;_x<subsArr.length;_x++){if(ct>=subsArr[_x].t)_di=_x;}
         var _ns=(_di+1<subsArr.length)?subsArr[_di+1].t:ps+6;
         var _exp=Math.max(ps+1,Math.min(ps+5,_ns-0.05));
-        if(ct>_exp) dbgP.textContent='⏰ ['+fmt(ps)+'] '+cur.substring(0,25)+' (истекла, exp='+_exp.toFixed(1)+'s)';
+        if(ct>_exp) dbgP.textContent='⏰ ['+fmt(ps)+'] '+cur.substring(0,25)+' (exp='+_exp.toFixed(1)+'s)';
         else dbgP.textContent='✅ ['+fmt(ps)+'] '+cur.substring(0,30)+(cur.length>30?'…':'')+'  →exp:'+_exp.toFixed(1)+'s';
       }
     }
@@ -890,8 +1321,8 @@ function fmtTc(s){if(!s||isNaN(s))s=0;var m=Math.floor(s/60),sc=Math.floor(s%60)
 document.getElementById('bgOp').addEventListener('input',function(){document.getElementById('bgOv').style.opacity=this.value;document.getElementById('bgOpVal').textContent=Math.round(this.value*100)+'%';});
 document.getElementById('bgFile').addEventListener('change',function(){var f=this.files&&this.files[0];if(!f)return;applyBg(URL.createObjectURL(f));});
 document.getElementById('btnApplyBg').addEventListener('click',function(){var u=document.getElementById('bgUrl').value.trim();if(u)applyBg(u);else showToast('⚠️ Введите URL');});
-document.getElementById('btnClearBg').addEventListener('click',function(){document.getElementById('bgOv').style.backgroundImage='';showToast('✕ Фон убран');});
-function applyBg(url){var o=document.getElementById('bgOv');o.style.backgroundImage='url("'+url+'")';o.style.backgroundSize='cover';o.style.backgroundPosition='center';o.style.opacity=document.getElementById('bgOp').value;showToast('🌸 Фон применён!');}
+document.getElementById('btnClearBg').addEventListener('click',function(){document.getElementById('bgOv').style.backgroundImage='';showToast((TR[curLang]||TR.ru).bgClear);});
+function applyBg(url){var o=document.getElementById('bgOv');o.style.backgroundImage='url("'+url+'")';o.style.backgroundSize='cover';o.style.backgroundPosition='center';o.style.opacity=document.getElementById('bgOp').value;showToast((TR[curLang]||TR.ru).bgApply);}
 
 /* ═══ SMART SUBTITLES with language badge ═══ */
 /* ═══════════════════════════════════════════════
@@ -958,15 +1389,15 @@ function parseSubs() {
   document.getElementById('subCount').textContent = subsArr.length;
 
   if (!subsArr.length) {
-    showToast('⚠️ Строк не найдено. Формат:  0:05 Текст фразы');
+    showToast('⚠️ '+(TR[curLang]||TR.ru).notFound);
     _hideSubOv(); return;
   }
 
   document.getElementById('subTog').checked = true;
   updateSubStyle();
   _showSubText('▶  ' + subsArr[0].tx, subLang, 'normal');
-  showToast('💬 ' + subsArr.length + ' фраз · ' + (LANG_NAMES[subLang]||subLang));
-  setStatus('💬 ' + (LANG_NAMES[subLang]||subLang) + ': ' + subsArr.length + ' фраз');
+  showToast('💬 ' + subsArr.length + ' ' + (TR[curLang]||TR.ru).phr + ' · ' + (LANG_NAMES[subLang]||subLang));
+  setStatus('💬 ' + (LANG_NAMES[subLang]||subLang) + ': ' + subsArr.length + ' ' + (TR[curLang]||TR.ru).phr);
 }
 
 function updateSubStyle() {
@@ -1002,11 +1433,12 @@ document.getElementById('subDebugTog').addEventListener('change', function() {
 });
 document.getElementById('btnSubsDemo').addEventListener('click', function() {
   var t = Math.floor(vEl.currentTime);
+  var _tr=TR[curLang]||TR.ru;
   document.getElementById('subTxt').value = [
-    [t,   '▶ Первая фраза субтитров'],
-    [t+5, 'Субтитры работают! · '+(LANG_NAMES[subLang]||subLang)],
-    [t+10,'Формат: М:СС Текст фразы'],
-    [t+15,'Редактируйте и жмите Применить']
+    [t,   _tr.demoLine1],
+    [t+5, _tr.demoLine2+' · '+(LANG_NAMES[subLang]||subLang)],
+    [t+10,_tr.demoLine3],
+    [t+15,_tr.demoLine4]
   ].map(function(d){
     var mm=Math.floor(d[0]/60),ss=d[0]%60;
     return mm+':'+(ss<10?'0':'')+ss+' '+d[1];
@@ -1036,19 +1468,19 @@ document.getElementById('transTog').addEventListener('change', function() {
 /* Mic permission test */
 document.getElementById('btnMicTest').addEventListener('click', function() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    setTstat('err','🔒 Доступ к микрофону недоступен. Нужен HTTPS или localhost (не file://)');
+    setTstat('err',(TR[curLang]||TR.ru).micNoHttps);
     return;
   }
   navigator.mediaDevices.getUserMedia({audio:true})
     .then(function(stream){
       stream.getTracks().forEach(function(t){t.stop();});
-      setTstat('on','✅ Микрофон доступен! Включите тумблер для старта.');
+      setTstat('on',(TR[curLang]||TR.ru).micOk);
     })
     .catch(function(err){
       if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError'){
-        setTstat('err','🔒 Микрофон заблокирован. Нажмите на 🔒 в адресной строке → разрешите микрофон.');
+        setTstat('err',(TR[curLang]||TR.ru).micBlocked);
       } else if(err.name==='NotFoundError'){
-        setTstat('err','🎤 Микрофон не найден. Подключите микрофон.');
+        setTstat('err',(TR[curLang]||TR.ru).micNotFound);
       } else {
         setTstat('err','⚠️ '+err.name+': '+err.message);
       }
@@ -1077,14 +1509,14 @@ document.getElementById('btnClrTrans').addEventListener('click', function() {
 });
 document.getElementById('btnCpyTrans').addEventListener('click', function() {
   var txt = transLines.map(function(l){ return '['+l.tc+'] '+l.txt; }).join('\n');
-  if (!txt) { showToast('⚠️ Нет текста'); return; }
-  navigator.clipboard.writeText(txt).then(function(){ showToast('📋 Скопировано!'); });
+  if (!txt) { showToast('⚠️ '+(TR[curLang]||TR.ru).noText); return; }
+  navigator.clipboard.writeText(txt).then(function(){ showToast((TR[curLang]||TR.ru).copied); });
 });
 
 function startTrans() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
-    setTstat('err','⚠️ Нужен Chrome, Edge или Safari');
+    setTstat('err','⚠️ '+(TR[curLang]||TR.ru).micNoHttps);
     document.getElementById('transTog').checked=false;
     if(_liveSubActive){ document.getElementById('liveSubTog').checked=false; _liveSubActive=false; }
     return;
@@ -1128,7 +1560,7 @@ function startTrans() {
       }
       if (e.error==='not-allowed'||e.error==='service-not-allowed') {
         transActive=false; document.getElementById('transTog').checked=false;
-        setTstat('err','🔒 Микрофон заблокирован. Откройте файл через HTTPS или localhost — file:// не даёт доступ к микрофону ни в одном браузере.'); return;
+        setTstat('err',(TR[curLang]||TR.ru).micBlocked2); return;
       }
       setTstat('err','⚠️ '+e.error);
     };
@@ -1138,7 +1570,7 @@ function startTrans() {
         _transRestartTimer=setTimeout(_restart,300);
       } else {
         transActive=false; setTstat('','');
-        document.getElementById('transTog').checked=false; setStatus('⏹ Остановлено');
+        document.getElementById('transTog').checked=false; setStatus((TR[curLang]||TR.ru).stopped);
       }
     };
   }
@@ -1162,7 +1594,7 @@ function stopTrans() {
   transActive=false;
   clearTimeout(_transRestartTimer); clearTimeout(_liveSubTimer);
   if (recog) { try{recog.abort();}catch(ex){} recog=null; }
-  setTstat('',''); setStatus('⏹ Остановлено'); showToast('⏹ Остановлено');
+  setTstat('',''); setStatus('⏹ Остановлено'); showToast((TR[curLang]||TR.ru).stopped);
 }
 function setTstat(type,msg){ var s=document.getElementById('tstat'); s.className='tstat'+(type?' '+type:''); s.textContent=msg; }
 
@@ -1185,12 +1617,12 @@ document.getElementById('btnSubsFromTrans').addEventListener('click', function()
   var res='';
   if (transLines.length) { res=transLines.map(function(l){return l.tc+' '+l.txt;}).join('\n'); }
   else {
-    var t=document.getElementById('manTrans').value.trim(); if(!t){showToast('⚠️ Нет текста');return;}
+    var t=document.getElementById('manTrans').value.trim(); if(!t){showToast('⚠️ '+(TR[curLang]||TR.ru).noText);return;}
     t.split(/[.!?]+/).map(function(s){return s.trim();}).filter(Boolean).forEach(function(s,i){
       var mm=Math.floor(i*5/60),ss=(i*5)%60; res+=mm+':'+(ss<10?'0':'')+ss+' '+s+'\n';
     });
   }
-  document.getElementById('subTxt').value=res.trim(); showToast('→ Конвертировано!');
+  document.getElementById('subTxt').value=res.trim(); showToast((TR[curLang]||TR.ru).toSubs);
 });
 
 /* Manual timecode capture */
@@ -1200,24 +1632,24 @@ document.getElementById('btnCaptureTc').addEventListener('click', function() {
   document.getElementById('captureText').focus();
   var btn=this; btn.style.background='linear-gradient(135deg,#c62828,#e53935)';
   setTimeout(function(){btn.style.background='';},700);
-  showToast('📍 '+tc+' зафиксирован');
+  showToast('📍 '+tc+' '+(TR[curLang]||TR.ru).tcFixed);
 });
 document.getElementById('captureText').addEventListener('keydown', function(e) {
   if(e.key==='Enter'){e.preventDefault();document.getElementById('btnAddCapture').click();}
 });
 document.getElementById('btnAddCapture').addEventListener('click', function() {
   var tc=document.getElementById('captureTcDisplay').value||fmtTc(vEl.currentTime);
-  var txt=document.getElementById('captureText').value.trim(); if(!txt){showToast('⚠️ Введите текст');return;}
+  var txt=document.getElementById('captureText').value.trim(); if(!txt){showToast('⚠️ '+(TR[curLang]||TR.ru).enterText);return;}
   var parts=tc.split(':'), t=+parts[0]*60+(+parts[1]||0);
   capturesArr.push({tc:tc,t:t,txt:txt}); transLines.push({tc:tc,txt:txt});
   renderTransBox(); document.getElementById('captureText').value='';
   document.getElementById('captureTcDisplay').value=fmtTc(t+5);
-  showToast('✚ ['+tc+'] добавлено'); document.getElementById('captureText').focus();
+  showToast('✚ ['+tc+'] '+(TR[curLang]||TR.ru).added); document.getElementById('captureText').focus();
 });
 document.getElementById('btnCapturesToSubs').addEventListener('click', function() {
-  var src=transLines.length?transLines:capturesArr; if(!src.length){showToast('⚠️ Нет захватов');return;}
+  var src=transLines.length?transLines:capturesArr; if(!src.length){showToast('⚠️ '+(TR[curLang]||TR.ru).noCaptures);return;}
   document.getElementById('subTxt').value=src.map(function(l){return l.tc+' '+l.txt;}).join('\n');
-  parseSubs(); showToast('⚡ '+src.length+' фраз → субтитры!');
+  parseSubs(); showToast('⚡ '+src.length+' '+(TR[curLang]||TR.ru).phr+' → '+(TR[curLang]||TR.ru).subs+'!');
 });
 
 
@@ -1239,7 +1671,7 @@ function genGH(){
   var url=curUrl||'YOUR_VIDEO_URL',sj=buildSubsJS(),pts=curAspect.split(':');
   var pct=((parseFloat(pts[1])/parseFloat(pts[0]))*100).toFixed(4)+'%';
   var out=['<!DOCTYPE html>','<html lang="'+curLang+'"><head>','<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">','<title>ИгроМир в Сундучке</title>','<style>','body{margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;}','.stage{position:relative;width:min(960px,100%);}','.sizer{padding-bottom:'+pct+';}','video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;display:block;}','.sub{position:absolute;bottom:0;left:0;right:0;padding:8px 5% 12px;background:linear-gradient(to top,rgba(0,0,0,.88),transparent);color:#fff;font-size:clamp(12px,2vw,18px);text-align:center;pointer-events:none;display:none;text-shadow:0 0 6px #000,1px 1px 0 #000,-1px -1px 0 #000;}','</style></head><body>','<div class="stage"><div class="sizer"></div>','  <video src="'+url+'" controls playsinline preload="metadata"></video>','  <div class="sub" id="s"></div>','</div>','<script>','var subs='+sj+';','var v=document.querySelector("video"),s=document.getElementById("s");','v.addEventListener("timeupdate",function(){var c="",ct=v.currentTime;subs.forEach(function(x){if(ct>=x.t)c=x.tx;});s.textContent=c;s.style.display=c?"block":"none";});','<\/script></body></html>'];
-  document.getElementById('ghCode').value=out.join('\n');showToast('✅ GitHub HTML готов!');
+  document.getElementById('ghCode').value=out.join('\n');showToast('✅ '+(TR[curLang]||TR.ru).ghDesc);
 }
 function genGN(){
   var url=curUrl||'YOUR_URL',plat=document.getElementById('platSel').value;
@@ -1247,14 +1679,14 @@ function genGN(){
   var out=isI?
     ['<!-- Genially → Добавить элемент → HTML-код -->','<div style="position:relative;width:100%;height:100%;overflow:hidden;background:#000;">','  <iframe','    src="'+url+'"','    style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"','    frameborder="0" allowfullscreen','    allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share"','    referrerpolicy="no-referrer-when-downgrade"','  ></iframe>','</div>']:
     ['<!-- Genially → Добавить элемент → HTML-код -->','<div style="position:relative;width:100%;height:100%;overflow:hidden;background:#000;">','  <video','    src="'+url+'"','    style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;"','    controls autoplay muted playsinline preload="metadata"','  ></video>','</div>'];
-  document.getElementById('gnCode').value=out.join('\n');showToast('✅ Genially код готов!');
+  document.getElementById('gnCode').value=out.join('\n');showToast('✅ '+(TR[curLang]||TR.ru).gnDesc);
 }
 function genIF(){
   var url=curUrl||'YOUR_URL',pts=curAspect.split(':'),asp=pts[0]+'/'+pts[1];
   var out=['<!-- Универсальный iFrame -->','<div style="position:relative;width:100%;max-width:960px;aspect-ratio:'+asp+';margin:0 auto;">','  <iframe src="'+url+'"','    style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:8px;"','    frameborder="0" allowfullscreen','    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"','    referrerpolicy="no-referrer-when-downgrade">','  </iframe>','</div>'];
-  document.getElementById('ifCode').value=out.join('\n');showToast('✅ iFrame готов!');
+  document.getElementById('ifCode').value=out.join('\n');showToast('✅ '+(TR[curLang]||TR.ru).ifDesc);
 }
-function cpyCode(id){var v=document.getElementById(id).value;if(!v){showToast('⚠️ Сначала Сгенерировать');return;}navigator.clipboard.writeText(v).then(function(){showToast('📋 Скопировано!');});}
+function cpyCode(id){var v=document.getElementById(id).value;if(!v){showToast((TR[curLang]||TR.ru).noCode);return;}navigator.clipboard.writeText(v).then(function(){showToast((TR[curLang]||TR.ru).copied);});}
 
 /* ═══ DRAG & DROP ═══ */
 function setupDD(zoneId,handler){
@@ -1264,7 +1696,7 @@ function setupDD(zoneId,handler){
   z.addEventListener('drop',function(e){e.preventDefault();z.style.borderColor='';if(e.dataTransfer.files&&e.dataTransfer.files[0])handler(e.dataTransfer.files[0]);});
 }
 setupDD('vidZone',function(f){showDirect(URL.createObjectURL(f),f.type||'');curUrl=f.name;setStatus('📁 '+f.name);showToast('🎬 '+f.name);});
-setupDD('bgZone',function(f){applyBg(URL.createObjectURL(f));showToast('🌸 Фон применён!');});
+setupDD('bgZone',function(f){applyBg(URL.createObjectURL(f));showToast((TR[curLang]||TR.ru).bgApply);});
 
 /* ═══ UTILS ═══ */
 function setStatus(m){document.getElementById('stxt').textContent=m;}
@@ -1284,13 +1716,13 @@ renderTransBox();
   var info=document.getElementById('srBrowserInfo');
   var liveInfo=document.getElementById('liveSubBrowser');
   if(SR){
-    var msg='✅ Ваш браузер поддерживает распознавание речи.';
+    var msg=(TR[curLang]||TR.ru).ready+' (Speech API)';
     if(info){info.style.background='rgba(50,150,50,.08)';info.style.border='1px solid rgba(50,180,50,.3)';info.style.color='#1a5a1a';info.textContent=msg;}
-    if(liveInfo)liveInfo.textContent='✅ Распознавание поддерживается';
+    if(liveInfo)liveInfo.textContent='✅';
   }else{
-    var noMsg='ℹ️ Распознавание речи недоступно в этом браузере. Используйте Chrome, Edge или Safari 14.1+. Ручной захват работает везде.';
+    var noMsg=(TR[curLang]||TR.ru).micNoHttps;
     if(info){info.style.background='rgba(120,80,0,.07)';info.style.border='1px solid rgba(180,130,0,.3)';info.style.color='#5a3a00';info.textContent=noMsg;}
-    if(liveInfo)liveInfo.textContent='ℹ️ Смените браузер для авто-субтитров';
+    if(liveInfo)liveInfo.textContent='ℹ️';
     var tog=document.getElementById('transTog');
     if(tog){tog.disabled=true;tog.parentElement.style.opacity='0.45';}
     var ltog=document.getElementById('liveSubTog');
@@ -1313,7 +1745,7 @@ document.getElementById('liveSubTog').addEventListener('change',function(){
     /* Sync sub lang display */
     var langCode=document.getElementById('transLangSel').value.split('-')[0];
     var sln=document.getElementById('subLangName');
-    if(sln)sln.textContent='🎙 '+langCode.toUpperCase()+' (авто)';
+    if(sln)sln.textContent='🎙 '+langCode.toUpperCase()+' (auto)';
   }
 });
 
@@ -1322,7 +1754,7 @@ document.getElementById('transLangSel').addEventListener('change',function(){
   if(document.getElementById('liveSubTog').checked){
     var langCode=this.value.split('-')[0];
     var sln=document.getElementById('subLangName');
-    if(sln)sln.textContent='🎙 '+langCode.toUpperCase()+' (авто)';
+    if(sln)sln.textContent='🎙 '+langCode.toUpperCase()+' (auto)';
     /* Restart recognition with new language */
     if(transActive){stopTrans();setTimeout(function(){document.getElementById('transTog').checked=true;startTrans();},400);}
   }
